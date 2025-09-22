@@ -1,0 +1,268 @@
+@import "tailwindcss";
+
+@theme {
+  /* Screens (breakpoints) as CSS variables */
+  --screen-xs: 450px;
+  --screen-sm: 575px;
+  --screen-md: 768px;
+  --screen-lg: 992px;
+  --screen-xl: 1200px;
+  --screen-2xl: 1400px;
+
+  /* Colors */
+  --color-primary: #4cbb17;
+  --color-secondary: #7e22ce;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-gray: #6b7280;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-hover: #f4f4f5;
+  --color-text2: #39542c;
+  --color-active-text: #4cbb17;
+  --color-active-bg: #edf8e7;
+  --color-primary-hover: #5fc02e;
+
+  /* Text */
+  --color-text-primary: #4cbb17;
+  --color-text-secondary: #7e22ce;
+
+  /* Backgrounds */
+  --color-bg-main: #ffffff;
+  --color-bg-card: #ffffff;
+
+  /* Sidebar */
+  --color-sidebar-bg: #ffffff;
+  --color-sidebar-text: #395455;
+  --color-sidebar-button-hover: #f4f4f5;
+
+  /* Table */
+  --color-table-header-bg: #f3f4f6;
+  --color-table-header-text: #111827;
+  --color-table-row-bg: #ffffff;
+  --color-table-row-hover: #f9fafb;
+  --color-table-border: #e5e7eb;
+
+  /* Shadows */
+  --shadow-signup: 0px 5px 10px rgba(4, 10, 34, 0.2);
+  --shadow-one: 0px 2px 3px rgba(7, 7, 77, 0.05);
+  --shadow-two: 0px 5px 10px rgba(6, 8, 15, 0.1);
+  --shadow-three: 0px 5px 15px rgba(6, 8, 15, 0.05);
+  --shadow-sticky: inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+  --shadow-sticky-dark: inset 0 -1px 0 0 rgba(255, 255, 255, 0.1);
+  --shadow-feature-2: 0px 10px 40px rgba(48, 86, 211, 0.12);
+  --shadow-submit: 0px 5px 20px rgba(4, 10, 34, 0.1);
+  --shadow-submit-dark: 0px 5px 20px rgba(4, 10, 34, 0.1);
+  --shadow-btn: 0px 1px 2px rgba(4, 10, 34, 0.15);
+  --shadow-btn-hover: 0px 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-btn-light: 0px 1px 2px rgba(0, 0, 0, 0.1);
+
+  /* Drop shadows */
+  --drop-shadow-three: 0px 5px 15px rgba(6, 8, 15, 0.05);
+}
+
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #252f40;
+}
+
+h1,
+.h1 {
+  font-size: 3rem;
+  line-height: 1.25;
+  letter-spacing: -0.025rem;
+}
+
+@media (min-width: 1200px) {
+  h1,
+  .h1 {
+    font-size: 3rem;
+  }
+}
+
+h2,
+.h2 {
+  font-size: 2.25rem;
+  line-height: 1.3;
+  letter-spacing: 0.05rem;
+}
+
+@media (min-width: 1200px) {
+  h2,
+  .h2 {
+    font-size: 2.25rem;
+  }
+}
+
+h3,
+.h3 {
+  font-size: 1.875rem;
+  line-height: 1.375;
+}
+
+@media (min-width: 1200px) {
+  h3,
+  .h3 {
+    font-size: 1.875rem;
+  }
+}
+
+h4,
+.h4 {
+  font-size: 1.5rem;
+  line-height: 1.375;
+}
+
+@media (min-width: 1200px) {
+  h4,
+  .h4 {
+    font-size: 1.5rem;
+  }
+}
+
+h5,
+.h5 {
+  font-size: 1.25rem;
+  line-height: 1.375;
+}
+
+h6,
+.h6 {
+  font-size: 1rem;
+  line-height: 1.625;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 400;
+  font-size: 0.9rem;
+  line-height: 1.425;
+}
+
+/* manual css  */
+.table-container {
+  @apply bg-white rounded-xl;
+}
+
+.table-wrapper {
+  @apply overflow-x-auto rounded-lg shadow;
+}
+
+.table-base {
+  @apply min-w-full border-collapse rounded-lg overflow-hidden;
+}
+
+.table-head {
+  @apply bg-gray-100;
+}
+
+.table-head-cell {
+  @apply px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-text2;
+}
+
+.table-row {
+  @apply even:bg-primary/4 odd:bg-white hover:bg-primary/15 transition-colors;
+}
+
+.table-cell {
+  @apply px-4 py-2 text-center text-sm;
+}
+
+.pagination-wrapper {
+  @apply mt-4 flex justify-end items-center gap-2;
+}
+
+.pagination-list {
+  @apply flex items-center gap-2;
+}
+
+.pagination-btn {
+  @apply px-3 py-1 rounded-lg text-sm bg-primary text-white disabled:bg-gray disabled:cursor-not-allowed;
+}
+
+.pagination-btn-outline {
+  @apply px-3 py-1 rounded-lg border border-gray text-gray hover:bg-primary hover:text-white transition;
+}
+
+.pagination-btn-active {
+  @apply px-3 py-1 rounded-lg bg-primary text-white;
+}
+
+.custom-checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 10px;
+  position: relative;
+  user-select: none;
+  gap: 8px;
+}
+
+.custom-checkbox-label input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.custom-checkbox-label .checkmark {
+  width: 17px;
+  height: 17px;
+  background-color: "#fff";
+  border: 2px solid var(--color-primary);
+  border-radius: 100%;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-checkbox-label input:checked + .checkmark {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.custom-checkbox-label .checkmark::after {
+  content: "";
+  display: none;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.custom-checkbox-label input:checked + .checkmark::after {
+  display: block;
+}
+
+/* Date Picker */
+.react-datepicker-wrapper {
+  display: inline !important;
+}
+.react-datepicker__input-container input {
+  background-image: url(/images/calendar-day.svg);
+  background-size: 20px;
+  background-repeat: no-repeat;
+  background-position: 98% 52%;
+}
+.react-datepicker-wrapper {
+  display: inline !important;
+}

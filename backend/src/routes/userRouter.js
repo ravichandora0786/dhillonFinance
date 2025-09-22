@@ -1,0 +1,143 @@
+/**
+ * User Router
+ */
+import express from "express";
+import userController from "../controllers/user.controller.js";
+import { authenticateUser } from "../middlewares/authMiddleware.js";
+
+const userRouter = express.Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management APIs
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         email:
+ *           type: string
+ *         mobileNumber:
+ *           type: string
+ *         password:
+ *           type: string
+ *         roleId:
+ *           type: string
+ *           format: uuid
+ *         status:
+ *           type: string
+ *         auth_status:
+ *           type: string
+ *         isVerified:
+ *           type: boolean
+ */
+
+/**
+ * @swagger
+ * /user:
+ *   post:
+ *     summary: Create a new user (with role-based child entry)
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: "#/components/schemas/User" }
+ *     responses:
+ *       201:
+ *         description: User created
+ */
+userRouter.post(
+  "/",
+  authenticateUser,
+  userController.createUser
+);
+
+/**
+ * @swagger
+ * /user:
+ *   get:
+ *     summary: Get list of users
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ */
+userRouter.get("/", authenticateUser, userController.getUsers);
+
+/**
+ * @swagger
+ * /user/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: User fetched
+ */
+userRouter.get("/:id", authenticateUser, userController.getUserById);
+
+/**
+ * @swagger
+ * /user/{id}:
+ *   put:
+ *     summary: Update user (and role child data)
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: "#/components/schemas/User" }
+ *     responses:
+ *       200:
+ *         description: User updated
+ */
+userRouter.put("/:id", authenticateUser, userController.updateUser);
+
+/**
+ * @swagger
+ * /user/{id}:
+ *   delete:
+ *     summary: Delete user
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: User deleted
+ */
+userRouter.delete("/:id", authenticateUser, userController.deleteUser);
+
+export default userRouter;
