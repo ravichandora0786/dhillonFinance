@@ -5,21 +5,21 @@ const bcrypt = require("bcryptjs");
 module.exports = {
   async up({ context: queryInterface, context: { sequelize } }) {
     await sequelize.transaction(async (transaction) => {
-      // Define role list with login permissions
-      const roleNames = ["Admin", "co-Admin"];
-
+      /** Create Roles **/
+      const roleNames = ["Admin", "Co Admin"];
       const roles = roleNames.map((name) => ({
         id: uuidv4(),
         name,
         description: name,
         isActive: true,
+        isSystemLogin: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }));
 
       await queryInterface.bulkInsert("roles", roles, { transaction });
 
-      // Define permissions
+      /** Create Permissions **/
       const permissionNames = [
         "VIEW LIST",
         "CREATE",
@@ -27,7 +27,7 @@ module.exports = {
         "DELETE",
         "VIEW DETAILS",
         "PRINT",
-        "DOWNLOARD",
+        "DOWNLOAD",
       ];
 
       const permissions = permissionNames.map((name) => ({
@@ -43,28 +43,14 @@ module.exports = {
         transaction,
       });
 
-      // Define activities
+      /** Create Activities **/
       const activityNames = [
         "DASHBOARD",
-        "STUDENTS",
-        "TEACHER",
-        "PERMISSIONS",
-        "DEPARTMENT",
-        "ROLE",
-        "PARENTS",
-        "ACCOUNT",
-        "SUBJECT",
-        "SYLLABUS",
-        "CLASS ROUTINE",
-        "CLASS",
-        "LEAVE TYPE",
-        "ATTENDENCE",
-        "EXAM",
-        "ROOM",
-        "USERS",
-        "GRADES",
-        "SECTION",
-        "NOTICE",
+        "CUSTOMER",
+        "LOANS",
+        "TRANSACTION",
+        "INVOICE",
+        "STAFF",
       ];
 
       const activities = activityNames.map((name) => ({
@@ -79,7 +65,7 @@ module.exports = {
         transaction,
       });
 
-      // Assign all permissions to Admin for all activities
+      /** Assign all permissions to Admin for all activities **/
       const adminRole = roles.find((r) => r.name === "Admin");
 
       const activityPermissions = activities.map((activity) => ({
@@ -97,16 +83,18 @@ module.exports = {
         { transaction }
       );
 
-      // Create default admin user
+      /** Create default Admin user **/
       const hashedPassword = await bcrypt.hash("Test@1234", 10);
+
       const users = [
         {
           id: uuidv4(),
+          userName: "Admin User",
           email: "ravikumar62843@gmail.com",
           roleId: adminRole.id,
           mobileNumber: "9657643786",
           password: hashedPassword,
-          isVerified: true,
+          isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

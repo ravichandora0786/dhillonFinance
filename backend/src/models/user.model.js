@@ -14,10 +14,17 @@ const UserModel = sequelize.define(
       primaryKey: true,
       allowNull: false,
     },
+    userName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     email: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
       unique: true,
+      validate: {
+        isEmail: true,
+      },
     },
     roleId: {
       type: DataTypes.UUID,
@@ -27,10 +34,10 @@ const UserModel = sequelize.define(
         key: "id",
       },
     },
-
     mobileNumber: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
+      unique: true,
     },
     password: {
       type: DataTypes.STRING,
@@ -40,25 +47,13 @@ const UserModel = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    status: {
-      type: DataTypes.STRING,
-      defaultValue: "Pending",
-      allowNull: false,
-    },
-    auth_status: {
-      type: DataTypes.STRING,
-      defaultValue: "Pending",
-      allowNull: false,
-    },
-    isVerified: {
+    isActive: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false,
-      allowNull: false,
+      defaultValue: true,
     },
   },
   {
     timestamps: true,
-    // updatedAt: false,
     paranoid: true,
     tableName: "users",
     defaultScope: {

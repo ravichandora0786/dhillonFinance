@@ -5,7 +5,7 @@ import {
   updateRoleSchema,
   updateRoleStatusSchema,
 } from "../schemas/role.schema.js";
-import validateRequest from "../middlewares/validationMiddleware.js";
+import validateSchema from "../middlewares/validationMiddleware.js";
 import {
   authenticateUser,
   authorizeUser,
@@ -93,7 +93,7 @@ roleRouter.get("/:id", authenticateUser, RoleController.getRoleById);
 roleRouter.post(
   "/",
   authenticateUser,
-  validateRequest(createRoleSchema),
+  validateSchema(createRoleSchema),
   RoleController.createRole
 );
 
@@ -124,7 +124,7 @@ roleRouter.post(
 roleRouter.put(
   "/:id",
   authenticateUser,
-  validateRequest(updateRoleSchema),
+  validateSchema(updateRoleSchema),
   RoleController.updateRole
 );
 
@@ -155,7 +155,7 @@ roleRouter.put(
 roleRouter.patch(
   "/:id/status",
   authenticateUser,
-  validateRequest(updateRoleStatusSchema),
+  validateSchema(updateRoleStatusSchema),
   RoleController.updateRoleStatus
 );
 

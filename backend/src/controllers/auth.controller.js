@@ -28,6 +28,7 @@ const generateToken = (user) => {
     {
       id: user.id,
       email: user.email,
+      mobileNumber: user.mobileNumber,
       roles: user.role?.name,
     },
     process.env.JWT_TOKEN_SECRET_KEY,
@@ -42,33 +43,6 @@ const generateToken = (user) => {
 
   return { accessToken, refreshToken };
 };
-
-const sendVerification = asyncHandler(async (req, res, next) => {
-  const { email } = req.body;
-
-  const user = await UserModel.findOne({
-    where: { email, isVerified: false },
-  });
-
-  if (!user) {
-    throw new ApiError(400, "Invalid Email");
-  }
-
-  const verificationToken = generateVerificationToken(user);
-
-  // await sendMail({
-  //   to: email,
-  //   subject: EMAIL_TEMPLATE.VERIFY.SUBJECT,
-  //   template: EMAIL_TEMPLATE.VERIFY.TEMPLATE,
-  //   context: {
-  //     link: `${BASE_URL}/verify?token=${verificationToken}`,
-  //   },
-  // });
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, null, "Verification email sent successfully"));
-});
 
 /**
  * Verify User
@@ -116,10 +90,8 @@ const loginUser = asyncHandler(async (req, res, next) => {
       throw new ApiError(401, "Invalid credentials");
     }
 
-    // console.log(user, "user");
-
-    if (!user.isVerified) {
-      throw new ApiError(401, "User is not verified");
+    if (!user.isActive) {
+      throw new ApiError(401, "User is not active");
     }
 
     // Validate password
@@ -169,16 +141,12 @@ const loginUser = asyncHandler(async (req, res, next) => {
       const permissionNames = permIds
         .map((id) => idToNameMap[id])
         .filter(Boolean);
-      console.log(permissionRecords, "activityPermsRaw");
-      // const permissions = activityPerms?.permissionIds || [];
 
       return {
         id: item.id,
-        // role: item.role,
+        role: item.role,
         activity: item.activity,
         permissionNames,
-        // createdAt: item.createdAt,
-        // updatedAt: item.updatedAt,
       };
     });
     // Generate JWT token
@@ -219,17 +187,6 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   if (!user) {
     throw new ApiError(400, "Invalid Email");
   }
-
-  const verificationToken = generateVerificationToken(user);
-
-  // await sendMail({
-  //   to: email,
-  //   subject: EMAIL_TEMPLATE.FORGOT_PASSWORD.SUBJECT,
-  //   template: EMAIL_TEMPLATE.FORGOT_PASSWORD.TEMPLATE,
-  //   context: {
-  //     link: `${BASE_URL}/reset-password?token=${verificationToken}`,
-  //   },
-  // });
 
   return res
     .status(200)
@@ -346,7 +303,6 @@ export default {
   verifyUser,
   loginUser,
   refreshToken,
-  sendVerification,
   forgotPassword,
   resetPassword,
   logoutUser,

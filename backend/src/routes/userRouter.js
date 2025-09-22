@@ -1,9 +1,8 @@
-/**
- * User Router
- */
 import express from "express";
 import userController from "../controllers/user.controller.js";
 import { authenticateUser } from "../middlewares/authMiddleware.js";
+import { createUserSchema, updateUserSchema } from "../schemas/user.schema.js";
+import validateSchema from "../middlewares/validationMiddleware.js";
 
 const userRouter = express.Router();
 
@@ -24,6 +23,8 @@ const userRouter = express.Router();
  *         id:
  *           type: string
  *           format: uuid
+ *         userName:
+ *           type: string
  *         email:
  *           type: string
  *         mobileNumber:
@@ -33,11 +34,9 @@ const userRouter = express.Router();
  *         roleId:
  *           type: string
  *           format: uuid
- *         status:
+ *         refreshToken:
  *           type: string
- *         auth_status:
- *           type: string
- *         isVerified:
+ *         isActive:
  *           type: boolean
  */
 
@@ -45,7 +44,7 @@ const userRouter = express.Router();
  * @swagger
  * /user:
  *   post:
- *     summary: Create a new user (with role-based child entry)
+ *     summary: Create a new user
  *     tags: [Users]
  *     security:
  *       - BearerAuth: []
@@ -61,6 +60,7 @@ const userRouter = express.Router();
 userRouter.post(
   "/",
   authenticateUser,
+  validateSchema(createUserSchema),
   userController.createUser
 );
 
@@ -101,7 +101,7 @@ userRouter.get("/:id", authenticateUser, userController.getUserById);
  * @swagger
  * /user/{id}:
  *   put:
- *     summary: Update user (and role child data)
+ *     summary: Update user
  *     tags: [Users]
  *     security:
  *       - BearerAuth: []
@@ -119,7 +119,12 @@ userRouter.get("/:id", authenticateUser, userController.getUserById);
  *       200:
  *         description: User updated
  */
-userRouter.put("/:id", authenticateUser, userController.updateUser);
+userRouter.put(
+  "/:id",
+  authenticateUser,
+  validateSchema(updateUserSchema),
+  userController.updateUser
+);
 
 /**
  * @swagger

@@ -51,33 +51,6 @@ authRouter
 
 /**
  * @swagger
- * /auth/send-verification:
- *   post:
- *     summary: send verification email
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "test@gmail.com"
- *     responses:
- *       200:
- *         description: Verification email sent successfully
- *       400:
- *         description: Invalid email
- *       500:
- *         description: Internal Server Error
- */
-authRouter.route("/send-verification").post(authController.sendVerification);
-
-/**
- * @swagger
  * /auth/verify:
  *   post:
  *     summary: Verify registered user

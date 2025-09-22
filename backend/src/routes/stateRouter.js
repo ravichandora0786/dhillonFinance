@@ -8,7 +8,7 @@ import {
   createStateSchema,
   updateStateSchema,
 } from "../schemas/state.schema.js";
-import validateRequest from "../middlewares/validationMiddleware.js";
+import validateSchema from "../middlewares/validationMiddleware.js";
 import {
   authenticateUser,
   authorizeUser,
@@ -95,7 +95,7 @@ stateRouter.get("/:id", authenticateUser, StateController.getStateById);
 stateRouter.post(
   "/",
   authenticateUser,
-  validateRequest(createStateSchema),
+  validateSchema(createStateSchema),
   StateController.createState
 );
 
@@ -126,7 +126,7 @@ stateRouter.post(
 stateRouter.put(
   "/:id",
   authenticateUser,
-  validateRequest(updateStateSchema),
+  validateSchema(updateStateSchema),
   StateController.updateState
 );
 

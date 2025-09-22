@@ -5,11 +5,9 @@ import sequelize, { umzugSeeding } from "./config/db.js";
 const PORT = process.env.PORT || 8000;
 
 try {
-  console.log("DB connected ✅");
   await sequelize.authenticate();
   // await sequelize.sync({ alter: true });
-  // sequelize.sync({ force: true });
-  // await umzugSeeding.up();
+  await umzugSeeding.up();
   logger.info("Successfully connected to the database");
   httpServer.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);

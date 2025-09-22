@@ -9,7 +9,7 @@ import {
   updateCountrySchema,
   updateCountryStatusSchema,
 } from "../schemas/country.schema.js";
-import validateRequest from "../middlewares/validationMiddleware.js";
+import validateSchema from "../middlewares/validationMiddleware.js";
 import { authenticateUser } from "../middlewares/authMiddleware.js";
 
 const countryRouter = express.Router();
@@ -89,7 +89,7 @@ countryRouter.get("/:id", authenticateUser, CountryController.getCountryById);
 countryRouter.post(
   "/",
   authenticateUser,
-  validateRequest(createCountrySchema),
+  validateSchema(createCountrySchema),
   CountryController.createCountry
 );
 
@@ -120,7 +120,7 @@ countryRouter.post(
 countryRouter.put(
   "/:id",
   authenticateUser,
-  validateRequest(updateCountrySchema),
+  validateSchema(updateCountrySchema),
   CountryController.updateCountry
 );
 
@@ -151,7 +151,7 @@ countryRouter.put(
 countryRouter.patch(
   "/:id/status",
   authenticateUser,
-  validateRequest(updateCountryStatusSchema),
+  validateSchema(updateCountryStatusSchema),
   CountryController.updateCountryStatus
 );
 

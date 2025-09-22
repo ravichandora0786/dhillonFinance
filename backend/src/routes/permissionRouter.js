@@ -5,7 +5,7 @@
 import express from "express";
 import PermissionController from "../controllers/permission.controller.js";
 
-import validateRequest from "../middlewares/validationMiddleware.js";
+import validateSchema from "../middlewares/validationMiddleware.js";
 import {
   createPermissionSchema,
   updatePermissionSchema,
@@ -136,7 +136,7 @@ permissionRouter.get(
 permissionRouter.post(
   "/",
   authenticateUser,
-  validateRequest(createPermissionSchema),
+  validateSchema(createPermissionSchema),
   PermissionController.createPermission
 );
 
@@ -169,7 +169,7 @@ permissionRouter.post(
 permissionRouter.put(
   "/:id",
   authenticateUser,
-  validateRequest(updatePermissionSchema),
+  validateSchema(updatePermissionSchema),
   PermissionController.updatePermission
 );
 
@@ -206,7 +206,7 @@ permissionRouter.put(
 permissionRouter.patch(
   "/:id/status",
   authenticateUser,
-  validateRequest(updatePermissionStatusSchema),
+  validateSchema(updatePermissionStatusSchema),
   PermissionController.updatePermissionStatus
 );
 

@@ -8,9 +8,9 @@ const options = {
   definition: {
     openapi: "3.0.1",
     info: {
-      title: "School Management API",
+      title: "Dhillon Finance Management System",
       version: "1.0.0",
-      description: "API documentation for School Management System",
+      description: "API documentation for Dhillon Finance Management System",
     },
     servers: [
       {
@@ -42,6 +42,7 @@ const options = {
       { name: "Roles", description: "Role Management" },
       { name: "Permissions", description: "Permission APIs" },
       { name: "Activities", description: "Activity Management" },
+      { name: "Customers", description: "Activity Management" },
       {
         name: "ActivityPermissions",
         description: "Activity Permission Management",

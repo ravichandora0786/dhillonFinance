@@ -9,7 +9,7 @@ import {
   updateActivitySchema,
   updateActivityStatusSchema,
 } from "../schemas/activityMaster.schema.js";
-import validateRequest from "../middlewares/validationMiddleware.js";
+import validateSchema from "../middlewares/validationMiddleware.js";
 
 const activityRouter = express.Router();
 
@@ -85,7 +85,7 @@ activityRouter.get("/:id", ActivityMasterController.getActivityById);
  */
 activityRouter.post(
   "/",
-  validateRequest(createActivitySchema),
+  validateSchema(createActivitySchema),
   ActivityMasterController.createActivity
 );
 
@@ -115,7 +115,7 @@ activityRouter.post(
  */
 activityRouter.put(
   "/:id",
-  validateRequest(updateActivitySchema),
+  validateSchema(updateActivitySchema),
   ActivityMasterController.updateActivity
 );
 
@@ -145,7 +145,7 @@ activityRouter.put(
  */
 activityRouter.patch(
   "/:id/status",
-  validateRequest(updateActivityStatusSchema),
+  validateSchema(updateActivityStatusSchema),
   ActivityMasterController.updateActivityStatus
 );
 

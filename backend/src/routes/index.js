@@ -12,6 +12,7 @@ import activityPermissionRouter from "./activityPermissionRouter.js";
 import countryRouter from "./countryRouter.js";
 import stateRouter from "./stateRouter.js";
 import districtRouter from "./districtRouter.js";
+import customerRouter from "./customer.routes.js";
 
 const router = express.Router();
 
@@ -27,5 +28,7 @@ router.use("/activityPermission", activityPermissionRouter);
 router.use("/country", countryRouter);
 router.use("/state", stateRouter);
 router.use("/district", districtRouter);
+
+router.use("/customer", customerRouter);
 
 export default router;

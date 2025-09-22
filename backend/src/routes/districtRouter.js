@@ -8,7 +8,7 @@ import {
   createDistrictSchema,
   updateDistrictSchema,
 } from "../schemas/district.schema.js";
-import validateRequest from "../middlewares/validationMiddleware.js";
+import validateSchema from "../middlewares/validationMiddleware.js";
 import {
   authenticateUser,
   authorizeUser,
@@ -97,7 +97,7 @@ districtRouter.get(
 districtRouter.post(
   "/",
   authenticateUser,
-  validateRequest(createDistrictSchema),
+  validateSchema(createDistrictSchema),
   DistrictController.createDistrict
 );
 
@@ -127,7 +127,7 @@ districtRouter.post(
 districtRouter.put(
   "/:id",
   authenticateUser,
-  validateRequest(updateDistrictSchema),
+  validateSchema(updateDistrictSchema),
   DistrictController.updateDistrict
 );
 
