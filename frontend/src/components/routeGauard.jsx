@@ -12,7 +12,7 @@ export default function RouteGuard({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const token = useSelector(selectAccessToken);
-  const rolePermissions = useSelector(selectRolePermissionsMap); // [{ route: "/role", permissionKey: "VIEW_ROLE" }, ...]
+  const rolePermissions = useSelector(selectRolePermissionsMap);
 
   const [authorized, setAuthorized] = useState(false);
 
@@ -40,17 +40,32 @@ export default function RouteGuard({ children }) {
       .map((p) => ProtectedRoutes[p.activity?.name?.toUpperCase()])
       .filter(Boolean);
 
-    // If path is protected but not in allowed routes → block
+    // All protected routes
     const allProtected = Object.values(ProtectedRoutes);
-    const isProtected = allProtected.includes(path);
+    const isProtected = allProtected.some((r) => path.startsWith(r));
 
-    if (isProtected && !allowedRoutes.includes(path)) {
+    // If protected but not in allowed → block
+    if (isProtected) {
+      const hasPermission = allowedRoutes.some((route) =>
+        path.startsWith(route)
+      );
+      if (!hasPermission) {
+        setAuthorized(false);
+        router.push("/404");
+        return;
+      }
+    }
+
+    // Handle completely invalid routes
+    const isValidRoute =
+      allProtected.some((r) => path.startsWith(r)) || isPublic;
+    if (!isValidRoute) {
       setAuthorized(false);
-      router.push("/404");
+      router.push(AuthRoutes.LoginScreen);
       return;
     }
 
-    // Authorized
+    // ✅ Authorized
     setAuthorized(true);
   }
 

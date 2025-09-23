@@ -12,16 +12,12 @@ import {
   imageUpload,
   loginApp,
   setAccessToken,
-  setClassOptions,
   setRefreshToken,
   setRolePermissionsMap,
-  setSectionOptions,
   setUser,
 } from "./slice";
 import { endPoints, httpRequest } from "@/request";
 import { decryptData, encryptData } from "@/Services/encryptDecrypt";
-import { getAllSectionDataList } from "../section/slice";
-import { getAllClassDataList } from "../class/slice";
 
 /**
  * User Login
@@ -121,47 +117,6 @@ function* getPermissionsByRoleIdSaga(action) {
     yield onFailure({ message: errorMessage });
   }
 }
-
-export const getAllClassOptions = ({ dispatch }) => {
-  dispatch(
-    getAllClassDataList({
-      data: {
-        name: "",
-        all: true,
-      },
-      onSuccess: ({ message, data }) => {
-        const options = data?.classes?.map((item) => {
-          return {
-            label: item.name,
-            value: item.id,
-          };
-        });
-        dispatch(setClassOptions(options));
-      },
-      onFailure: () => {},
-    })
-  );
-};
-export const getAllSectionsOptions = ({ dispatch }) => {
-  dispatch(
-    getAllSectionDataList({
-      data: {
-        name: "",
-        all: true,
-      },
-      onSuccess: ({ message, data }) => {
-        const options = data?.sections?.map((item) => {
-          return {
-            label: item.name,
-            value: item.id,
-          };
-        });
-        dispatch(setSectionOptions(options));
-      },
-      onFailure: () => {},
-    })
-  );
-};
 
 export function* commonSagas() {
   yield takeLatest(loginApp, loginAppSaga);

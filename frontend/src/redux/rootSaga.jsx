@@ -14,6 +14,8 @@ import { permissionSaga } from "@/app/permissions/sagas";
 import { countrySaga } from "@/app/country/sagas";
 import { stateSaga } from "@/app/state/sagas";
 import { districtSaga } from "@/app/district/sagas";
+import { customerSaga } from "@/app/customer/sagas";
+import { customerLoanSaga } from "@/app/loan/sagas";
 
 function* rootSaga() {
   yield spawn(commonSagas);
@@ -24,6 +26,8 @@ function* rootSaga() {
   yield spawn(countrySaga);
   yield spawn(stateSaga);
   yield spawn(districtSaga);
+  yield spawn(customerSaga);
+  yield spawn(customerLoanSaga);
 }
 
 export default rootSaga;

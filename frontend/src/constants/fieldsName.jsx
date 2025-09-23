@@ -77,83 +77,20 @@ export const PermissionFields = {
   DESCRIPTION: "description",
 };
 
-export const ClassFields = {
-  ID: "id",
-  NAME: "name",
-  SEACTION_ID: "sectionId",
-  MAX_NUMBER_OF_STUDENT: "studentMaxLimit",
-  SUBJECTS: "subjects",
-  STATUS: "status",
-};
-
-export const RoomFields = {
-  ID: "id",
-  ROOM_NUMBER: "roomNumber",
-  CAPACITY: "capacity",
-  STATUS: "status",
-  ROOM_TYPE: "roomType",
-};
-
-export const SectionFields = {
-  ID: "id",
-  NAME: "name",
-  STATUS: "status",
-};
-
-export const SubjectFields = {
-  ID: "id",
-  NAME: "name",
-  CODE: "code",
-  TYPE: "types",
-  STATUS: "status",
-};
-
-export const GradeFields = {
-  ID: "id",
-  NAME: "grade",
-  MARKS_FROM: "marksFrom",
-  MARKS_UPTO: "marksUpTo",
-  GRADE_POINTS: "gradePoints",
-  STATUS: "status",
-};
-
-export const ExamFields = {
-  ID: "id",
-  NAME: "name",
-  DESCRIPTION: "description",
-  STATUS: "status",
-};
-
-export const SyllabusFields = {
-  ID: "id",
-  CLASS_ID: "classId",
-  SECTION_ID: "sectionId",
-  SYLLABUS: "syllabus",
-  STATUS: "status",
-};
-
-export const DepartmentFields = {
-  ID: "id",
-  NAME: "name",
-  STATUS: "status",
-};
-
-export const LeaveTypeFields = {
-  ID: "id",
-  NAME: "name",
-  STATUS: "status",
-};
-
-export const YearLevelFields = {
-  ID: "id",
-  NAME: "name",
-  LEVEL_ORDER: "levelOrder",
-};
-
-export const SchoolYearFields = {
-  NAME: "name",
-  START_DATE: "startDate",
-  END_DATE: "endDate",
+export const CustomerFields = {
+  FIRST_NAME: "firstName",
+  LAST_NAME: "lastName",
+  MOBILE_NUMBER: "mobileNumber",
+  PIN_CODE: "pinCode",
+  ADDRESS: "address",
+  CITY: "city",
+  STATE: "state",
+  AADHAR_NUMBER: "aadharNumber",
+  PAN_CARD_NUMBER: "panCardNumber",
+  AADHAR_IMAGE: "aadharImage",
+  PAN_CARD_IMAGE: "panCardImage",
+  AGREEMENT_IMAGE: "agreementImage",
+  PROFILE_IMAGE: "profileImage",
 };
 
 export const CommonFields = {

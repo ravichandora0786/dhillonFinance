@@ -17,6 +17,8 @@ import { permissionReducer } from "@/app/permissions/slice";
 import { countryReducer } from "@/app/country/slice";
 import { stateReducer } from "@/app/state/slice";
 import { districtReducer } from "@/app/district/slice";
+import { customerReducer } from "@/app/customer/slice";
+import { customerLoanReducer } from "@/app/loan/slice";
 
 const dummyReducer = (state = {}, action) => {
   switch (action.type) {
@@ -51,6 +53,8 @@ const appReducer = combineReducers({
   countryReducer,
   stateReducer,
   districtReducer,
+  customerReducer,
+  customerLoanReducer,
   // Add other reducers here
 });
 

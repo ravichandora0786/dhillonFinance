@@ -42,7 +42,7 @@ const RenderFields = ({
           const fieldTouched = getIn(touched, name);
           return (
             <div key={name}>
-              {type !== "toogle" && (
+              {type !== "toggle" && (
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {label} {required && <span className="text-danger">*</span>}
                 </label>
@@ -85,7 +85,7 @@ const RenderFields = ({
                   disabled={disabled}
                   isMulti={isMulti}
                 />
-              ) : type === "toogle" ? (
+              ) : type === "toggle" ? (
                 <div className="w-full flex flex-row justify-between">
                   <div className="flex flex-col justify-between">
                     <label className="block text-sm font-medium text-gray-700">
@@ -121,9 +121,14 @@ const RenderFields = ({
                   dateFormat="dd MMM yyyy"
                   minDate={today}
                 />
-              ) : ["text", "email", "number", "password", "textarea"].includes(
-                  type
-                ) ? (
+              ) : [
+                  "text",
+                  "email",
+                  "number",
+                  "password",
+                  "textarea",
+                  "file",
+                ].includes(type) ? (
                 <InputBox
                   type={type}
                   name={name}

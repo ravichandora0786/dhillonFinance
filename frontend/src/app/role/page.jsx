@@ -13,7 +13,6 @@ import Label from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loadingButton";
 import TitleAndDescription from "@/components/ui/titleAndDescription";
 import { useRouter } from "next/navigation";
-import GenericModal from "@/components/ui/genericModal";
 import AddEditRole from "./add/page";
 import { useDispatch, useSelector } from "react-redux";
 import {

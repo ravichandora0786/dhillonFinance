@@ -23,12 +23,14 @@ import {
   Assignment as ExamIcon,
   AssignmentTurnedIn as HomeworkIcon,
   Lock as PermissionsIcon,
-  MenuBook as SyllabusIcon,
   Home as HomeIcon,
   Menu as MenuIcon,
   ChevronLeft,
+  CloseOutlined as CloseOutlinedIcon,
 } from "@mui/icons-material";
-
+import { FaFileInvoiceDollar } from "react-icons/fa";
+import { FaHandHoldingUsd } from "react-icons/fa";
+import { GrTransaction } from "react-icons/gr";
 import IconButton from "@/components/buttons/IconButton";
 import { getFilteredMenuData } from "@/Services/utils";
 import { selectRolePermissionsMap, selectUser } from "@/app/common/selectors";
@@ -46,118 +48,40 @@ const menuData = [
     link: ProtectedRoutes.DASHBOARD,
   },
   {
-    id: "role",
-    label: "Role",
+    id: "customers",
+    label: "Customer",
     icon: <PeopleIcon />,
-    link: ProtectedRoutes.ROLE,
+    link: ProtectedRoutes.CUSTOMER,
+  },
+
+  {
+    id: "loans",
+    label: "Loan",
+    icon: <FaHandHoldingUsd size={22} />,
+    link: ProtectedRoutes.LOAN,
+  },
+
+  {
+    id: "transactions",
+    label: "Transaction",
+    icon: <GrTransaction size={22} />,
+    link: ProtectedRoutes.TRANSATION,
   },
   {
-    id: "class",
-    label: "Class",
-    icon: <SchoolIcon />,
-    link: ProtectedRoutes.CLASS,
-  },
-  {
-    id: "room",
-    label: "Room",
-    icon: <RoomIcon />,
-    link: ProtectedRoutes.ROOM,
-  },
-  {
-    id: "subject",
-    label: "Subject",
-    icon: <SubjectIcon />,
-    link: ProtectedRoutes.SUBJECT,
-  },
-  {
-    id: "section",
-    label: "Section",
-    icon: <SectionIcon />,
-    link: ProtectedRoutes.SECTION,
-  },
-  {
-    id: "grades",
-    label: "Grades",
-    icon: <GradeIcon />,
-    link: ProtectedRoutes.GRADES,
-  },
-  {
-    id: "exam",
-    label: "Exam",
-    icon: <ExamIcon />,
-    link: ProtectedRoutes.EXAM,
-  },
-  {
-    id: "leaveType",
-    label: "Leave Type",
-    icon: <ExamIcon />,
-    link: ProtectedRoutes["LEAVE TYPE"],
-  },
-  {
-    id: "schoolYear",
-    label: "School Year",
-    icon: <ExamIcon />,
-    link: ProtectedRoutes["SCHOOL YEAR"],
-  },
-  {
-    id: "department",
-    label: "Department",
-    icon: <ExamIcon />,
-    link: ProtectedRoutes.DEPARTMENT,
-  },
-  {
-    id: "homework",
-    label: "Home Work",
-    icon: <HomeworkIcon />,
-    link: ProtectedRoutes["HOME WORK"],
+    id: "invoices",
+    label: "Invoice",
+    icon: <FaFileInvoiceDollar size={22} />,
+    link: ProtectedRoutes.INVOICE,
   },
   {
     id: "permissions",
-    label: "Permissions",
+    label: "Permission",
     icon: <PermissionsIcon />,
     link: ProtectedRoutes.PERMISSIONS,
   },
-  {
-    id: "syllabus",
-    label: "Syllabus",
-    icon: <SyllabusIcon />,
-    link: ProtectedRoutes.SYLLABUS,
-  },
-  {
-    id: "users",
-    label: "Users",
-    icon: <PeopleIcon />,
-    link: ProtectedRoutes.USERS,
-    children: [
-      {
-        id: "students",
-        label: "Students",
-        icon: <PeopleIcon />,
-        link: ProtectedRoutes.STUDENTS,
-      },
-      {
-        id: "parents",
-        label: "Parents",
-        icon: <PeopleIcon />,
-        link: ProtectedRoutes.PARENTS,
-      },
-      {
-        id: "teachers",
-        label: "Teacher",
-        icon: <PeopleIcon />,
-        link: ProtectedRoutes.TEACHERS,
-      },
-      {
-        id: "staff",
-        label: "Staff",
-        icon: <PeopleIcon />,
-        link: ProtectedRoutes.STAFF,
-      },
-    ],
-  },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ isMobile = false, mobileViewToggle = () => {} }) => {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const { socket } = useSocket();
@@ -168,7 +92,7 @@ const Sidebar = () => {
   const userDetail = useSelector(selectUser) || {};
 
   const filteredMenu = getFilteredMenuData(menuData, permissionsState);
-  // console.log(permissionsState, "filteredMenu");
+  console.log(permissionsState, "filteredMenu");
 
   const handleOpenSubMenu = (key) => {
     setOpen(open === key ? "" : key);
@@ -228,7 +152,7 @@ const Sidebar = () => {
                 color: "var(--color-sidebar-text)",
                 justifyContent: collapsed ? "center" : "flex-start",
                 padding: collapsed ? "8px" : "10px 16px",
-                height: "34px",
+                // height: "34px",
               };
               const activeStyles = {
                 backgroundColor: "var(--color-active-bg)",
@@ -265,14 +189,27 @@ const Sidebar = () => {
                 onClick={() => collapsed && toggleSidebar()}
               ></MenuItem>
             ) : (
-              <div className="flex m-2 items-center justify-between w-full">
-                <h5 className=" font-semibold text-sidebar-text">My IC Site</h5>
-                <IconButton
-                  icon={
-                    <ChevronLeft sx={{ color: "var(--color-sidebar-text)" }} />
-                  }
-                  onClick={toggleSidebar}
-                />
+              <div className="flex flex-row px-4 py-2 items-center justify-between w-full">
+                <h5 className=" font-semibold text-sidebar-text">Finance</h5>
+                {isMobile ? (
+                  <IconButton
+                    icon={
+                      <CloseOutlinedIcon
+                        sx={{ color: "var(--color-sidebar-text)" }}
+                      />
+                    }
+                    onClick={mobileViewToggle}
+                  />
+                ) : (
+                  <IconButton
+                    icon={
+                      <ChevronLeft
+                        sx={{ color: "var(--color-sidebar-text)" }}
+                      />
+                    }
+                    onClick={toggleSidebar}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -315,6 +252,7 @@ const Sidebar = () => {
                   pathname === menu.link || pathname.startsWith(menu.link + "/")
                 }
                 component={<Link href={menu.link} />}
+                onClick={isMobile && mobileViewToggle}
               >
                 {!collapsed && menu.label}
               </MenuItem>

@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useEffect, useMemo, useState } from "react";
 import socketio from "socket.io-client";
 import  store  from "@/redux/store";

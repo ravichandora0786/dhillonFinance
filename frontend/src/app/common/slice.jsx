@@ -10,13 +10,7 @@ const initialState = {
   accessToken: null,
   refreshToken: null,
   rolePermissionsMap: [],
-  classOptions: [],
-  sectionOptions: [],
-  subjectOptions: [],
-  roomOptions: [],
-  schoolYearOptions: [],
   countryOptions: [],
-
 };
 
 const commonSlice = createSlice({
@@ -35,21 +29,6 @@ const commonSlice = createSlice({
 
     setRolePermissionsMap(state, action) {
       state.rolePermissionsMap = action.payload;
-    },
-    setSectionOptions(state, action) {
-      state.sectionOptions = action.payload;
-    },
-    setClassOptions(state, action) {
-      state.classOptions = action.payload;
-    },
-    setSubjectOptions(state, action) {
-      state.subjectOptions = action.payload;
-    },
-    setRoomOptions(state, action) {
-      state.roomOptions = action.payload;
-    },
-    setSchoolYearOptions(state, action) {
-      state.schoolYearOptions = action.payload;
     },
     setCountryOptions(state, action) {
       state.countryOptions = action.payload;
@@ -70,13 +49,7 @@ export const {
   setUser,
   setAccessToken,
   setRefreshToken,
-
   setRolePermissionsMap,
-  setClassOptions,
-  setSectionOptions,
-  setSubjectOptions,
-  setRoomOptions,
-  setSchoolYearOptions,
   setCountryOptions,
 } = commonSlice.actions;
 
