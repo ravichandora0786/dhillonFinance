@@ -4,6 +4,7 @@
 
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
+import UploadFileModel from "./uploadFile.model.js";
 
 const CustomerModel = sequelize.define(
   "Customer",
@@ -52,20 +53,32 @@ const CustomerModel = sequelize.define(
       allowNull: false,
     },
     aadharImage: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: UploadFileModel,
+      },
     },
     panCardImage: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: UploadFileModel,
+      },
     },
     agreementImage: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: UploadFileModel,
+      },
     },
     profileImage: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: UploadFileModel,
+      },
     },
     description: {
       type: DataTypes.STRING,

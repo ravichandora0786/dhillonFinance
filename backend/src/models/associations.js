@@ -7,6 +7,8 @@ import ActivityPermissionModel from "./activityPermission.model.js";
 import CountryModel from "./country.model.js";
 import DistrictModel from "./district.model.js";
 import StateModel from "./state.model.js";
+import CustomerModel from "./customer.model.js";
+import UploadFileModel from "./uploadFile.model.js";
 
 // =======================
 // User & Role Relations
@@ -35,6 +37,27 @@ ActivityPermissionModel.belongsTo(ActivityMasterModel, {
   as: "activity",
 });
 
+// Customer has multiple file references
+CustomerModel.belongsTo(UploadFileModel, {
+  foreignKey: "aadharImage",
+  as: "aadharFile",
+});
+
+CustomerModel.belongsTo(UploadFileModel, {
+  foreignKey: "panCardImage",
+  as: "panCardFile",
+});
+
+CustomerModel.belongsTo(UploadFileModel, {
+  foreignKey: "agreementImage",
+  as: "agreementFile",
+});
+
+CustomerModel.belongsTo(UploadFileModel, {
+  foreignKey: "profileImage",
+  as: "profileFile",
+});
+
 // =======================
 // Export
 // =======================
@@ -47,4 +70,6 @@ export {
   CountryModel,
   DistrictModel,
   StateModel,
+  CustomerModel,
+  UploadFileModel,
 };

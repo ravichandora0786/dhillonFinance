@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { responseMessage } from "../utils/responseMessage.js";
+import UploadFileModel from "../models/uploadFile.model.js";
 
 /** Create Customer */
 const createCustomer = asyncHandler(async (req, res, next) => {
@@ -32,7 +33,14 @@ const createCustomer = asyncHandler(async (req, res, next) => {
 /** Get all Customers */
 const getCustomers = asyncHandler(async (req, res, next) => {
   try {
-    const customers = await CustomerModel.findAll();
+    const customers = await CustomerModel.findAll({
+      include: [
+        { model: UploadFileModel, as: "aadharFile" },
+        { model: UploadFileModel, as: "panCardFile" },
+        { model: UploadFileModel, as: "agreementFile" },
+        { model: UploadFileModel, as: "profileFile" },
+      ],
+    });
     return res
       .status(200)
       .json(
@@ -46,7 +54,14 @@ const getCustomers = asyncHandler(async (req, res, next) => {
 /** Get Customer by ID */
 const getCustomerById = asyncHandler(async (req, res, next) => {
   try {
-    const customer = await CustomerModel.findByPk(req.params.id);
+    const customer = await CustomerModel.findByPk(req.params.id, {
+      include: [
+        { model: UploadFileModel, as: "aadharFile" },
+        { model: UploadFileModel, as: "panCardFile" },
+        { model: UploadFileModel, as: "agreementFile" },
+        { model: UploadFileModel, as: "profileFile" },
+      ],
+    });
     if (!customer)
       return next(new ApiError(404, responseMessage.notFound("Customer")));
     return res

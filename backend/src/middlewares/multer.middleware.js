@@ -1,5 +1,5 @@
 /**
- * multer Middleware for image upload
+ * multer Middleware for image/document upload (single folder)
  */
 
 import multer from "multer";
@@ -16,27 +16,19 @@ if (!fs.existsSync(uploadBaseDir)) {
   fs.mkdirSync(uploadBaseDir, { recursive: true });
 }
 
-// Function to create storage dynamically
-const createStorage = (subFolder) => {
-  return multer.diskStorage({
-    destination: (req, file, cb) => {
-      const filePath = path.join(uploadBaseDir, subFolder);
+// Storage configuration (all files go to the same folder)
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadBaseDir);
+  },
+  filename: (req, file, cb) => {
+    const fileExt = path.extname(file.originalname).toLowerCase();
+    const uniqueFilename = `${v4()}${fileExt}`;
+    cb(null, uniqueFilename);
+  },
+});
 
-      if (!fs.existsSync(filePath)) {
-        fs.mkdirSync(filePath, { recursive: true });
-      }
-
-      cb(null, filePath);
-    },
-    filename: (req, file, cb) => {
-      const fileExt = path.extname(file.originalname).toLowerCase();
-      const uniqueFilename = `${v4()}${fileExt}`; // Generate unique filename
-      cb(null, uniqueFilename);
-    },
-  });
-};
-
-// File validation functions
+// File validation
 const imageFilter = (req, file, cb) => {
   const allowedImageTypes = /jpeg|jpg|png/;
   const extName = allowedImageTypes.test(
@@ -65,50 +57,43 @@ const documentFilter = (req, file, cb) => {
   }
 };
 
-// Define Multer upload configurations
+// Multer configurations
 const uploadImageConfig = multer({
-  storage: createStorage("images"), // Save images in "uploads/images/"
+  storage,
   fileFilter: imageFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
 const uploadDocumentConfig = multer({
-  storage: createStorage("documents"), // Save documents in "uploads/documents/"
+  storage,
   fileFilter: documentFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit for documents
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-// Middleware functions
+// Middleware
 export const uploadImage = (fieldName) => (req, res, next) => {
   uploadImageConfig.single(fieldName)(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
+    if (err instanceof multer.MulterError)
       return res.status(400).json({ message: `Multer error: ${err.message}` });
-    } else if (err) {
-      return res.status(400).json({ message: err.message });
-    }
+    else if (err) return res.status(400).json({ message: err.message });
     next();
   });
 };
 
 export const uploadDocument = (fieldName) => (req, res, next) => {
   uploadDocumentConfig.single(fieldName)(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
+    if (err instanceof multer.MulterError)
       return res.status(400).json({ message: `Multer error: ${err.message}` });
-    } else if (err) {
-      return res.status(400).json({ message: err.message });
-    }
+    else if (err) return res.status(400).json({ message: err.message });
     next();
   });
 };
 
 export const uploadMultiImage = (fieldName) => (req, res, next) => {
   uploadImageConfig.array(fieldName, 5)(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
+    if (err instanceof multer.MulterError)
       return res.status(400).json({ message: `Multer error: ${err.message}` });
-    } else if (err) {
-      return res.status(400).json({ message: err.message });
-    }
+    else if (err) return res.status(400).json({ message: err.message });
     next();
   });
 };
-

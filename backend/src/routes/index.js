@@ -13,6 +13,7 @@ import countryRouter from "./countryRouter.js";
 import stateRouter from "./stateRouter.js";
 import districtRouter from "./districtRouter.js";
 import customerRouter from "./customer.routes.js";
+import fileRouter from "./file.routes.js";
 
 const router = express.Router();
 
@@ -30,5 +31,7 @@ router.use("/state", stateRouter);
 router.use("/district", districtRouter);
 
 router.use("/customer", customerRouter);
+
+router.use("/file", fileRouter);
 
 export default router;
