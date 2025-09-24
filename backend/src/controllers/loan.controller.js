@@ -7,7 +7,6 @@ import { ApiError } from "../utils/ApiError.js";
 import { responseMessage } from "../utils/responseMessage.js";
 import TransactionModel from "../models/transaction.model.js";
 
-
 /** Create Loan with initial Disbursement transaction */
 const createLoan = asyncHandler(async (req, res, next) => {
   const transaction = await sequelize.transaction();
@@ -64,13 +63,14 @@ const createLoan = asyncHandler(async (req, res, next) => {
 
     return res
       .status(201)
-      .json(new ApiResponse(201, loan, "Loan created and disbursed successfully"));
+      .json(
+        new ApiResponse(201, loan, "Loan created and disbursed successfully")
+      );
   } catch (err) {
     await transaction.rollback();
     next(new ApiError(500, err.message));
   }
 });
-
 
 /** Get all Loans with pagination, sorting, search, status filter, and next/previous flags */
 const getLoans = asyncHandler(async (req, res, next) => {
@@ -113,6 +113,8 @@ const getLoans = asyncHandler(async (req, res, next) => {
           model: TransactionModel,
           as: "transactions",
           attributes: ["amount", "transactionType"], // include type
+          separate: true,
+          order: [["createdAt", "DESC"]], // latest transaction first
         },
       ],
       order: [[sortBy, order.toUpperCase()]],
@@ -173,6 +175,8 @@ const getLoanById = asyncHandler(async (req, res, next) => {
           model: TransactionModel,
           as: "transactions",
           attributes: ["amount", "transactionType"], // include type
+          separate: true,
+          order: [["createdAt", "DESC"]], // latest transaction first
         },
       ],
     });

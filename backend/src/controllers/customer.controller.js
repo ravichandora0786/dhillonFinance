@@ -58,7 +58,7 @@ const getCustomers = asyncHandler(async (req, res, next) => {
         }
       : {};
 
-    // Include loans and transactions for stats
+    // Fetch customers with related files, loans, and transactions
     const customers = await CustomerModel.findAndCountAll({
       where: searchCondition,
       include: [
@@ -73,9 +73,13 @@ const getCustomers = asyncHandler(async (req, res, next) => {
             {
               model: TransactionModel,
               as: "transactions",
-              attributes: ["amount", "transactionType"],
+              attributes: ["amount", "transactionType", "createdAt"],
+              separate: true,
+              order: [["createdAt", "DESC"]], // latest transaction first
             },
           ],
+          separate: true,
+          order: [["createdAt", "DESC"]], // latest loan first
         },
       ],
       order: [[sortBy, order.toUpperCase()]],
@@ -86,6 +90,23 @@ const getCustomers = asyncHandler(async (req, res, next) => {
     // Map customers with loan/payment stats
     const customerData = customers.rows.map((customer) => {
       const loans = customer.loans || [];
+
+      // Map each loan with its own repayment stats
+      const loansWithStats = loans.map((loan) => {
+        const repaymentsReceived = loan.transactions
+          .filter((tx) => tx.transactionType === "Repayment")
+          .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+
+        const repaymentsPending =
+          parseFloat(loan.totalPayableAmount) - repaymentsReceived;
+
+        return {
+          ...loan.toJSON(),
+          repaymentsReceived,
+          repaymentsPending: repaymentsPending >= 0 ? repaymentsPending : 0,
+        };
+      });
+
       const totalLoans = loans.length;
       const closedLoans = loans.filter((l) => l.status === "Closed").length;
       const pendingLoans = loans.filter(
@@ -95,29 +116,12 @@ const getCustomers = asyncHandler(async (req, res, next) => {
           l.status === "Defaulted"
       ).length;
 
-      // Aggregate payments across all loans
-      let totalRepaymentsReceived = 0;
-      let totalRepaymentsPending = 0;
-
-      loans.forEach((loan) => {
-        const repaymentsReceived = loan.transactions
-          .filter((tx) => tx.transactionType === "Repayment")
-          .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
-
-        totalRepaymentsReceived += repaymentsReceived;
-
-        const pendingAmount =
-          parseFloat(loan.totalPayableAmount) - repaymentsReceived;
-        totalRepaymentsPending += pendingAmount >= 0 ? pendingAmount : 0;
-      });
-
       return {
         ...customer.toJSON(),
         totalLoans,
         closedLoans,
         pendingLoans,
-        totalRepaymentsReceived,
-        totalRepaymentsPending,
+        loans: loansWithStats, // include loans with individual stats
       };
     });
 
@@ -143,7 +147,7 @@ const getCustomers = asyncHandler(async (req, res, next) => {
   }
 });
 
-/** Get Customer by ID */
+/** Get Customer by ID with loans/transactions stats */
 const getCustomerById = asyncHandler(async (req, res, next) => {
   try {
     const customer = await CustomerModel.findByPk(req.params.id, {
@@ -155,11 +159,15 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
         {
           model: LoanModel,
           as: "loans",
+          separate: true, // important to enable ordering
+          order: [["createdAt", "DESC"]], // latest loan first
           include: [
             {
               model: TransactionModel,
               as: "transactions",
-              attributes: ["amount", "transactionType"],
+              attributes: ["amount", "transactionType", "createdAt"],
+              separate: true, // important to enable ordering
+              order: [["createdAt", "DESC"]], // latest transaction first
             },
           ],
         },
@@ -170,6 +178,23 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
       return next(new ApiError(404, responseMessage.notFound("Customer")));
 
     const loans = customer.loans || [];
+
+    // Map each loan with its own repayment stats
+    const loansWithStats = loans.map((loan) => {
+      const repaymentsReceived = loan.transactions
+        .filter((tx) => tx.transactionType === "Repayment")
+        .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+
+      const repaymentsPending =
+        parseFloat(loan.totalPayableAmount) - repaymentsReceived;
+
+      return {
+        ...loan.toJSON(),
+        repaymentsReceived,
+        repaymentsPending: repaymentsPending >= 0 ? repaymentsPending : 0,
+      };
+    });
+
     const totalLoans = loans.length;
     const closedLoans = loans.filter((l) => l.status === "Closed").length;
     const pendingLoans = loans.filter(
@@ -179,28 +204,12 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
         l.status === "Defaulted"
     ).length;
 
-    let totalRepaymentsReceived = 0;
-    let totalRepaymentsPending = 0;
-
-    loans.forEach((loan) => {
-      const repaymentsReceived = loan.transactions
-        .filter((tx) => tx.transactionType === "Repayment")
-        .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
-
-      totalRepaymentsReceived += repaymentsReceived;
-
-      const pendingAmount =
-        parseFloat(loan.totalPayableAmount) - repaymentsReceived;
-      totalRepaymentsPending += pendingAmount >= 0 ? pendingAmount : 0;
-    });
-
     const customerWithStats = {
       ...customer.toJSON(),
       totalLoans,
       closedLoans,
       pendingLoans,
-      totalRepaymentsReceived,
-      totalRepaymentsPending,
+      loans: loansWithStats, // include loans with individual stats
     };
 
     return res
