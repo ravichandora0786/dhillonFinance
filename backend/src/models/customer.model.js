@@ -5,6 +5,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
 import UploadFileModel from "./uploadFile.model.js";
+import { CUSTOMER_STATUS_ENUM } from "../utils/constants/index.js";
 
 const CustomerModel = sequelize.define(
   "Customer",
@@ -87,6 +88,11 @@ const CustomerModel = sequelize.define(
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
+    },
+    status: {
+      type: DataTypes.ENUM(...CUSTOMER_STATUS_ENUM),
+      allowNull: true,
+      defaultValue: "Active",
     },
   },
   {

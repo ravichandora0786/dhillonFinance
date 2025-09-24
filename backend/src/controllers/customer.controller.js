@@ -30,22 +30,61 @@ const createCustomer = asyncHandler(async (req, res, next) => {
   }
 });
 
-/** Get all Customers */
+/** Get all Customers with pagination, sorting, search, and next/previous page flags */
 const getCustomers = asyncHandler(async (req, res, next) => {
   try {
-    const customers = await CustomerModel.findAll({
+    let {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      order = "DESC",
+      search = "",
+    } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+    const offset = (page - 1) * limit;
+
+    const searchCondition = search
+      ? {
+          [Op.or]: [
+            { firstName: { [Op.iLike]: `%${search}%` } },
+            { lastName: { [Op.iLike]: `%${search}%` } },
+            { mobileNumber: { [Op.iLike]: `%${search}%` } },
+          ],
+        }
+      : {};
+
+    const customers = await CustomerModel.findAndCountAll({
+      where: searchCondition,
       include: [
         { model: UploadFileModel, as: "aadharFile" },
         { model: UploadFileModel, as: "panCardFile" },
         { model: UploadFileModel, as: "agreementFile" },
         { model: UploadFileModel, as: "profileFile" },
       ],
+      order: [[sortBy, order.toUpperCase()]],
+      limit,
+      offset,
     });
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(200, customers, responseMessage.fetched("Customers"))
-      );
+
+    const totalPages = Math.ceil(customers.count / limit);
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          total: customers.count,
+          page,
+          limit,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1,
+          customers: customers.rows,
+        },
+        responseMessage.fetched("Customers")
+      )
+    );
   } catch (err) {
     next(new ApiError(500, err.message));
   }

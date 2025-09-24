@@ -36,9 +36,6 @@ app.use(
     credentials: true,
   })
 );
-// Must come BEFORE express.json()
-// app.use("/api/v1/campaign/webhook", express.raw({ type: "application/json" }));
-
 // Middleware to parse incoming JSON requests
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));

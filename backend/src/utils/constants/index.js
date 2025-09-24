@@ -36,4 +36,8 @@ export const ChatEventEnum = Object.freeze({
 
 export const AvailableChatEvents = Object.values(ChatEventEnum);
 
-export { USER_ROLE, PHONE_REGEX };
+const CUSTOMER_STATUS_ENUM = ["Active", "Inactive", "Pending", "Blocked"];
+
+const LOAN_STATUS_ENUM = ["Active", "Closed", "Defaulted", "Pending"];
+
+export { USER_ROLE, PHONE_REGEX, CUSTOMER_STATUS_ENUM, LOAN_STATUS_ENUM };

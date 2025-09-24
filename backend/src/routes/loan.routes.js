@@ -1,58 +1,50 @@
 import express from "express";
-import customerController from "../controllers/customer.controller.js";
+import loanController from "../controllers/loan.controller.js";
 import { authenticateUser } from "../middlewares/authMiddleware.js";
-// import {
-//   createCustomerSchema,
-//   updateCustomerSchema,
-// } from "../schemas/customer.schema.js";
+// import { createLoanSchema, updateLoanSchema } from "../schemas/loan.schema.js";
 // import validateSchema from "../middlewares/validationMiddleware.js";
 
-const customerRouter = express.Router();
+const loanRouter = express.Router();
 
 /**
  * @swagger
  * tags:
- *   name: Customers
- *   description: Customer management APIs
+ *   name: Loans
+ *   description: Loan management APIs
  */
 
 /**
  * @swagger
  * components:
  *   schemas:
- *     Customer:
+ *     Loan:
  *       type: object
  *       properties:
  *         id:
  *           type: string
  *           format: uuid
- *         firstName:
+ *         customerId:
  *           type: string
- *         lastName:
+ *           format: uuid
+ *         amount:
+ *           type: number
+ *         interestRate:
+ *           type: number
+ *         tenureMonths:
+ *           type: integer
+ *         emiAmount:
+ *           type: number
+ *         totalPayableAmount:
+ *           type: number
+ *         startDate:
  *           type: string
- *         mobileNumber:
+ *           format: date
+ *         endDate:
  *           type: string
- *         pinCode:
- *           type: string
- *         address:
- *           type: string
- *         city:
- *           type: string
- *         state:
- *           type: string
- *         aadharNumber:
- *           type: string
- *         panCardNumber:
- *           type: string
- *         aadharImage:
- *           type: string
- *         panCardImage:
- *           type: string
- *         agreementImage:
- *           type: string
- *         profileImage:
- *           type: string
+ *           format: date
  *         description:
+ *           type: string
+ *         status:
  *           type: string
  *         isActive:
  *           type: boolean
@@ -60,34 +52,34 @@ const customerRouter = express.Router();
 
 /**
  * @swagger
- * /customer:
+ * /loan:
  *   post:
- *     summary: Create a new customer
- *     tags: [Customers]
+ *     summary: Create a new loan
+ *     tags: [Loans]
  *     security:
  *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           schema: { $ref: "#/components/schemas/Customer" }
+ *           schema: { $ref: "#/components/schemas/Loan" }
  *     responses:
  *       201:
- *         description: Customer created
+ *         description: Loan created
  */
-customerRouter.post(
+loanRouter.post(
   "/",
   authenticateUser,
-  // validateSchema(createCustomerSchema),
-  customerController.createCustomer
+  // validateSchema(createLoanSchema),
+  loanController.createLoan
 );
 
 /**
  * @swagger
- * /customer:
+ * /loan:
  *   get:
- *     summary: Get list of customers with pagination, search, and sorting
- *     tags: [Customers]
+ *     summary: Get list of loans with pagination, search, and filters
+ *     tags: [Loans]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -106,18 +98,27 @@ customerRouter.post(
  *       - in: query
  *         name: search
  *         schema: { type: string }
+ *       - in: query
+ *         name: status
+ *         schema: { type: string }
+ *       - in: query
+ *         name: startDate
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: endDate
+ *         schema: { type: string, format: date }
  *     responses:
  *       200:
- *         description: List of customers
+ *         description: List of loans
  */
-customerRouter.get("/", authenticateUser, customerController.getCustomers);
+loanRouter.get("/", authenticateUser, loanController.getLoans);
 
 /**
  * @swagger
- * /customer/{id}:
+ * /loan/{id}:
  *   get:
- *     summary: Get customer by ID
- *     tags: [Customers]
+ *     summary: Get loan by ID
+ *     tags: [Loans]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -127,20 +128,16 @@ customerRouter.get("/", authenticateUser, customerController.getCustomers);
  *         schema: { type: string, format: uuid }
  *     responses:
  *       200:
- *         description: Customer fetched
+ *         description: Loan fetched
  */
-customerRouter.get(
-  "/:id",
-  authenticateUser,
-  customerController.getCustomerById
-);
+loanRouter.get("/:id", authenticateUser, loanController.getLoanById);
 
 /**
  * @swagger
- * /customer/{id}:
+ * /loan/{id}:
  *   put:
- *     summary: Update customer
- *     tags: [Customers]
+ *     summary: Update loan
+ *     tags: [Loans]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -152,24 +149,24 @@ customerRouter.get(
  *       required: true
  *       content:
  *         application/json:
- *           schema: { $ref: "#/components/schemas/Customer" }
+ *           schema: { $ref: "#/components/schemas/Loan" }
  *     responses:
  *       200:
- *         description: Customer updated
+ *         description: Loan updated
  */
-customerRouter.put(
+loanRouter.put(
   "/:id",
   authenticateUser,
-  // validateSchema(updateCustomerSchema),
-  customerController.updateCustomer
+  // validateSchema(updateLoanSchema),
+  loanController.updateLoan
 );
 
 /**
  * @swagger
- * /customer/{id}:
+ * /loan/{id}:
  *   delete:
- *     summary: Delete customer
- *     tags: [Customers]
+ *     summary: Delete loan
+ *     tags: [Loans]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -179,12 +176,8 @@ customerRouter.put(
  *         schema: { type: string, format: uuid }
  *     responses:
  *       200:
- *         description: Customer deleted
+ *         description: Loan deleted
  */
-customerRouter.delete(
-  "/:id",
-  authenticateUser,
-  customerController.deleteCustomer
-);
+loanRouter.delete("/:id", authenticateUser, loanController.deleteLoan);
 
-export default customerRouter;
+export default loanRouter;

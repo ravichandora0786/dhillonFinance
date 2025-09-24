@@ -1,4 +1,7 @@
-// src/models/index.js
+/*
+ * Associations between models
+ */
+
 import UserModel from "./user.model.js";
 import RoleModel from "./role.model.js";
 import ActivityMasterModel from "./activityMaster.model.js";
@@ -9,16 +12,21 @@ import DistrictModel from "./district.model.js";
 import StateModel from "./state.model.js";
 import CustomerModel from "./customer.model.js";
 import UploadFileModel from "./uploadFile.model.js";
+import LoanModel from "./loan.model.js";
 
-// =======================
-// User & Role Relations
-// =======================
+/*
+ * =======================
+ * User & Role Relations
+ * =======================
+ */
 RoleModel.hasMany(UserModel, { foreignKey: "roleId", as: "users" });
 UserModel.belongsTo(RoleModel, { foreignKey: "roleId", as: "role" });
 
-// =======================
-// Role & ActivityPermission Relations
-// =======================
+/*
+ * ==============================
+ * Role & ActivityPermission Relations
+ * ==============================
+ */
 RoleModel.hasMany(ActivityPermissionModel, {
   foreignKey: "roleId",
   as: "activityPermissions",
@@ -37,7 +45,11 @@ ActivityPermissionModel.belongsTo(ActivityMasterModel, {
   as: "activity",
 });
 
-// Customer has multiple file references
+/*
+ * =======================
+ * Customer & UploadFile Relations
+ * =======================
+ */
 CustomerModel.belongsTo(UploadFileModel, {
   foreignKey: "aadharImage",
   as: "aadharFile",
@@ -58,9 +70,22 @@ CustomerModel.belongsTo(UploadFileModel, {
   as: "profileFile",
 });
 
-// =======================
-// Export
-// =======================
+/*
+ * =======================
+ * Customer & Loan Relations
+ * =======================
+ */
+CustomerModel.hasMany(LoanModel, { foreignKey: "customerId", as: "loans" });
+LoanModel.belongsTo(CustomerModel, {
+  foreignKey: "customerId",
+  as: "customer",
+});
+
+/*
+ * =======================
+ * Export
+ * =======================
+ */
 export {
   UserModel,
   RoleModel,
@@ -72,4 +97,5 @@ export {
   StateModel,
   CustomerModel,
   UploadFileModel,
+  LoanModel,
 };

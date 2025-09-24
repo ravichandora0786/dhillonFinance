@@ -47,10 +47,8 @@ const options = {
         name: "ActivityPermissions",
         description: "Activity Permission Management",
       },
-      {
-        name: "File",
-        description: "File Management",
-      },
+      { name: "File", description: "File Management" },
+      { name: "Loans", description: "Loan Management" },
     ],
   },
   apis: ["./src/routes/*.js", "./src/models/*.js"],

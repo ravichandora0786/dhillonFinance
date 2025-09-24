@@ -56,7 +56,7 @@ const createORupdateActivityPermission = asyncHandler(
         await ActivityPermissionModel.bulkCreate(records, { transaction });
       }
 
-      // ✅ Emit socket event to all clients (broadcast)
+      // Emit socket event to all clients (broadcast)
       emitSocketEvent(req, ChatEventEnum.ACTIVITY_PERMISSION_UPDATED_EVENT, {
         message: "Permission updated",
       });
