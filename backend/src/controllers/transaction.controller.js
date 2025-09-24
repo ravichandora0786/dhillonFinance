@@ -8,7 +8,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { responseMessage } from "../utils/responseMessage.js";
 import { Op } from "sequelize";
 
-/** Create Transaction */
+/** Create Transaction with Loan Update Logic */
 const createTransaction = asyncHandler(async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
@@ -38,6 +38,7 @@ const createTransaction = asyncHandler(async (req, res, next) => {
       return next(new ApiError(404, "Loan not found"));
     }
 
+    // Create Transaction
     const transactionRecord = await TransactionModel.create(
       {
         loanId,
@@ -50,6 +51,51 @@ const createTransaction = asyncHandler(async (req, res, next) => {
       },
       { transaction: t }
     );
+
+    // Update Loan if transactionType is Repayment
+    if (transactionType === "Repayment") {
+      const newPaidEmis = loan.paidEmis + 1;
+      const newPendingEmis = loan.tenureMonths - newPaidEmis;
+
+      // Calculate nextEmiAmount with decimal precision
+      let calculatedNextEmiAmount = parseFloat(
+        (
+          parseFloat(loan.nextEmiAmount || 0) -
+          parseFloat(amount) +
+          parseFloat(loan.emiAmount || 0)
+        ).toFixed(2)
+      );
+
+      // Handle overpayment: nextEmiAmount should not be negative
+      const newNextEmiAmount =
+        calculatedNextEmiAmount > 0 ? calculatedNextEmiAmount : 0;
+
+      // Update installmentDate by adding 1 month only if pendingEmis > 0
+      const currentInstallmentDate = loan.installmentDate
+        ? new Date(loan.installmentDate)
+        : new Date();
+      const newInstallmentDate =
+        newPendingEmis > 0
+          ? (() => {
+              currentInstallmentDate.setMonth(
+                currentInstallmentDate.getMonth() + 1
+              );
+              return currentInstallmentDate.toISOString().split("T")[0];
+            })()
+          : null;
+
+      // Update Loan
+      await loan.update(
+        {
+          paidEmis: newPaidEmis,
+          pendingEmis: newPendingEmis > 0 ? newPendingEmis : 0,
+          nextEmiAmount: newNextEmiAmount,
+          installmentDate: newInstallmentDate,
+          status: newPendingEmis === 0 ? "Completed" : loan.status,
+        },
+        { transaction: t }
+      );
+    }
 
     await t.commit();
     return res

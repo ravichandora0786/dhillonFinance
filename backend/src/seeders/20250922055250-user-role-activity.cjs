@@ -47,7 +47,7 @@ module.exports = {
       const activityNames = [
         "DASHBOARD",
         "CUSTOMER",
-        "LOANS",
+        "LOAN",
         "TRANSACTION",
         "INVOICE",
         "STAFF",

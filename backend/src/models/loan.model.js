@@ -71,6 +71,25 @@ const LoanModel = sequelize.define(
       allowNull: true,
       defaultValue: "Active",
     },
+    installmentDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+
+    nextEmiAmount: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+    },
+
+    pendingEmis: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+
+    paidEmis: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
 
     isActive: {
       type: DataTypes.BOOLEAN,

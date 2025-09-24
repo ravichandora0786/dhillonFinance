@@ -46,6 +46,11 @@ const loanRouter = express.Router();
  *           type: string
  *         status:
  *           type: string
+ *         installmentDate:
+ *           type: string
+ *           format: date
+ *         nextEmiAmount:
+ *           type: number
  *         isActive:
  *           type: boolean
  */

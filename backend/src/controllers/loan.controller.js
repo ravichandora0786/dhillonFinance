@@ -7,46 +7,70 @@ import { ApiError } from "../utils/ApiError.js";
 import { responseMessage } from "../utils/responseMessage.js";
 import TransactionModel from "../models/transaction.model.js";
 
-/** Create Loan */
+
+/** Create Loan with initial Disbursement transaction */
 const createLoan = asyncHandler(async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
-    const { customerId } = req.body;
+    const { customerId, emiAmount, amount, startDate, tenureMonths } = req.body;
 
-    // Check if customer exists
+    // Customer check
     const customer = await CustomerModel.findByPk(customerId, { transaction });
     if (!customer) {
       await transaction.rollback();
       return next(new ApiError(404, "Customer not found"));
     }
 
-    // Check if customer already has an active/pending/defaulted loan
+    // Check existing active/pending/defaulted loan
     const existingLoan = await LoanModel.findOne({
       where: {
         customerId,
-        status: ["Active", "Pending", "Defaulted"], // Closed loans are allowed
+        status: ["Active", "Pending", "Defaulted"],
         isActive: true,
       },
       transaction,
     });
-
     if (existingLoan) {
       await transaction.rollback();
       return next(new ApiError(400, "Customer already has an ongoing loan"));
     }
 
-    // Create new loan
-    const loan = await LoanModel.create(req.body, { transaction });
+    // Initialize loan fields
+    const loanData = {
+      ...req.body,
+      paidEmis: 0,
+      pendingEmis: tenureMonths,
+      nextEmiAmount: emiAmount,
+      installmentDate: startDate,
+    };
+
+    // Create loan
+    const loan = await LoanModel.create(loanData, { transaction });
+
+    // Create Disbursement transaction automatically
+    await TransactionModel.create(
+      {
+        loanId: loan.id,
+        customerId,
+        amount, // full loan amount
+        transactionType: "Disbursement",
+        transactionDate: startDate,
+        description: "Loan disbursed",
+      },
+      { transaction }
+    );
+
     await transaction.commit();
 
     return res
       .status(201)
-      .json(new ApiResponse(201, loan, "Loan created successfully"));
+      .json(new ApiResponse(201, loan, "Loan created and disbursed successfully"));
   } catch (err) {
     await transaction.rollback();
     next(new ApiError(500, err.message));
   }
 });
+
 
 /** Get all Loans with pagination, sorting, search, status filter, and next/previous flags */
 const getLoans = asyncHandler(async (req, res, next) => {
