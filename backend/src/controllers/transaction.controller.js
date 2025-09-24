@@ -12,8 +12,7 @@ import { Op } from "sequelize";
 const createTransaction = asyncHandler(async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
-    const {
-      loanId,
+    let {
       customerId,
       amount,
       transactionType,
@@ -31,12 +30,18 @@ const createTransaction = asyncHandler(async (req, res, next) => {
       return next(new ApiError(404, "Customer not found"));
     }
 
-    // Validate Loan
-    const loan = await LoanModel.findByPk(loanId, { transaction: t });
-    if (!loan) {
+    // find the active loan for the customer
+    const activeLoan = await LoanModel.findOne({
+      where: { customerId, status: "Active", isActive: true },
+      transaction: t,
+    });
+
+    if (!activeLoan) {
       await t.rollback();
-      return next(new ApiError(404, "Loan not found"));
+      return next(new ApiError(404, "No active loan found for this customer"));
     }
+
+    const loanId = activeLoan.id;
 
     // Create Transaction
     const transactionRecord = await TransactionModel.create(
@@ -53,27 +58,27 @@ const createTransaction = asyncHandler(async (req, res, next) => {
     );
 
     // Update Loan if transactionType is Repayment
-    if (transactionType === "Repayment") {
-      const newPaidEmis = loan.paidEmis + 1;
-      const newPendingEmis = loan.tenureMonths - newPaidEmis;
+    const loanToUpdate = await LoanModel.findByPk(loanId, { transaction: t });
 
-      // Calculate nextEmiAmount with decimal precision
+    if (transactionType === "Repayment") {
+      const newPaidEmis = loanToUpdate.paidEmis + 1;
+      const newPendingEmis = loanToUpdate.tenureMonths - newPaidEmis;
+
       let calculatedNextEmiAmount = parseFloat(
         (
-          parseFloat(loan.nextEmiAmount || 0) -
+          parseFloat(loanToUpdate.nextEmiAmount || 0) -
           parseFloat(amount) +
-          parseFloat(loan.emiAmount || 0)
+          parseFloat(loanToUpdate.emiAmount || 0)
         ).toFixed(2)
       );
 
-      // Handle overpayment: nextEmiAmount should not be negative
       const newNextEmiAmount =
         calculatedNextEmiAmount > 0 ? calculatedNextEmiAmount : 0;
 
-      // Update installmentDate by adding 1 month only if pendingEmis > 0
-      const currentInstallmentDate = loan.installmentDate
-        ? new Date(loan.installmentDate)
+      const currentInstallmentDate = loanToUpdate.installmentDate
+        ? new Date(loanToUpdate.installmentDate)
         : new Date();
+
       const newInstallmentDate =
         newPendingEmis > 0
           ? (() => {
@@ -84,14 +89,13 @@ const createTransaction = asyncHandler(async (req, res, next) => {
             })()
           : null;
 
-      // Update Loan
-      await loan.update(
+      await loanToUpdate.update(
         {
           paidEmis: newPaidEmis,
           pendingEmis: newPendingEmis > 0 ? newPendingEmis : 0,
           nextEmiAmount: newNextEmiAmount,
           installmentDate: newInstallmentDate,
-          status: newPendingEmis === 0 ? "Completed" : loan.status,
+          status: newPendingEmis === 0 ? "Completed" : loanToUpdate.status,
         },
         { transaction: t }
       );

@@ -21,9 +21,6 @@ const router = express.Router();
  *         id:
  *           type: string
  *           format: uuid
- *         loanId:
- *           type: string
- *           format: uuid
  *         customerId:
  *           type: string
  *           format: uuid
