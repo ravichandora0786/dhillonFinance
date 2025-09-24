@@ -49,6 +49,7 @@ const options = {
       },
       { name: "File", description: "File Management" },
       { name: "Loans", description: "Loan Management" },
+      { name: "Transactions", description: "Transaction Management" },
     ],
   },
   apis: ["./src/routes/*.js", "./src/models/*.js"],

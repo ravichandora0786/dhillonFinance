@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import sequelize from "../config/db.js";
 import CustomerModel from "../models/customer.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -5,6 +6,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { responseMessage } from "../utils/responseMessage.js";
 import UploadFileModel from "../models/uploadFile.model.js";
+import TransactionModel from "../models/transaction.model.js";
+import LoanModel from "../models/loan.model.js";
 
 /** Create Customer */
 const createCustomer = asyncHandler(async (req, res, next) => {
@@ -55,6 +58,7 @@ const getCustomers = asyncHandler(async (req, res, next) => {
         }
       : {};
 
+    // Include loans and transactions for stats
     const customers = await CustomerModel.findAndCountAll({
       where: searchCondition,
       include: [
@@ -62,10 +66,59 @@ const getCustomers = asyncHandler(async (req, res, next) => {
         { model: UploadFileModel, as: "panCardFile" },
         { model: UploadFileModel, as: "agreementFile" },
         { model: UploadFileModel, as: "profileFile" },
+        {
+          model: LoanModel,
+          as: "loans",
+          include: [
+            {
+              model: TransactionModel,
+              as: "transactions",
+              attributes: ["amount", "transactionType"],
+            },
+          ],
+        },
       ],
       order: [[sortBy, order.toUpperCase()]],
       limit,
       offset,
+    });
+
+    // Map customers with loan/payment stats
+    const customerData = customers.rows.map((customer) => {
+      const loans = customer.loans || [];
+      const totalLoans = loans.length;
+      const closedLoans = loans.filter((l) => l.status === "Closed").length;
+      const pendingLoans = loans.filter(
+        (l) =>
+          l.status === "Active" ||
+          l.status === "Pending" ||
+          l.status === "Defaulted"
+      ).length;
+
+      // Aggregate payments across all loans
+      let totalRepaymentsReceived = 0;
+      let totalRepaymentsPending = 0;
+
+      loans.forEach((loan) => {
+        const repaymentsReceived = loan.transactions
+          .filter((tx) => tx.transactionType === "Repayment")
+          .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+
+        totalRepaymentsReceived += repaymentsReceived;
+
+        const pendingAmount =
+          parseFloat(loan.totalPayableAmount) - repaymentsReceived;
+        totalRepaymentsPending += pendingAmount >= 0 ? pendingAmount : 0;
+      });
+
+      return {
+        ...customer.toJSON(),
+        totalLoans,
+        closedLoans,
+        pendingLoans,
+        totalRepaymentsReceived,
+        totalRepaymentsPending,
+      };
     });
 
     const totalPages = Math.ceil(customers.count / limit);
@@ -80,7 +133,7 @@ const getCustomers = asyncHandler(async (req, res, next) => {
           totalPages,
           hasNextPage: page < totalPages,
           hasPreviousPage: page > 1,
-          customers: customers.rows,
+          customers: customerData,
         },
         responseMessage.fetched("Customers")
       )
@@ -99,14 +152,65 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
         { model: UploadFileModel, as: "panCardFile" },
         { model: UploadFileModel, as: "agreementFile" },
         { model: UploadFileModel, as: "profileFile" },
+        {
+          model: LoanModel,
+          as: "loans",
+          include: [
+            {
+              model: TransactionModel,
+              as: "transactions",
+              attributes: ["amount", "transactionType"],
+            },
+          ],
+        },
       ],
     });
+
     if (!customer)
       return next(new ApiError(404, responseMessage.notFound("Customer")));
+
+    const loans = customer.loans || [];
+    const totalLoans = loans.length;
+    const closedLoans = loans.filter((l) => l.status === "Closed").length;
+    const pendingLoans = loans.filter(
+      (l) =>
+        l.status === "Active" ||
+        l.status === "Pending" ||
+        l.status === "Defaulted"
+    ).length;
+
+    let totalRepaymentsReceived = 0;
+    let totalRepaymentsPending = 0;
+
+    loans.forEach((loan) => {
+      const repaymentsReceived = loan.transactions
+        .filter((tx) => tx.transactionType === "Repayment")
+        .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+
+      totalRepaymentsReceived += repaymentsReceived;
+
+      const pendingAmount =
+        parseFloat(loan.totalPayableAmount) - repaymentsReceived;
+      totalRepaymentsPending += pendingAmount >= 0 ? pendingAmount : 0;
+    });
+
+    const customerWithStats = {
+      ...customer.toJSON(),
+      totalLoans,
+      closedLoans,
+      pendingLoans,
+      totalRepaymentsReceived,
+      totalRepaymentsPending,
+    };
+
     return res
       .status(200)
       .json(
-        new ApiResponse(200, customer, responseMessage.fetched("Customer"))
+        new ApiResponse(
+          200,
+          customerWithStats,
+          responseMessage.fetched("Customer")
+        )
       );
   } catch (err) {
     next(new ApiError(500, err.message));

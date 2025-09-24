@@ -13,6 +13,7 @@ import StateModel from "./state.model.js";
 import CustomerModel from "./customer.model.js";
 import UploadFileModel from "./uploadFile.model.js";
 import LoanModel from "./loan.model.js";
+import TransactionModel from "./transaction.model.js";
 
 /*
  * =======================
@@ -83,6 +84,31 @@ LoanModel.belongsTo(CustomerModel, {
 
 /*
  * =======================
+ * Customer & Transaction Relations
+ * =======================
+ */
+CustomerModel.hasMany(TransactionModel, {
+  foreignKey: "customerId",
+  as: "transactions",
+});
+TransactionModel.belongsTo(CustomerModel, {
+  foreignKey: "customerId",
+  as: "customer",
+});
+
+/*
+ * =======================
+ * Loan & Transaction Relations
+ * =======================
+ */
+LoanModel.hasMany(TransactionModel, {
+  foreignKey: "loanId",
+  as: "transactions",
+});
+TransactionModel.belongsTo(LoanModel, { foreignKey: "loanId", as: "loan" });
+
+/*
+ * =======================
  * Export
  * =======================
  */
@@ -98,4 +124,5 @@ export {
   CustomerModel,
   UploadFileModel,
   LoanModel,
+  TransactionModel,
 };

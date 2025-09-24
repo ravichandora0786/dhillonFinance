@@ -40,4 +40,15 @@ const CUSTOMER_STATUS_ENUM = ["Active", "Inactive", "Pending", "Blocked"];
 
 const LOAN_STATUS_ENUM = ["Active", "Closed", "Defaulted", "Pending"];
 
-export { USER_ROLE, PHONE_REGEX, CUSTOMER_STATUS_ENUM, LOAN_STATUS_ENUM };
+const TRANSACTION_TYPE_ENUM = ["Disbursement", "Repayment"];
+
+const TRANSACTION_PAYMENT_MODE_ENUM = ["Cash", "Bank", "UPI", "Cheque"];
+
+export {
+  USER_ROLE,
+  PHONE_REGEX,
+  CUSTOMER_STATUS_ENUM,
+  LOAN_STATUS_ENUM,
+  TRANSACTION_TYPE_ENUM,
+  TRANSACTION_PAYMENT_MODE_ENUM,
+};

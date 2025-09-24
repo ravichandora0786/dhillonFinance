@@ -1,26 +1,27 @@
 import express from "express";
-import loanController from "../controllers/loan.controller.js";
+import transactionController from "../controllers/transaction.controller.js";
 import { authenticateUser } from "../middlewares/authMiddleware.js";
-// import { createLoanSchema, updateLoanSchema } from "../schemas/loan.schema.js";
-// import validateSchema from "../middlewares/validationMiddleware.js";
 
-const loanRouter = express.Router();
+const router = express.Router();
 
 /**
  * @swagger
  * tags:
- *   name: Loans
- *   description: Loan management APIs
+ *   name: Transactions
+ *   description: Transaction management APIs
  */
 
 /**
  * @swagger
  * components:
  *   schemas:
- *     Loan:
+ *     Transaction:
  *       type: object
  *       properties:
  *         id:
+ *           type: string
+ *           format: uuid
+ *         loanId:
  *           type: string
  *           format: uuid
  *         customerId:
@@ -28,23 +29,16 @@ const loanRouter = express.Router();
  *           format: uuid
  *         amount:
  *           type: number
- *         interestRate:
- *           type: number
- *         tenureMonths:
- *           type: integer
- *         emiAmount:
- *           type: number
- *         totalPayableAmount:
- *           type: number
- *         startDate:
+ *         transactionType:
  *           type: string
- *           format: date
- *         endDate:
+ *           enum: ["Disbursement", "Repayment"]
+ *         paymentMode:
+ *           type: string
+ *           enum: ["Cash", "Bank", "UPI", "Cheque"]
+ *         transactionDate:
  *           type: string
  *           format: date
  *         description:
- *           type: string
- *         status:
  *           type: string
  *         isActive:
  *           type: boolean
@@ -52,39 +46,37 @@ const loanRouter = express.Router();
 
 /**
  * @swagger
- * /loan:
+ * /transaction:
  *   post:
- *     summary: Create a new loan
- *     tags: [Loans]
+ *     summary: Create a new transaction
+ *     tags: [Transactions]
  *     security:
  *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           schema: { $ref: "#/components/schemas/Loan" }
+ *           schema: { $ref: "#/components/schemas/Transaction" }
  *     responses:
  *       201:
- *         description: Loan created
+ *         description: Transaction created
  */
-loanRouter.post(
-  "/",
-  authenticateUser,
-  // validateSchema(createLoanSchema),
-  loanController.createLoan
-);
+router.post("/", authenticateUser, transactionController.createTransaction);
 
 /**
  * @swagger
- * /loan:
+ * /transaction:
  *   get:
- *     summary: Get list of loans with pagination, search, and filters
- *     tags: [Loans]
+ *     summary: Get list of transactions with pagination, search, and filters
+ *     tags: [Transactions]
  *     security:
  *       - BearerAuth: []
  *     parameters:
  *       - in: query
  *         name: customerId
+ *         schema: { type: string }
+ *       - in: query
+ *         name: loanId
  *         schema: { type: string }
  *       - in: query
  *         name: page
@@ -102,8 +94,11 @@ loanRouter.post(
  *         name: search
  *         schema: { type: string }
  *       - in: query
- *         name: status
- *         schema: { type: string }
+ *         name: transactionType
+ *         schema: { type: string, enum: ["Disbursement", "Repayment"] }
+ *       - in: query
+ *         name: paymentMode
+ *         schema: { type: string, enum: ["Cash", "Bank", "UPI", "Cheque"] }
  *       - in: query
  *         name: startDate
  *         schema: { type: string, format: date }
@@ -112,16 +107,16 @@ loanRouter.post(
  *         schema: { type: string, format: date }
  *     responses:
  *       200:
- *         description: List of loans
+ *         description: List of transactions
  */
-loanRouter.get("/", authenticateUser, loanController.getLoans);
+router.get("/", authenticateUser, transactionController.getTransactions);
 
 /**
  * @swagger
- * /loan/{id}:
+ * /transaction/{id}:
  *   get:
- *     summary: Get loan by ID
- *     tags: [Loans]
+ *     summary: Get transaction by ID
+ *     tags: [Transactions]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -131,16 +126,16 @@ loanRouter.get("/", authenticateUser, loanController.getLoans);
  *         schema: { type: string, format: uuid }
  *     responses:
  *       200:
- *         description: Loan fetched
+ *         description: Transaction fetched
  */
-loanRouter.get("/:id", authenticateUser, loanController.getLoanById);
+router.get("/:id", authenticateUser, transactionController.getTransactionById);
 
 /**
  * @swagger
- * /loan/{id}:
+ * /transaction/{id}:
  *   put:
- *     summary: Update loan
- *     tags: [Loans]
+ *     summary: Update transaction
+ *     tags: [Transactions]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -152,24 +147,19 @@ loanRouter.get("/:id", authenticateUser, loanController.getLoanById);
  *       required: true
  *       content:
  *         application/json:
- *           schema: { $ref: "#/components/schemas/Loan" }
+ *           schema: { $ref: "#/components/schemas/Transaction" }
  *     responses:
  *       200:
- *         description: Loan updated
+ *         description: Transaction updated
  */
-loanRouter.put(
-  "/:id",
-  authenticateUser,
-  // validateSchema(updateLoanSchema),
-  loanController.updateLoan
-);
+router.put("/:id", authenticateUser, transactionController.updateTransaction);
 
 /**
  * @swagger
- * /loan/{id}:
+ * /transaction/{id}:
  *   delete:
- *     summary: Delete loan
- *     tags: [Loans]
+ *     summary: Delete transaction
+ *     tags: [Transactions]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -179,8 +169,12 @@ loanRouter.put(
  *         schema: { type: string, format: uuid }
  *     responses:
  *       200:
- *         description: Loan deleted
+ *         description: Transaction deleted
  */
-loanRouter.delete("/:id", authenticateUser, loanController.deleteLoan);
+router.delete(
+  "/:id",
+  authenticateUser,
+  transactionController.deleteTransaction
+);
 
-export default loanRouter;
+export default router;

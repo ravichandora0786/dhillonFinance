@@ -15,6 +15,7 @@ import districtRouter from "./districtRouter.js";
 import customerRouter from "./customer.routes.js";
 import fileRouter from "./file.routes.js";
 import loanRouter from "./loan.routes.js";
+import transactionRouter from "./transaction.routes.js";
 
 const router = express.Router();
 
@@ -36,5 +37,7 @@ router.use("/customer", customerRouter);
 router.use("/file", fileRouter);
 
 router.use("/loan", loanRouter);
+
+router.use("/transaction", transactionRouter);
 
 export default router;
