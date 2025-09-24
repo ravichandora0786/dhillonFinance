@@ -7,6 +7,8 @@ import {
   PutObjectCommand,
   S3Client,
   GetObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -136,4 +138,79 @@ function checkImageUrlExpired(presignedUrl) {
   return currentTime > expirationTime;
 }
 
-export { s3UploadFile, s3getUploadedFile, checkImageUrlExpired };
+/**
+ * List all files from S3 bucket (console.log all)
+ */
+async function listAllS3Files(folderName = "uploads") {
+  try {
+    const s3Client = new S3Client({
+      credentials: {
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      },
+      region: process.env.AWS_REGION,
+    });
+
+    const command = new ListObjectsV2Command({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Prefix: folderName + "/",
+    });
+
+    const response = await s3Client.send(command);
+
+    if (response.Contents) {
+      response.Contents.forEach((file, index) => {
+        console.log(
+          `AWS File ${index + 1}: ${file.Key} (Size: ${file.Size} bytes)`
+        );
+      });
+      return response.Contents; // return array of S3 files
+    } else {
+      console.log("No files found in S3 bucket.");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error listing S3 files:", error);
+    return [];
+  }
+}
+
+/**
+ * Delete a file from S3 bucket
+ * @param {string} key - file name or key
+ * @param {string} folderName
+ */
+
+/**
+ * Delete file from S3 bucket
+ */
+async function s3DeleteFile(key, folderName) {
+  try {
+    const s3Client = new S3Client({
+      credentials: {
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      },
+      region: process.env.AWS_REGION,
+    });
+
+    await s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: `${folderName}/${key}`,
+      })
+    );
+
+  } catch (error) {
+    console.error(`Error deleting S3 file ${folderName}/${key}:`, error);
+    throw error;
+  }
+}
+
+export {
+  s3UploadFile,
+  s3getUploadedFile,
+  checkImageUrlExpired,
+  listAllS3Files,
+  s3DeleteFile,
+};

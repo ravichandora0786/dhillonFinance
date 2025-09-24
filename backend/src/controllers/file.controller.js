@@ -1,5 +1,11 @@
 import UploadFileModel from "../models/uploadFile.model.js";
-import { s3UploadFile, s3getUploadedFile } from "../services/aws/s3.config.js";
+import {
+  checkImageUrlExpired,
+  listAllS3Files,
+  s3DeleteFile,
+  s3UploadFile,
+  s3getUploadedFile,
+} from "../services/aws/s3.config.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -51,7 +57,10 @@ const getFileById = asyncHandler(async (req, res) => {
     }
 
     // Regenerate presigned URL if needed
-    const presignedUrl = await s3getUploadedFile(fileRecord.imageKey, process.env.FOLDER_NAME || "uploads");
+    const presignedUrl = await s3getUploadedFile(
+      fileRecord.imageKey,
+      process.env.FOLDER_NAME || "uploads"
+    );
 
     return res
       .status(200)
@@ -68,4 +77,41 @@ const getFileById = asyncHandler(async (req, res) => {
   }
 });
 
-export default { uploadFile, getFileById };
+/**
+ * Get All Files with refreshed URLs and delete extra S3 files
+ */
+const getAllFiles = asyncHandler(async (req, res) => {
+  const folderName = process.env.FOLDER_NAME || "uploads";
+
+  // List S3 files keys only
+  const s3Files = (await listAllS3Files(folderName)).map((file) =>
+    file.Key.replace(`${folderName}/`, "")
+  );
+
+  // Get DB files
+  const dbFiles = await UploadFileModel.findAll({ where: { isActive: true } });
+  const dbFileKeys = dbFiles.map((file) => file.imageKey);
+
+  // Delete S3 files not in DB
+  const filesToDelete = s3Files.filter((key) => !dbFileKeys.includes(key));
+  for (const key of filesToDelete) await s3DeleteFile(key, folderName);
+
+  // Refresh expired URLs
+  const refreshedFiles = await Promise.all(
+    dbFiles.map(async (file) => {
+      if (checkImageUrlExpired(file.image)) {
+        file.image = await s3getUploadedFile(file.imageKey, folderName);
+        await file.save();
+      }
+      return file;
+    })
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, refreshedFiles, "All files fetched successfully")
+    );
+});
+
+export default { uploadFile, getFileById, getAllFiles };

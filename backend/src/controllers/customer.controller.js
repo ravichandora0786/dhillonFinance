@@ -8,6 +8,28 @@ import { responseMessage } from "../utils/responseMessage.js";
 import UploadFileModel from "../models/uploadFile.model.js";
 import TransactionModel from "../models/transaction.model.js";
 import LoanModel from "../models/loan.model.js";
+import {
+  checkImageUrlExpired,
+  s3getUploadedFile,
+} from "../services/aws/s3.config.js";
+
+/**
+ * Refresh signed URL of a file if expired
+ */
+const refreshFileUrl = async (fileObj, folderName) => {
+  if (!fileObj) return null;
+  const isExpired = checkImageUrlExpired(fileObj.image);
+  if (isExpired) {
+    const newUrl = await s3getUploadedFile(fileObj.fileName, folderName);
+    fileObj.image = newUrl;
+
+    // DB update
+    if (typeof fileObj.save === "function") {
+      await fileObj.save();
+    }
+  }
+  return fileObj;
+};
 
 /** Create Customer */
 const createCustomer = asyncHandler(async (req, res, next) => {
@@ -58,7 +80,6 @@ const getCustomers = asyncHandler(async (req, res, next) => {
         }
       : {};
 
-    // Fetch customers with related files, loans, and transactions
     const customers = await CustomerModel.findAndCountAll({
       where: searchCondition,
       include: [
@@ -75,11 +96,11 @@ const getCustomers = asyncHandler(async (req, res, next) => {
               as: "transactions",
               attributes: ["amount", "transactionType", "createdAt"],
               separate: true,
-              order: [["createdAt", "DESC"]], // latest transaction first
+              order: [["createdAt", "DESC"]],
             },
           ],
           separate: true,
-          order: [["createdAt", "DESC"]], // latest loan first
+          order: [["createdAt", "DESC"]],
         },
       ],
       order: [[sortBy, order.toUpperCase()]],
@@ -87,11 +108,32 @@ const getCustomers = asyncHandler(async (req, res, next) => {
       offset,
     });
 
+    // Refresh file URLs for all customers
+    await Promise.all(
+      customers.rows.map(async (customer) => {
+        customer.aadharFile = await refreshFileUrl(
+          customer.aadharFile,
+          process.env.AADHAR_FOLDER
+        );
+        customer.panCardFile = await refreshFileUrl(
+          customer.panCardFile,
+          process.env.PANCARD_FOLDER
+        );
+        customer.agreementFile = await refreshFileUrl(
+          customer.agreementFile,
+          process.env.AGREEMENT_FOLDER
+        );
+        customer.profileFile = await refreshFileUrl(
+          customer.profileFile,
+          process.env.PROFILE_PIC_FOLDER
+        );
+      })
+    );
+
     // Map customers with loan/payment stats
     const customerData = customers.rows.map((customer) => {
       const loans = customer.loans || [];
 
-      // Map each loan with its own repayment stats
       const loansWithStats = loans.map((loan) => {
         const repaymentsReceived = loan.transactions
           .filter((tx) => tx.transactionType === "Repayment")
@@ -121,7 +163,7 @@ const getCustomers = asyncHandler(async (req, res, next) => {
         totalLoans,
         closedLoans,
         pendingLoans,
-        loans: loansWithStats, // include loans with individual stats
+        loans: loansWithStats,
       };
     });
 
@@ -159,15 +201,15 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
         {
           model: LoanModel,
           as: "loans",
-          separate: true, // important to enable ordering
-          order: [["createdAt", "DESC"]], // latest loan first
+          separate: true,
+          order: [["createdAt", "DESC"]],
           include: [
             {
               model: TransactionModel,
               as: "transactions",
               attributes: ["amount", "transactionType", "createdAt"],
-              separate: true, // important to enable ordering
-              order: [["createdAt", "DESC"]], // latest transaction first
+              separate: true,
+              order: [["createdAt", "DESC"]],
             },
           ],
         },
@@ -177,9 +219,26 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
     if (!customer)
       return next(new ApiError(404, responseMessage.notFound("Customer")));
 
+    // Refresh file URLs
+    customer.aadharFile = await refreshFileUrl(
+      customer.aadharFile,
+      process.env.AADHAR_FOLDER
+    );
+    customer.panCardFile = await refreshFileUrl(
+      customer.panCardFile,
+      process.env.PANCARD_FOLDER
+    );
+    customer.agreementFile = await refreshFileUrl(
+      customer.agreementFile,
+      process.env.AGREEMENT_FOLDER
+    );
+    customer.profileFile = await refreshFileUrl(
+      customer.profileFile,
+      process.env.PROFILE_PIC_FOLDER
+    );
+
     const loans = customer.loans || [];
 
-    // Map each loan with its own repayment stats
     const loansWithStats = loans.map((loan) => {
       const repaymentsReceived = loan.transactions
         .filter((tx) => tx.transactionType === "Repayment")
@@ -209,7 +268,7 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
       totalLoans,
       closedLoans,
       pendingLoans,
-      loans: loansWithStats, // include loans with individual stats
+      loans: loansWithStats,
     };
 
     return res
@@ -225,7 +284,6 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
     next(new ApiError(500, err.message));
   }
 });
-
 /** Update Customer */
 const updateCustomer = asyncHandler(async (req, res, next) => {
   const transaction = await sequelize.transaction();
