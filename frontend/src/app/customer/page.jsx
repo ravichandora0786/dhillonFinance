@@ -32,43 +32,79 @@ import {
 } from "./selector";
 import ActionColumnsComponent from "@/components/tableCollumnComponents/actionColumn";
 import SingleParagraphColumn from "@/components/tableCollumnComponents/singleParagraphCol";
+import DoubleParagraphColumn from "@/components/tableCollumnComponents/doubleParagraphCol";
+import NameAvatarColumn from "@/components/tableCollumnComponents/nameWithImageCol";
+import ButtonColumn from "@/components/tableCollumnComponents/buttonCol";
 import { removeTimeFromDate } from "@/Services/utils";
 import DeleteConfirmationModal from "@/components/ui/deleteConfirmation";
+import CustomerDetailModal from "./customerDetailModal";
+import ReceiveMoneyModal from "./receiveMoneyModal";
 import { toast } from "react-toastify";
 
-const columns = (handleDelete) => [
+const columns = (handleDelete, handleView, handleReceivedMoneyBtn) => [
   {
     header: () => <div className="">Customer name</div>,
-    accessorKey: "name",
-    cell: ({ getValue }) => (
-      <SingleParagraphColumn value={getValue()} className={"font-bold"} />
-    ),
-  },
-
-  {
-    header: "Description",
-    accessorKey: "description",
-    cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
-  },
-  {
-    header: "Status ",
-    accessorKey: "isActive",
-    cell: ({ getValue }) => (
-      <Status text={getValue() == true ? "Active" : "Inactive"} />
+    accessorKey: "firstName",
+    cell: ({ row, getValue }) => (
+      <NameAvatarColumn
+        name={`${getValue()} ${row.original.lastName}`}
+        mobileNumber={`${row.original.mobileNumber}`}
+        showImage={true}
+        showMobile={true}
+      />
     ),
   },
   {
-    header: "Created On",
-    accessorKey: "createdAt",
-    cell: ({ getValue }) => (
-      <SingleParagraphColumn value={removeTimeFromDate(getValue())} />
+    header: "Loan Amount",
+    accessorKey: "amount",
+    cell: ({ row }) => (
+      <SingleParagraphColumn
+        value={`${row.original.loans?.[0]?.totalPayableAmount || 0}`}
+      />
     ),
   },
   {
-    header: "Created ad",
-    accessorKey: "createdAt",
-    cell: ({ getValue }) => (
-      <SingleParagraphColumn value={removeTimeFromDate(getValue())} />
+    header: "Loan Received Amount",
+    accessorKey: "recieved",
+    cell: ({ row }) => (
+      <SingleParagraphColumn
+        value={`${row.original.loans?.[0]?.totalPayableAmount || 0}`}
+      />
+    ),
+  },
+  {
+    header: "Loan Pending Amount",
+    accessorKey: "pending",
+    cell: ({ row }) => (
+      <SingleParagraphColumn
+        value={`${row.original.loans?.[0]?.totalPayableAmount || 0}`}
+      />
+    ),
+  },
+  {
+    header: "Current Loan Transactions",
+    accessorKey: "t",
+    cell: ({ row }) => (
+      <SingleParagraphColumn
+        value={`${row.original.loansloans?.[0]?.transactions?.length || 0}`}
+      />
+    ),
+  },
+  {
+    header: "Current Loan Status ",
+    accessorKey: "loans[0].status",
+    cell: ({ row }) => <Status text={`${row.original?.loans[0]?.status}`} />,
+  },
+  {
+    header: "Receive Money",
+    accessorKey: "rm",
+    cell: ({ row }) => (
+      <ButtonColumn
+        buttonName={"Receive Money"}
+        onClick={() => {
+          handleReceivedMoneyBtn(row?.original);
+        }}
+      />
     ),
   },
   {
@@ -77,8 +113,12 @@ const columns = (handleDelete) => [
       <ActionColumnsComponent
         showDeleteButton={true}
         showEditLink={true}
-        editOnLink={() => navigate.push(`/customer/edit/${row.original.id}`)}
+        editOnLink={`/customer/edit/${row.original.id}`}
         deleteOnClick={() => handleDelete(row?.original)}
+        showViewButton={true}
+        viewOnClick={() => {
+          handleView(row?.original);
+        }}
       />
     ),
   },
@@ -90,20 +130,24 @@ const Customer = (permissions) => {
   const dispatch = useDispatch();
   const { confirm, ModalContent } = DeleteConfirmationModal();
   const [loading, setLoading] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
+  const [customerId, setCustomerId] = useState(null);
+  const [openViewDetailModal, setOpenViewDetailModal] = useState(false);
+  const [openReceivedMoneyModal, setOpenReceivedMoneyModal] = useState(false);
   const [rowData, setRowData] = useState({});
   const [columnVisibility, setColumnVisibility] = useState({});
   const pagination = useSelector(selectCustomerPagination);
   const customerList = useSelector(selectAllCustomerList);
   const customerSearchData = useSelector(selectCustomerSearchData);
-  const customerId = useSelector(selectCustomerId);
 
   const searchFields = [
     {
-      name: "name",
+      name: "search",
+      placeholder: "Search by name,number",
       onChange: (e) => {
         const value = e.target.value;
-        dispatch(setCustomerSearchData({ ...customerSearchData, name: value }));
+        dispatch(
+          setCustomerSearchData({ ...customerSearchData, search: value })
+        );
       },
     },
   ];
@@ -126,9 +170,19 @@ const Customer = (permissions) => {
     );
   };
 
-  const handleRefrsh = () => {
+  const handleRefresh = () => {
     dispatch(setCustomerPagination({ pageIndex: 0, pageSize: 10 }));
-    dispatch(setCustomerSearchData({ name: "" }));
+    dispatch(setCustomerSearchData({ search: "" }));
+  };
+
+  const handleView = (rowData) => {
+    setRowData(rowData);
+    setOpenViewDetailModal(true);
+  };
+
+  const handleReceivedMoneyBtn = (rowData) => {
+    setRowData(rowData);
+    setOpenReceivedMoneyModal(true);
   };
 
   //   Apis Functions
@@ -138,7 +192,7 @@ const Customer = (permissions) => {
         data: {
           page: pagination?.pageIndex + 1,
           limit: pagination?.pageSize,
-          name: customerSearchData?.name,
+          search: customerSearchData?.search,
         },
         onSuccess: ({ message, data }) => {
           dispatch(setAllCustomerList(data));
@@ -183,7 +237,7 @@ const Customer = (permissions) => {
                 <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <InputBox
                   type="text"
-                  placeholder={`Search by ${field?.name}`}
+                  placeholder={`${field?.placeholder}`}
                   className="pl-10"
                   onChange={field?.onChange}
                   value={customerSearchData?.[field.name] ?? ""}
@@ -200,7 +254,7 @@ const Customer = (permissions) => {
               isLoading={false}
               disabled={false}
               variant="secondary"
-              onClick={handleRefrsh}
+              onClick={handleRefresh}
             >
               <RefreshIcon />
             </LoadingButton>
@@ -208,7 +262,7 @@ const Customer = (permissions) => {
         </div>
         <div className="w-full">
           <DataTableComponent
-            columns={columns(handleDelete)}
+            columns={columns(handleDelete, handleView, handleReceivedMoneyBtn)}
             data={customerList?.customers || []}
             pagination={pagination}
             setPagination={(newPagination) =>
@@ -222,6 +276,23 @@ const Customer = (permissions) => {
       </div>
       {/* Delete Confirmation Modal */}
       {ModalContent}
+
+      <CustomerDetailModal
+        openModal={openViewDetailModal}
+        onBack={() => {
+          setRowData({});
+          setOpenViewDetailModal(false);
+        }}
+        data={rowData}
+      />
+      <ReceiveMoneyModal
+        openModal={openReceivedMoneyModal}
+        onBack={() => {
+          setRowData({});
+          setOpenReceivedMoneyModal(false);
+        }}
+        data={rowData}
+      />
     </>
   );
 };

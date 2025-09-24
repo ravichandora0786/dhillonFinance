@@ -13,9 +13,12 @@ const endPoints = {
   ActivityPermission: "/activityPermission",
   User: "/users",
   Customer: "/customer",
+  CustomerLoan: "/loan",
   Country: "/country",
   State: "/state",
   District: "/district",
+  CommonImageUpload: "/file",
+  Transaction: "/transaction",
 };
 
 export default endPoints;

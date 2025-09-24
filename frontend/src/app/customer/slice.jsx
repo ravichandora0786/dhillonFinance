@@ -9,7 +9,7 @@ const initialState = {
   allCustomerList: {},
   customerData: {},
   pagination: { pageIndex: 0, pageSize: 10 },
-  customerSearchData: { name: "" },
+  customerSearchData: { search: "" },
   customerOptions: [],
   customerId: "",
 };
@@ -59,3 +59,6 @@ export const updateCustomerStatus = createAction("UPDATE_CUSTOMER_STATUS");
 export const getAllCustomers = createAction("GET_ALL_CUSTOMERS");
 export const getCustomerDetailById = createAction("GET_CUSTOMER_DETAIL_BY_ID");
 export const deleteCustomer = createAction("GET_DELETE_CUSTOMER_BY_ID");
+export const getCustomerListForOptions = createAction(
+  "GET_ALL_CUSTOMER_LIST_FOR_OPTIONS"
+);

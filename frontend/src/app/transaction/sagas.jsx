@@ -1,5 +1,5 @@
 /**
- *  CustomerLoan Saga
+ *  Transaction Saga
  * @format
  */
 
@@ -7,23 +7,23 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import { toast } from "react-toastify";
 import { endPoints, httpRequest } from "@/request";
 import {
-  createCustomerLoan,
-  deleteCustomerLoan,
-  getAllCustomerLoans,
-  getCustomerLoanDetailById,
-  setCustomerLoanData,
-  updateCustomerLoan,
-  updateCustomerLoanStatus,
+  createTransaction,
+  deleteTransaction,
+  getAllTransactions,
+  getTransactionDetailById,
+  setTransactionData,
+  updateTransaction,
+  updateTransactionStatus,
 } from "./slice";
 
 /**
- * Get All CustomerLoan
+ * Get All Transaction
  * @param {*}
  */
-function* getAllCustomerLoanListSaga(action) {
+function* getAllTransactionListSaga(action) {
   const { data, onSuccess, onFailure } = action.payload;
   try {
-    const response = yield httpRequest.get(endPoints.CustomerLoan, {
+    const response = yield httpRequest.get(endPoints.Transaction, {
       params: data,
     });
     yield onSuccess({ message: response?.data?.message, data: response?.data });
@@ -35,19 +35,16 @@ function* getAllCustomerLoanListSaga(action) {
 }
 
 /**
- * Get CustomerLoan Details By CustomerLoan Id
+ * Get Transaction Details By Transaction Id
  * @param {*}
  */
-function* getCustomerLoanDetailByIdSaga(action) {
+function* getTransactionDetailByIdSaga(action) {
   const { id, onSuccess, onFailure } = action.payload;
   try {
-    const response = yield call(
-      httpRequest.get,
-      `${endPoints.CustomerLoan}/${id}`
-    );
+    const response = yield call(httpRequest.get, `${endPoints.Transaction}/${id}`);
 
-    yield put(setCustomerLoanData(response?.data));
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield put(setTransactionData(response?.data));
+    yield onSuccess({ resp: response });
   } catch (error) {
     const errorMessage = error?.message || "Something went wrong!";
     toast.error(errorMessage);
@@ -56,16 +53,13 @@ function* getCustomerLoanDetailByIdSaga(action) {
 }
 
 /**
- * Delete CustomerLoan By Id
+ * Delete Transaction By Id
  * @param {*}
  */
-function* deleteCustomerLoanByIdSaga(action) {
+function* deleteTransactionByIdSaga(action) {
   const { id, onSuccess, onFailure } = action.payload;
   try {
-    const response = yield call(
-      httpRequest.delete,
-      `${endPoints.CustomerLoan}/${id}`
-    );
+    const response = yield call(httpRequest.delete, `${endPoints.Transaction}/${id}`);
 
     yield onSuccess({ resp: response });
   } catch (error) {
@@ -76,13 +70,13 @@ function* deleteCustomerLoanByIdSaga(action) {
 }
 
 /**
- * Add New CustomerLoan
+ * Add New Transaction
  * @param {*}
  */
-function* createNewCustomerLoanSaga(action) {
+function* createNewTransactionSaga(action) {
   const { data, onSuccess, onFailure } = action.payload;
   try {
-    const response = yield httpRequest.post(endPoints.CustomerLoan, {
+    const response = yield httpRequest.post(endPoints.Transaction, {
       ...data,
     });
 
@@ -95,13 +89,13 @@ function* createNewCustomerLoanSaga(action) {
 }
 
 /**
- * Update CustomerLoan By Id
+ * Update Transaction By Id
  * @param {*}
  */
-function* updateCustomerLoansSaga(action) {
+function* updateTransactionsSaga(action) {
   const { id, data, onSuccess, onFailure } = action.payload;
   try {
-    const response = yield httpRequest.put(`${endPoints.CustomerLoan}/${id}`, {
+    const response = yield httpRequest.put(`${endPoints.Transaction}/${id}`, {
       ...data,
     });
 
@@ -114,13 +108,13 @@ function* updateCustomerLoansSaga(action) {
 }
 
 /**
- * Update CustomerLoan Status By Id
+ * Update Transaction Status By Id
  * @param {*}
  */
-function* updateCustomerLoanStatusSaga(action) {
+function* updateTransactionStatusSaga(action) {
   const { id, data, onSuccess, onFailure } = action.payload;
   try {
-    const response = yield httpRequest.put(`${endPoints.CustomerLoan}/${id}`);
+    const response = yield httpRequest.put(`${endPoints.Transaction}/${id}`);
 
     yield onSuccess({ message: response?.message });
   } catch (error) {
@@ -130,11 +124,11 @@ function* updateCustomerLoanStatusSaga(action) {
   }
 }
 
-export function* customerLoanSaga() {
-  yield takeLatest(getAllCustomerLoans, getAllCustomerLoanListSaga);
-  yield takeLatest(deleteCustomerLoan, deleteCustomerLoanByIdSaga);
-  yield takeLatest(getCustomerLoanDetailById, getCustomerLoanDetailByIdSaga);
-  yield takeLatest(createCustomerLoan, createNewCustomerLoanSaga);
-  yield takeLatest(updateCustomerLoan, updateCustomerLoansSaga);
-  yield takeLatest(updateCustomerLoanStatus, updateCustomerLoanStatusSaga);
+export function* transactionSaga() {
+  yield takeLatest(getAllTransactions, getAllTransactionListSaga);
+  yield takeLatest(deleteTransaction, deleteTransactionByIdSaga);
+  yield takeLatest(getTransactionDetailById, getTransactionDetailByIdSaga);
+  yield takeLatest(createTransaction, createNewTransactionSaga);
+  yield takeLatest(updateTransaction, updateTransactionsSaga);
+  yield takeLatest(updateTransactionStatus, updateTransactionStatusSaga);
 }

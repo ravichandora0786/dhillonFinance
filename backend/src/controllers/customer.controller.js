@@ -267,10 +267,56 @@ const deleteCustomer = asyncHandler(async (req, res, next) => {
   }
 });
 
+const getCustomerOptions = asyncHandler(async (req, res, next) => {
+  try {
+    // Agar search query hai to filter karenge
+    const { search = "" } = req.query;
+
+    const searchCondition = search
+      ? {
+          [Op.or]: [
+            { firstName: { [Op.like]: `%${search}%` } },
+            { lastName: { [Op.like]: `%${search}%` } },
+            { mobileNumber: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
+
+    // Fetch customers, only required fields
+    const customers = await CustomerModel.findAll({
+      attributes: ["id", "firstName", "lastName", "mobileNumber"],
+      where: searchCondition,
+      order: [["firstName", "ASC"]],
+    });
+
+    // Map to option format (optional)
+    const options = customers.map((c) => ({
+      id: c.id,
+      name: `${c.firstName} ${c.lastName}`,
+      mobileNumber: c.mobileNumber,
+    }));
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          status: "success",
+          total: options.length,
+          customers: options,
+        },
+        "Customers fetched successfully"
+      )
+    );
+  } catch (err) {
+    next(new ApiError(500, err.message));
+  }
+});
+
 export default {
   createCustomer,
   getCustomers,
   getCustomerById,
   updateCustomer,
   deleteCustomer,
+  getCustomerOptions,
 };

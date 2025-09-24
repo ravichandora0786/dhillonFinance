@@ -266,3 +266,25 @@ p {
 .react-datepicker-wrapper {
   display: inline !important;
 }
+
+/* global.css ya tailwind.css ke andar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.react-datepicker__close-icon {
+  right: 2rem !important; /* default right se thoda aage */
+  top: 50% !important;
+  transform: translateY(-50%);
+}
+/* Clear icon ke andar jo "×" span hai uska color change */
+.react-datepicker__close-icon::after {
+  background-color: transparent !important;
+  color: #cccccc !important;
+  font-size: 22px !important;
+  font-weight: bold;
+}

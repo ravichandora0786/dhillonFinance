@@ -58,7 +58,7 @@ function* imageUploadSaga(action) {
   try {
     let formData = new FormData();
     formData.append("file", file);
-    formData.append("type", type);
+    // formData.append("type", type);
 
     // Make the API request with custom headers
     const response = yield httpRequest.post(
@@ -86,13 +86,13 @@ function* getUploadedFileSaga(action) {
   const { id, onSuccess, onFailure } = action.payload;
   try {
     const response = yield httpRequest.get(
-      `${endPoints.CommonImageUpload}/${id}`,
-      {
-        responseType: "blob",
-      }
+      `${endPoints.CommonImageUpload}/${id}`
+      // {
+      //   responseType: "blob",
+      // }
     );
 
-    yield call(onSuccess, { file: response });
+    yield call(onSuccess, { data: response?.data });
   } catch (error) {
     const errorMessage = error?.message || "Something went wrong!";
     toast.error(errorMessage);
@@ -122,5 +122,5 @@ export function* commonSagas() {
   yield takeLatest(loginApp, loginAppSaga);
   yield takeLatest(imageUpload, imageUploadSaga);
   yield takeEvery(getUploadedFile, getUploadedFileSaga);
-  yield takeEvery(getPermissionsByRoleId, getPermissionsByRoleIdSaga);
+  yield takeLatest(getPermissionsByRoleId, getPermissionsByRoleIdSaga);
 }

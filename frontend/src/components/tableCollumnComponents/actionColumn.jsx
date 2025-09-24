@@ -2,7 +2,6 @@
  *  Action Columns Component
  * @format
  */
-import Link from "next/link";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -11,6 +10,7 @@ import EditIcon from "@mui/icons-material/DriveFileRenameOutlineOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteForeverOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import Link from "next/link";
 
 export default function ActionColumnsComponent({
   showDeleteButton = false,

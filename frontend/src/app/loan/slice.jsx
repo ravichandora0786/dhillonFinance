@@ -53,11 +53,9 @@ export const {
 } = customerLoanSlice.actions;
 
 // Api Actions
-export const createCustomerLoan = createAction("CREATE_NEW_CUSTOMER");
-export const updateCustomerLoan = createAction("UPDATE_CUSTOMER");
-export const updateCustomerLoanStatus = createAction("UPDATE_CUSTOMER_STATUS");
-export const getAllCustomerLoans = createAction("GET_ALL_CUSTOMERS");
-export const getCustomerLoanDetailById = createAction(
-  "GET_CUSTOMER_DETAIL_BY_ID"
-);
-export const deleteCustomerLoan = createAction("GET_DELETE_CUSTOMER_BY_ID");
+export const createCustomerLoan = createAction("CREATE_NEW_LOAN");
+export const updateCustomerLoan = createAction("UPDATE_LOAN");
+export const updateCustomerLoanStatus = createAction("UPDATE_LOAN_STATUS");
+export const getAllCustomerLoans = createAction("GET_ALL_LOANS");
+export const getCustomerLoanDetailById = createAction("GET_LOAN_DETAIL_BY_ID");
+export const deleteCustomerLoan = createAction("GET_DELETE_LOAN_BY_ID");

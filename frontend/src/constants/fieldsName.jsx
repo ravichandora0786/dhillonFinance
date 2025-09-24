@@ -84,6 +84,7 @@ export const CustomerFields = {
   PIN_CODE: "pinCode",
   ADDRESS: "address",
   CITY: "city",
+  DISTRICT: "district",
   STATE: "state",
   AADHAR_NUMBER: "aadharNumber",
   PAN_CARD_NUMBER: "panCardNumber",
@@ -93,12 +94,28 @@ export const CustomerFields = {
   PROFILE_IMAGE: "profileImage",
 };
 
+export const LoanFields = {
+  PRINCIPAL_AMOUNT: "amount",
+  INTREST_RATE: "interestRate",
+  MONTHS: "tenureMonths",
+  EMI_AMOUNT: "emiAmount",
+  TOTAL_PAY_AMOUNT: "totalPayableAmount",
+  START_DATE: "startDate",
+  END_DATE: "endDate",
+  PAY_INSTALLMENT_DATE: "installmentDate",
+};
+
+export const TransactionFields = {
+  TRANSACTION_TYPE: "transactionType",
+  AMOUNT: "amount",
+  PAYMENT_MODE: "paymentMode",
+  TRANSACTION_DATE: "transactionDate",
+};
+
 export const CommonFields = {
   ID: "id",
-  DEPARTMENT_ID: "departmentId",
-  CLASS_ID: "classId",
-  ROOM_ID: "roomId",
-  SECTION_ID: "sectionId",
+  CUSTOMER_ID: "customerId",
+  STATUS: "status",
   ROLE_ID: "roleId",
   IS_ACTIVE: "isActive",
   DESCRIPTION: "description",

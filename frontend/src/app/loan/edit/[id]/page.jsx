@@ -7,5 +7,5 @@ import { useParams } from "next/navigation";
 export default function AddEditCustomerLoan() {
   const params = useParams();
   const id = params.id;
-  return <AddEditCustomerLoanComponent customerLoanId={id} isEdit={false} />;
+  return <AddEditCustomerLoanComponent customerLoanId={id} isEdit={true} />;
 }

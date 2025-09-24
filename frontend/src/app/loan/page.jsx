@@ -38,38 +38,70 @@ import { toast } from "react-toastify";
 
 const columns = (handleDelete) => [
   {
-    header: () => <div className="">CustomerLoan name</div>,
-    accessorKey: "name",
-    cell: ({ getValue }) => (
-      <SingleParagraphColumn value={getValue()} className={"font-bold"} />
+    header: () => <div className="">Customer name</div>,
+    accessorKey: "customer.firstName",
+    cell: ({ row, getValue }) => (
+      <SingleParagraphColumn
+        value={`${getValue()} ${row.original.customer.lastName}`}
+        className={"font-bold"}
+      />
     ),
   },
-
   {
-    header: "Description",
-    accessorKey: "description",
+    header: "Principal Amount",
+    accessorKey: "amount",
     cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
   },
   {
+    header: "Total Amount",
+    accessorKey: "totalPayableAmount",
+    cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
+  },
+  {
+    header: "No.of Installment",
+    accessorKey: "tenureMonths",
+    cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
+  },
+  {
+    header: "EMI",
+    accessorKey: "emiAmount",
+    cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
+  },
+  {
+    header: "Pending Amount",
+    accessorKey: "pendingAmount",
+    cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
+  },
+  {
+    header: "Received Amount",
+    accessorKey: "paymentsReceived",
+    cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
+  },
+  {
+    header: "Installment Date",
+    accessorKey: "installmentDate",
+    cell: ({ getValue }) => (
+      <SingleParagraphColumn value={removeTimeFromDate(getValue())} />
+    ),
+  },
+  {
+    header: "Loan Start Date",
+    accessorKey: "startDate",
+    cell: ({ getValue }) => (
+      <SingleParagraphColumn value={removeTimeFromDate(getValue())} />
+    ),
+  },
+  {
+    header: "Loan End Date",
+    accessorKey: "endDate",
+    cell: ({ getValue }) => (
+      <SingleParagraphColumn value={removeTimeFromDate(getValue())} />
+    ),
+  },
+  {
     header: "Status ",
-    accessorKey: "isActive",
-    cell: ({ getValue }) => (
-      <Status text={getValue() == true ? "Active" : "Inactive"} />
-    ),
-  },
-  {
-    header: "Created On",
-    accessorKey: "createdAt",
-    cell: ({ getValue }) => (
-      <SingleParagraphColumn value={removeTimeFromDate(getValue())} />
-    ),
-  },
-  {
-    header: "Created ad",
-    accessorKey: "createdAt",
-    cell: ({ getValue }) => (
-      <SingleParagraphColumn value={removeTimeFromDate(getValue())} />
-    ),
+    accessorKey: "status",
+    cell: ({ getValue }) => <Status text={getValue()} />,
   },
   {
     header: "Action",
@@ -77,7 +109,7 @@ const columns = (handleDelete) => [
       <ActionColumnsComponent
         showDeleteButton={true}
         showEditLink={true}
-        editOnLink={() => navigate.push(`/loan/edit/${row.original.id}`)}
+        editOnLink={`/loan/edit/${row.original.id}`}
         deleteOnClick={() => handleDelete(row?.original)}
       />
     ),
@@ -96,15 +128,18 @@ const CustomerLoan = (permissions) => {
   const pagination = useSelector(selectCustomerLoanPagination);
   const customerLoanList = useSelector(selectAllCustomerLoanList);
   const customerLoanSearchData = useSelector(selectCustomerLoanSearchData);
-  const customerLoanId = useSelector(selectCustomerLoanId);
 
   const searchFields = [
     {
-      name: "name",
+      name: "search",
+      placeholder: "Search By Customer",
       onChange: (e) => {
         const value = e.target.value;
         dispatch(
-          setCustomerLoanSearchData({ ...customerLoanSearchData, name: value })
+          setCustomerLoanSearchData({
+            ...customerLoanSearchData,
+            search: value,
+          })
         );
       },
     },
@@ -130,7 +165,7 @@ const CustomerLoan = (permissions) => {
 
   const handleRefrsh = () => {
     dispatch(setCustomerLoanPagination({ pageIndex: 0, pageSize: 10 }));
-    dispatch(setCustomerLoanSearchData({ name: "" }));
+    dispatch(setCustomerLoanSearchData({ search: "" }));
   };
 
   //   Apis Functions
@@ -140,7 +175,7 @@ const CustomerLoan = (permissions) => {
         data: {
           page: pagination?.pageIndex + 1,
           limit: pagination?.pageSize,
-          name: customerLoanSearchData?.name,
+          name: customerLoanSearchData?.search,
         },
         onSuccess: ({ message, data }) => {
           dispatch(setAllCustomerLoanList(data));
@@ -211,12 +246,12 @@ const CustomerLoan = (permissions) => {
         <div className="w-full">
           <DataTableComponent
             columns={columns(handleDelete)}
-            data={customerLoanList?.customerLoans || []}
+            data={customerLoanList?.loans || []}
             pagination={pagination}
             setPagination={(newPagination) =>
               dispatch(setCustomerLoanPagination(newPagination))
             }
-            totalRows={customerLoanList?.customerLoans?.length}
+            totalRows={customerLoanList?.total}
             columnVisibility={columnVisibility}
             setColumnVisibility={setColumnVisibility}
           />

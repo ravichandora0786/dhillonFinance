@@ -114,6 +114,54 @@ customerRouter.get("/", authenticateUser, customerController.getCustomers);
 
 /**
  * @swagger
+ * /customer/options:
+ *   get:
+ *     summary: Get customer list for dropdown
+ *     tags: [Customers]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by first name, last name or mobile number
+ *     responses:
+ *       200:
+ *         description: List of customers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 total:
+ *                   type: integer
+ *                   example: 2
+ *                 customers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                       name:
+ *                         type: string
+ *                       mobileNumber:
+ *                         type: string
+ */
+
+customerRouter.get(
+  "/options",
+  authenticateUser,
+  customerController.getCustomerOptions
+);
+
+/**
+ * @swagger
  * /customer/{id}:
  *   get:
  *     summary: Get customer by ID

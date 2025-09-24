@@ -11,6 +11,7 @@ import {
   deleteCustomer,
   getAllCustomers,
   getCustomerDetailById,
+  getCustomerListForOptions,
   setCustomerData,
   updateCustomer,
   updateCustomerStatus,
@@ -44,7 +45,7 @@ function* getCustomerDetailByIdSaga(action) {
     const response = yield call(httpRequest.get, `${endPoints.Customer}/${id}`);
 
     yield put(setCustomerData(response?.data));
-    yield onSuccess({ resp: response });
+    yield onSuccess({ message: response?.data?.message, data: response.data });
   } catch (error) {
     const errorMessage = error?.message || "Something went wrong!";
     toast.error(errorMessage);
@@ -127,6 +128,24 @@ function* updateCustomerStatusSaga(action) {
   }
 }
 
+/**
+ * Get All Customer List for Options
+ * @param {*}
+ */
+function* getCustomerListForOptionsSaga(action) {
+  const { data, onSuccess, onFailure } = action.payload;
+  try {
+    const response = yield httpRequest.get(`${endPoints.Customer}/options`, {
+      params: data,
+    });
+    yield onSuccess({ message: response?.data?.message, data: response?.data });
+  } catch (err) {
+    const errorMessage = err.message || "Something went wrong!";
+    toast.error(errorMessage);
+    yield onFailure({ message: errorMessage });
+  }
+}
+
 export function* customerSaga() {
   yield takeLatest(getAllCustomers, getAllCustomerListSaga);
   yield takeLatest(deleteCustomer, deleteCustomerByIdSaga);
@@ -134,4 +153,5 @@ export function* customerSaga() {
   yield takeLatest(createCustomer, createNewCustomerSaga);
   yield takeLatest(updateCustomer, updateCustomersSaga);
   yield takeLatest(updateCustomerStatus, updateCustomerStatusSaga);
+  yield takeLatest(getCustomerListForOptions, getCustomerListForOptionsSaga);
 }

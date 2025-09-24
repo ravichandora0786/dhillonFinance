@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Formik } from "formik";
+import { toast } from "react-toastify";
 import * as Yup from "yup";
 
 import LoadingButton from "@/components/ui/loadingButton";
@@ -9,9 +10,7 @@ import InputBox from "@/components/ui/inputBox";
 import SelectDropDown from "@/components/ui/selectDropDown";
 import { CommonFields, RoleFields } from "@/constants/fieldsName";
 import { createRoleSchema } from "@/validationSchema/roleValidationSchema";
-import { Switch } from "@mui/material";
 import CustomSwitch from "@/components/ui/customSwitch";
-import { toast } from "react-toastify";
 import { createRole, updateRole } from "../slice";
 import { useDispatch, useSelector } from "react-redux";
 import GenericModal from "@/components/ui/genericModal";
@@ -44,7 +43,6 @@ const fields = [
 
 const AddEditRole = ({ openModal, onBack = () => {}, callBackFunc, data }) => {
   const dispatch = useDispatch();
-  const router = useRouter();
   const isEdit = Object.keys(data)?.length > 0;
   const initialValues = fields.reduce((acc, f) => {
     if (f.name === CommonFields.IS_ACTIVE) {

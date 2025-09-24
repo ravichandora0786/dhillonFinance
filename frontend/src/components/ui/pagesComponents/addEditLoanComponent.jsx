@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Formik } from "formik";
 
 import LoadingButton from "@/components/ui/loadingButton";
-import { CommonFields, CustomerLoanFields } from "@/constants/fieldsName";
+import { CommonFields, LoanFields } from "@/constants/fieldsName";
 import GenericModal from "@/components/ui/genericModal";
 import RenderFields from "@/components/ui/renderFields";
 import {
@@ -20,51 +20,99 @@ import {
   updateCustomerLoan,
 } from "@/app/loan/slice";
 import TitleAndDescription from "../titleAndDescription";
-
-// Field Configuration Array
-const fields = [
-  {
-    name: CustomerLoanFields.NAME,
-    label: "Year Name",
-    type: "text",
-    required: true,
-    disabled: false,
-  },
-  {
-    name: CustomerLoanFields.START_DATE,
-    label: "Start Date",
-    type: "date",
-    required: true,
-    disabled: false,
-    dateMode: "single",
-  },
-  {
-    name: CustomerLoanFields.END_DATE,
-    label: "End Date",
-    type: "date",
-    required: true,
-    disabled: false,
-    dateMode: "single",
-  },
-  {
-    name: CommonFields.DESCRIPTION,
-    label: "Description",
-    type: "textarea",
-    required: false,
-    disabled: false,
-  },
-  {
-    name: CommonFields.IS_ACTIVE,
-    label: "Active",
-    type: "toogle",
-    required: true,
-    disabled: false,
-  },
-];
+import { getCustomerListForOptions } from "@/app/customer/slice";
 
 const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
   const dispatch = useDispatch();
   const navigate = useRouter();
+  const [customerOptions, setCustomerOptions] = useState([]);
+
+  // Field Configuration Array
+  const fields = [
+    {
+      name: CommonFields.CUSTOMER_ID,
+      label: "Customer Name",
+      type: "select",
+      options: customerOptions,
+      required: true,
+      disabled: false,
+    },
+
+    {
+      name: LoanFields.PRINCIPAL_AMOUNT,
+      label: "Pay Amount",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+    {
+      name: LoanFields.TOTAL_PAY_AMOUNT,
+      label: "Loan Amount",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+    {
+      name: LoanFields.MONTHS,
+      label: "No. of Installments",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+    {
+      name: LoanFields.EMI_AMOUNT,
+      label: "EMI",
+      type: "text",
+      required: true,
+      disabled: true,
+    },
+    {
+      name: LoanFields.INTREST_RATE,
+      label: "Intrest Rate",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+    {
+      name: LoanFields.PAY_INSTALLMENT_DATE,
+      label: "Pay Installment Date",
+      type: "date",
+      required: true,
+      disabled: false,
+      dateMode: "single",
+    },
+    {
+      name: LoanFields.START_DATE,
+      label: "Start Date",
+      type: "date",
+      required: true,
+      disabled: false,
+      dateMode: "single",
+    },
+    {
+      name: LoanFields.END_DATE,
+      label: "End Date",
+      type: "date",
+      required: true,
+      disabled: false,
+      dateMode: "single",
+    },
+    {
+      name: CommonFields.DESCRIPTION,
+      label: "Description",
+      type: "textarea",
+      required: false,
+      disabled: false,
+    },
+    {
+      name: CommonFields.STATUS,
+      label: "Status",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+  ];
+
   const initialValues = fields.reduce((acc, f) => {
     if (f.name === CommonFields.IS_ACTIVE) {
       acc[f.name] = true;
@@ -144,13 +192,21 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
             if (data) {
               const obj = {
                 [CommonFields.ID]: data[CommonFields.ID],
-                [CustomerLoanFields.NAME]: data[CustomerLoanFields.NAME],
-                [CustomerLoanFields.START_DATE]:
-                  data[CustomerLoanFields.START_DATE],
-                [CustomerLoanFields.END_DATE]:
-                  data[CustomerLoanFields.END_DATE],
+                [CommonFields.CUSTOMER_ID]: data[CommonFields.CUSTOMER_ID],
+
+                [LoanFields.PRINCIPAL_AMOUNT]:
+                  data[LoanFields.PRINCIPAL_AMOUNT],
+                [LoanFields.TOTAL_PAY_AMOUNT]:
+                  data[LoanFields.TOTAL_PAY_AMOUNT],
+                [LoanFields.MONTHS]: data[LoanFields.MONTHS],
+                [LoanFields.EMI_AMOUNT]: data[LoanFields.EMI_AMOUNT],
+                [LoanFields.INTREST_RATE]: data[LoanFields.INTREST_RATE],
+                [LoanFields.PAY_INSTALLMENT_DATE]:
+                  data[LoanFields.PAY_INSTALLMENT_DATE],
+                [LoanFields.START_DATE]: data[LoanFields.START_DATE],
+                [LoanFields.END_DATE]: data[LoanFields.END_DATE],
                 [CommonFields.DESCRIPTION]: data[CommonFields.DESCRIPTION],
-                [CommonFields.IS_ACTIVE]: data[CommonFields.IS_ACTIVE],
+                [CommonFields.STATUS]: data[CommonFields.STATUS],
               };
 
               setInitialObject(obj);
@@ -162,12 +218,27 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
     }
   }, [customerLoanId, dispatch]);
 
+  useEffect(() => {
+    dispatch(
+      getCustomerListForOptions({
+        data: { search: "" },
+        onSuccess: ({ data }) => {
+          const options = data?.customers?.map((item) => {
+            return { label: item.name, value: item.id };
+          });
+          setCustomerOptions(options || []);
+        },
+        onFailure: () => {},
+      })
+    );
+  }, [dispatch]);
+
   return (
-    <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6 border">
+    <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6">
       <div className="">
         <TitleAndDescription
-          title="Add New CustomerLoan"
-          description="Manage your CustomerLoan"
+          title={isEdit ? "Edit Customer Loan" : "Add New Customer Loan"}
+          description="Manage your Customer Loan"
         />
       </div>
       {/* Formik */}
@@ -195,7 +266,7 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
                 touched={touched}
                 setFieldValue={setFieldValue}
                 handleBlur={handleBlur}
-                columns={1}
+                columns={2}
               />
               {/* Buttons */}
               <div className="flex justify-end gap-3 mt-6">

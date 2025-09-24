@@ -4,6 +4,8 @@ import CustomSwitch from "./customSwitch";
 import InputBox from "./inputBox";
 import SelectDropDown from "./selectDropDown";
 import { getIn } from "formik";
+import LoadingButton from "./loadingButton";
+import { LoanFields } from "@/constants/fieldsName";
 
 const RenderFields = ({
   fields,
@@ -36,13 +38,14 @@ const RenderFields = ({
           isMulti = false,
           selectOnChange,
           dateMode = "single",
+          onChange = () => {},
         }) => {
           const fieldValue = getIn(values, name);
           const fieldError = getIn(errors, name);
           const fieldTouched = getIn(touched, name);
           return (
             <div key={name}>
-              {type !== "toggle" && (
+              {type !== "toggle" && type !== "file" && (
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {label} {required && <span className="text-danger">*</span>}
                 </label>
@@ -121,14 +124,9 @@ const RenderFields = ({
                   dateFormat="dd MMM yyyy"
                   minDate={today}
                 />
-              ) : [
-                  "text",
-                  "email",
-                  "number",
-                  "password",
-                  "textarea",
-                  "file",
-                ].includes(type) ? (
+              ) : ["text", "email", "number", "password", "textarea"].includes(
+                  type
+                ) ? (
                 <InputBox
                   type={type}
                   name={name}
@@ -136,6 +134,39 @@ const RenderFields = ({
                   onChange={(e) => {
                     const value = e.target.value;
                     setFieldValue(name, value);
+
+                    const principal =
+                      name === LoanFields.PRINCIPAL_AMOUNT
+                        ? parseFloat(value)
+                        : parseFloat(values[LoanFields.PRINCIPAL_AMOUNT] || 0);
+
+                    const totalPay =
+                      name === LoanFields.TOTAL_PAY_AMOUNT
+                        ? parseFloat(value)
+                        : parseFloat(values[LoanFields.TOTAL_PAY_AMOUNT] || 0);
+
+                    const months =
+                      name === LoanFields.MONTHS
+                        ? parseInt(value)
+                        : parseInt(values[LoanFields.MONTHS] || 0);
+
+                    if (principal > 0 && totalPay > 0 && months > 0) {
+                      // EMI calculation with interest
+                      const emi = totalPay / months;
+
+                      // Interest rate calculation
+                      const interestAmount = totalPay - principal;
+                      const interestRate = (interestAmount / principal) * 100;
+
+                      setFieldValue(LoanFields.EMI_AMOUNT, emi.toFixed(2));
+                      setFieldValue(
+                        LoanFields.INTREST_RATE,
+                        interestRate.toFixed(2)
+                      );
+                    } else {
+                      setFieldValue(LoanFields.EMI_AMOUNT, "");
+                      setFieldValue(LoanFields.INTREST_RATE, "");
+                    }
                   }}
                   placeholder={`Enter ${label}`}
                   error={fieldError}
@@ -143,9 +174,7 @@ const RenderFields = ({
                   disabled={disabled}
                   onBlur={handleBlur}
                 />
-              ) : (
-                <></>
-              )}
+              ) : null}
             </div>
           );
         }

@@ -3,11 +3,10 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { Formik } from "formik";
+import { Formik, useFormikContext } from "formik";
 
 import LoadingButton from "@/components/ui/loadingButton";
 import { CommonFields, CustomerFields } from "@/constants/fieldsName";
-import GenericModal from "@/components/ui/genericModal";
 import RenderFields from "@/components/ui/renderFields";
 import {
   selectCustomerData,
@@ -20,136 +19,96 @@ import {
   updateCustomer,
 } from "@/app/customer/slice";
 import TitleAndDescription from "../titleAndDescription";
-import { selectAccessToken } from "@/app/common/selectors";
+import { getUploadedFile, imageUpload } from "@/app/common/slice";
+import InputBox from "../inputBox";
 
 // Field Configuration Array
-const fields = [
-  {
-    name: CustomerFields.FIRST_NAME,
-    label: "First Name",
-    type: "text",
-    required: true,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.LAST_NAME,
-    label: "Last Name",
-    type: "text",
-    required: false,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.MOBILE_NUMBER,
-    label: "Mobile Number",
-    type: "text",
-    required: true,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.ADDRESS,
-    label: "Address",
-    type: "textarea",
-    required: true,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.STATE,
-    label: "State",
-    type: "select",
-    options: [],
-    required: true,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.CITY,
-    label: "City",
-    type: "select",
-    options: [],
-    required: true,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.PIN_CODE,
-    label: "Pin Code",
-    type: "text",
-    required: true,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.AADHAR_NUMBER,
-    label: "Aadhar Number",
-    type: "text",
-    required: true,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.PAN_CARD_NUMBER,
-    label: "PAN Card Number",
-    type: "text",
-    required: true,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.AADHAR_IMAGE,
-    label: "Aadhar Image",
-    type: "file",
-    required: false,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.PAN_CARD_IMAGE,
-    label: "PAN Card Image",
-    type: "file",
-    required: false,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.AGREEMENT_IMAGE,
-    label: "Agreement Image",
-    type: "file",
-    required: false,
-    disabled: false,
-  },
-  {
-    name: CustomerFields.PROFILE_IMAGE,
-    label: "Profile Image",
-    type: "file",
-    required: false,
-    disabled: false,
-  },
-  {
-    name: CommonFields.IS_ACTIVE,
-    label: "Active",
-    type: "toggle",
-    required: true,
-    disabled: false,
-  },
-];
-
-const API_KEY = "AIzaSyBkhAI3ZcgXkS33-zUZ5ded-gZtFNQOI_g";
-const CLIENT_ID =
-  "414759855925-kdkq58dci4aelr0p6aa3s8ilsn8q3c4t.apps.googleusercontent.com";
-const SCOPES = "https://www.googleapis.com/auth/drive.file";
-
-// Dynamic gapi load
-const loadGapiScript = () => {
-  return new Promise((resolve, reject) => {
-    if (document.getElementById("gapi")) {
-      resolve();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://apis.google.com/js/api.js";
-    script.id = "gapi";
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("GAPI failed to load"));
-    document.body.appendChild(script);
-  });
-};
 
 const AddEditCustomerComponent = ({ customerId, isEdit }) => {
   const dispatch = useDispatch();
   const navigate = useRouter();
+
+  const fields = [
+    {
+      name: CustomerFields.FIRST_NAME,
+      label: "First Name",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+    {
+      name: CustomerFields.LAST_NAME,
+      label: "Last Name",
+      type: "text",
+      required: false,
+      disabled: false,
+    },
+    {
+      name: CustomerFields.MOBILE_NUMBER,
+      label: "Mobile Number",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+    {
+      name: CustomerFields.ADDRESS,
+      label: "Address",
+      type: "textarea",
+      required: true,
+      disabled: false,
+    },
+    {
+      name: CustomerFields.STATE,
+      label: "State",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+    {
+      name: CustomerFields.CITY,
+      label: "City",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+    // {
+    //   name: CustomerFields.DISTRICT,
+    //   label: "District",
+    //   type: "select",
+    //   options: districtOptions,
+    //   required: true,
+    //   disabled: false,
+    // },
+    {
+      name: CustomerFields.PIN_CODE,
+      label: "Pin Code",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+    {
+      name: CustomerFields.AADHAR_NUMBER,
+      label: "Aadhar Number",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+    {
+      name: CustomerFields.PAN_CARD_NUMBER,
+      label: "PAN Card Number",
+      type: "text",
+      required: true,
+      disabled: false,
+    },
+
+    {
+      name: CommonFields.IS_ACTIVE,
+      label: "Active",
+      type: "toggle",
+      required: true,
+      disabled: false,
+    },
+  ];
   const initialValues = fields.reduce((acc, f) => {
     if (f.name === CommonFields.IS_ACTIVE) {
       acc[f.name] = true;
@@ -160,7 +119,6 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
   }, {});
 
   const pagination = useSelector(selectCustomerPagination);
-  const token = useSelector(selectAccessToken);
 
   // Initial form state from field array
   const [buttonLoading, setButtonLoading] = useState(false);
@@ -264,68 +222,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
     }
   }, [customerId, dispatch]);
 
-  // ------------------------ Google Drive Init ------------------------
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      loadGapiScript()
-        .then(() => {
-          window.gapi.load("client:auth2", () => {
-            window.gapi.client.init({
-              apiKey: API_KEY,
-              clientId: CLIENT_ID,
-              scope: SCOPES,
-              discoveryDocs: [
-                "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
-              ],
-            });
-          });
-        })
-        .catch((err) => console.error(err));
-    }
-  }, []);
-
-  const handleLogin = () => {
-    if (window.gapi) {
-      window.gapi.auth2
-        .getAuthInstance()
-        .signIn()
-        .then((googleUser) => {
-          console.log("User logged in:", googleUser);
-        });
-    }
-  };
-
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!file) return alert("Please select a file first!");
-    if (window.gapi) {
-      const accessToken = token;
-      const metadata = { name: file.name, mimeType: file.type };
-      const form = new FormData();
-      form.append(
-        "metadata",
-        new Blob([JSON.stringify(metadata)], { type: "application/json" })
-      );
-      form.append("file", file);
-
-      const res = await fetch(
-        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
-        {
-          method: "POST",
-          headers: { Authorization: "Bearer " + accessToken },
-          body: form,
-        }
-      );
-      const data = await res.json();
-      console.log("File uploaded:", data);
-      alert("Uploaded File ID: " + data.id);
-    }
-  };
+  useEffect(() => {}, []);
 
   return (
     <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6">
@@ -352,23 +249,6 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
           resetForm,
         }) => (
           <>
-            {/* Google Drive Upload */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleLogin}
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-              >
-                Login with Google
-              </button>
-              <input type="file" accept="image/*" onChange={handleFileChange} />
-              <button
-                onClick={handleUpload}
-                disabled={!file}
-                className="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50"
-              >
-                Upload Profile Photo
-              </button>
-            </div>
             <form onSubmit={handleSubmit}>
               <RenderFields
                 fields={fields}
@@ -377,8 +257,73 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                 touched={touched}
                 setFieldValue={setFieldValue}
                 handleBlur={handleBlur}
-                columns={1}
+                columns={2}
               />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 py-4">
+                {[
+                  {
+                    name: CustomerFields.AADHAR_IMAGE,
+                    label: "Aadhar Image",
+                    type: "file",
+                    required: false,
+                    disabled: false,
+                    onChange: (e) => {
+                      setSelectedImage(e.target.files[0]);
+                    },
+                    // onChange: (e) => {
+                    //   if (selectedImage) {
+                    //     dispatch(
+                    //       imageUpload({
+                    //         file: selectedImage,
+                    //         onSuccess: (response) => {
+                    //           const { message, data } = response;
+                    //           if (data) {
+                    //             setFieldValue(ExpenseTrackerFields.RECEIPT_ID, data?.id);
+                    //             getFileDetail(data?.id);
+                    //           }
+                    //           toast.success(message);
+                    //         },
+                    //         onFailure: () => {},
+                    //       })
+                    //     );
+                    //   }
+                    // },
+                  },
+                  {
+                    name: CustomerFields.PAN_CARD_IMAGE,
+                    label: "PAN Card Image",
+                    type: "file",
+                    required: false,
+                    disabled: false,
+                  },
+                  {
+                    name: CustomerFields.AGREEMENT_IMAGE,
+                    label: "Agreement Image",
+                    type: "file",
+                    required: false,
+                    disabled: false,
+                  },
+                  {
+                    name: CustomerFields.PROFILE_IMAGE,
+                    label: "Profile Image",
+                    type: "file",
+                    required: false,
+                    disabled: false,
+                  },
+                ]?.map((field) => {
+                  return (
+                    <div key={field.name} className="">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {field.label}{" "}
+                        {field.required && (
+                          <span className="text-danger">*</span>
+                        )}
+                      </label>
+                      <UploadImage fieldName={field?.name} />
+                    </div>
+                  );
+                })}
+              </div>
               {/* Buttons */}
               <div className="flex justify-end gap-3 mt-6">
                 <div>
@@ -412,6 +357,109 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
           </>
         )}
       </Formik>
+    </div>
+  );
+};
+
+const UploadImage = ({ fieldName }) => {
+  const { setFieldValue, values } = useFormikContext();
+  const dispatch = useDispatch();
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isUploaded, setIsUploaded] = useState(true);
+  // Function to fetch and update file fields
+  const updateFileField = async (fieldKey, fileId) => {
+    if (!fileId) return;
+
+    dispatch(
+      getUploadedFile({
+        id: fileId,
+        onSuccess: ({ data }) => {
+          console.log(data?.url, "response");
+          if (data?.url) {
+            setUploadedImage(data?.url);
+          }
+        },
+        onFailure: () => {
+          console.error(`Failed to fetch file for ${fieldKey}`);
+        },
+      })
+    );
+  };
+
+  useEffect(() => {
+    if (values[fieldName] && isUploaded) {
+      updateFileField(fieldName, values[fieldName]);
+      setIsUploaded(false);
+    }
+  }, [values[fieldName], isUploaded]);
+
+  return uploadedImage && values[fieldName] ? (
+    <div className="relative w-32 p-2 rounded border">
+      <img
+        src={uploadedImage}
+        className="w-full h-20 object-cover rounded"
+        alt="Preview"
+      />
+      <button
+        type="button"
+        className="absolute top-1 right-1 bg-white text-red-500 font-bold rounded-full w-6 h-6 flex items-center justify-center shadow"
+        onClick={() => {
+          setIsUploaded(false);
+          setUploadedImage(null);
+          setSelectedImage(null);
+        }}
+      >
+        ×
+      </button>
+    </div>
+  ) : (
+    <div className="flex items-center justify-between rounded-md w-full gap-3">
+      <InputBox
+        accept="image/jpeg,image/png"
+        name={fieldName}
+        type="file"
+        id={fieldName}
+        onChange={(e) => {
+          setSelectedImage(e.target.files[0]);
+        }}
+        // error={fieldError}
+        // touched={fieldTouched}
+        // disabled={disabled}
+        // onBlur={handleBlur}
+      />
+      <div>
+        <LoadingButton
+          type="button"
+          isLoading={false}
+          disabled={!selectedImage}
+          onClick={() => {
+            if (selectedImage) {
+              try {
+                dispatch(
+                  imageUpload({
+                    file: selectedImage,
+                    // type: fieldName,
+                    onSuccess: (response) => {
+                      const { message, data } = response;
+                      if (data) {
+                        setFieldValue(fieldName, data?.id);
+                        setSelectedImage(null);
+                      }
+                      toast.success(message);
+                    },
+                    onFailure: () => {},
+                  })
+                );
+              } catch (error) {
+                console.error(error);
+              }
+            }
+          }}
+        >
+          Upload
+        </LoadingButton>
+      </div>
     </div>
   );
 };
