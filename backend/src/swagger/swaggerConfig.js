@@ -38,6 +38,7 @@ const options = {
     ],
     tags: [
       { name: "Auth", description: "Authentication APIs" },
+      { name: "Dashboard", description: "Dashboard Management" },
       { name: "Users", description: "User Management" },
       { name: "Roles", description: "Role Management" },
       { name: "Permissions", description: "Permission APIs" },

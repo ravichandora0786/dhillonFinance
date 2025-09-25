@@ -370,6 +370,116 @@ const getCustomerOptions = asyncHandler(async (req, res, next) => {
   }
 });
 
+/** Get overall totals (customers, repaymentsReceived, repaymentsPending) for Active loans */
+const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
+  try {
+    const customers = await CustomerModel.findAll({
+      include: [
+        {
+          model: LoanModel,
+          as: "loans",
+          include: [
+            {
+              model: TransactionModel,
+              as: "transactions",
+              attributes: ["amount", "transactionType"],
+            },
+          ],
+        },
+      ],
+    });
+
+    // ---- Customer Stats ----
+    const customerStats = {
+      Active: 0,
+      Inactive: 0,
+      Pending: 0,
+      Blocked: 0,
+      totalCustomers: customers.length,
+    };
+
+    customers.forEach((cust) => {
+      if (customerStats[cust.status] !== undefined) {
+        customerStats[cust.status]++;
+      }
+    });
+
+    // ---- Loan Stats ----
+    const loanStats = {
+      Active: 0,
+      Closed: 0,
+      Defaulted: 0,
+      Pending: 0,
+      totalLoans: 0,
+    };
+
+    let totalRepaymentsReceived = 0;
+    let totalRepaymentsPending = 0;
+    let totalActiveLoans = 0;
+    const activeLoanCustomersSet = new Set(); // unique active loan customers
+
+    // ---- Loan Customers grouping (only count) ----
+    const loanCustomers = {
+      Active: 0,
+      Closed: 0,
+      Defaulted: 0,
+      Pending: 0,
+    };
+
+    customers.forEach((customer) => {
+      customer.loans.forEach((loan) => {
+        // loan status count
+        if (loanStats[loan.status] !== undefined) {
+          loanStats[loan.status]++;
+          loanCustomers[loan.status]++;
+        }
+        loanStats.totalLoans++;
+
+        // repayments (only for Active loans)
+        if (loan.status === "Active") {
+          totalActiveLoans++;
+          activeLoanCustomersSet.add(customer.id);
+
+          const repaymentsReceived = loan.transactions
+            .filter((tx) => tx.transactionType === "Repayment")
+            .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+
+          const repaymentsPending =
+            parseFloat(loan.totalPayableAmount || 0) - repaymentsReceived;
+
+          totalRepaymentsReceived += repaymentsReceived;
+          totalRepaymentsPending +=
+            repaymentsPending >= 0 ? repaymentsPending : 0;
+        }
+      });
+    });
+
+    // Format to 2 decimal places
+    totalRepaymentsReceived = Number(totalRepaymentsReceived.toFixed(2));
+    totalRepaymentsPending = Number(totalRepaymentsPending.toFixed(2));
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          customerStats,
+          loanStats,
+          loanCustomers, // loan customers count by status
+          repaymentStats: {
+            totalActiveLoans, // total active loans
+            totalActiveLoanCustomers: activeLoanCustomersSet.size, // unique active loan customers
+            totalRepaymentsReceived,
+            totalRepaymentsPending,
+          },
+        },
+        "Customer and loan stats calculated successfully"
+      )
+    );
+  } catch (err) {
+    next(new ApiError(500, err.message));
+  }
+});
+
 export default {
   createCustomer,
   getCustomers,
@@ -377,4 +487,5 @@ export default {
   updateCustomer,
   deleteCustomer,
   getCustomerOptions,
+  getCustomerRepaymentStats,
 };

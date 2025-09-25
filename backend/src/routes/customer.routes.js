@@ -235,4 +235,36 @@ customerRouter.delete(
   customerController.deleteCustomer
 );
 
+/**
+ * @swagger
+ * /customer/dashboard/customerRepaymentStats:
+ *   get:
+ *     summary: Get total customers with active loans and repayment stats for dashboard
+ *     tags: [Dashboard]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Repayment stats
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalCustomers:
+ *                   type: integer
+ *                   example: 5
+ *                 totalRepaymentsReceived:
+ *                   type: number
+ *                   example: 75000
+ *                 totalRepaymentsPending:
+ *                   type: number
+ *                   example: 225000
+ */
+customerRouter.get(
+  "/dashboard/customerRepaymentStats",
+  authenticateUser,
+  customerController.getCustomerRepaymentStats
+);
+
 export default customerRouter;
