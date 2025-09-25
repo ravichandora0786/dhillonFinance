@@ -370,7 +370,7 @@ const getCustomerOptions = asyncHandler(async (req, res, next) => {
   }
 });
 
-/** Get overall totals (customers, repaymentsReceived, repaymentsPending) for Active loans */
+/** Get overall totals (customers, repaymentsReceived, repaymentsPending, disbursedAmount) for Active loans */
 const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
   try {
     const customers = await CustomerModel.findAll({
@@ -416,6 +416,7 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
     let totalRepaymentsReceived = 0;
     let totalRepaymentsPending = 0;
     let totalActiveLoans = 0;
+    let totalDisbursedAmount = 0;
     const activeLoanCustomersSet = new Set(); // unique active loan customers
 
     // ---- Loan Customers grouping (only count) ----
@@ -440,6 +441,8 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
           totalActiveLoans++;
           activeLoanCustomersSet.add(customer.id);
 
+          totalDisbursedAmount += parseFloat(loan.amount || 0);
+
           const repaymentsReceived = loan.transactions
             .filter((tx) => tx.transactionType === "Repayment")
             .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
@@ -457,6 +460,7 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
     // Format to 2 decimal places
     totalRepaymentsReceived = Number(totalRepaymentsReceived.toFixed(2));
     totalRepaymentsPending = Number(totalRepaymentsPending.toFixed(2));
+    totalDisbursedAmount = Number(totalDisbursedAmount.toFixed(2));
 
     return res.status(200).json(
       new ApiResponse(
@@ -468,6 +472,7 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
           repaymentStats: {
             totalActiveLoans, // total active loans
             totalActiveLoanCustomers: activeLoanCustomersSet.size, // unique active loan customers
+            totalDisbursedAmount,
             totalRepaymentsReceived,
             totalRepaymentsPending,
           },
