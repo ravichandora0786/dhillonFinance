@@ -485,6 +485,81 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
   }
 });
 
+/** Get Customers with next EMI info */
+const getCustomersNextEMI = asyncHandler(async (req, res, next) => {
+  try {
+    const today = new Date();
+
+    // Fetch customers with active loans
+    const customers = await CustomerModel.findAll({
+      attributes: ["id", "firstName", "lastName", "mobileNumber"],
+      include: [
+        {
+          model: LoanModel,
+          as: "loans",
+          where: { status: "Active" },
+          required: true, // sirf active loans
+          attributes: ["id", "nextEmiAmount", "startDate", "tenureMonths"],
+        },
+      ],
+      order: [["firstName", "ASC"]],
+    });
+
+    const result = [];
+
+    customers.forEach((customer) => {
+      const loans = customer.loans || [];
+
+      let nextEMI = null;
+
+      loans.forEach((loan) => {
+        const nextEmiAmount = parseFloat(loan.nextEmiAmount || 0);
+        const startDate = new Date(loan.startDate);
+        const tenure = loan.tenureMonths || 0;
+
+        for (let i = 0; i < tenure; i++) {
+          const emiDate = new Date(startDate);
+          emiDate.setMonth(emiDate.getMonth() + i);
+
+          // only consider EMIs not yet cleared (>= start date)
+          if (!nextEMI || emiDate < nextEMI.date) {
+            nextEMI = {
+              date: emiDate,
+              amount: nextEmiAmount,
+              overdue: emiDate < today, // true if overdue
+            };
+          }
+        }
+      });
+
+      if (nextEMI) {
+        result.push({
+          id: customer.id,
+          name: `${customer.firstName} ${customer.lastName}`,
+          mobileNumber: customer.mobileNumber,
+          nextEMIDate: nextEMI.date.toISOString().split("T")[0],
+          nextEMIAmount: nextEMI.amount,
+          overdue: nextEMI.overdue,
+        });
+      }
+    });
+
+    // Sort by EMI date ascending (overdue will come first automatically)
+    result.sort((a, b) => new Date(a.nextEMIDate) - new Date(b.nextEMIDate));
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        result,
+        "Next EMI details for all active customers fetched and sorted successfully"
+      )
+    );
+  } catch (err) {
+    next(new ApiError(500, err.message));
+  }
+});
+
+
 export default {
   createCustomer,
   getCustomers,
@@ -493,4 +568,6 @@ export default {
   deleteCustomer,
   getCustomerOptions,
   getCustomerRepaymentStats,
+  getCustomersNextEMI,
+
 };

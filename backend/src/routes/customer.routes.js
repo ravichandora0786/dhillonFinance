@@ -266,5 +266,42 @@ customerRouter.get(
   authenticateUser,
   customerController.getCustomerRepaymentStats
 );
+/**
+ * @swagger
+ * /customer/dashboard/customer/nextEmi:
+ *   get:
+ *     summary: Get next EMI date and amount for all customers
+ *     tags: [Dashboard]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Next EMI details for customers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     format: uuid
+ *                   name:
+ *                     type: string
+ *                   mobileNumber:
+ *                     type: string
+ *                   nextEMIDate:
+ *                     type: string
+ *                     example: "2025-10-25"
+ *                   nextEMIAmount:
+ *                     type: number
+ *                     example: 5000
+ */
+customerRouter.get(
+  "/dashboard/customer/nextEmi",
+  authenticateUser,
+  customerController.getCustomersNextEMI
+);
 
 export default customerRouter;
