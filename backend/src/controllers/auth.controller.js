@@ -74,9 +74,7 @@ const verifyUser = asyncHandler(async (req, res, next) => {
  */
 const loginUser = asyncHandler(async (req, res, next) => {
   try {
-    
-    const { email, password } = req.body; // identifier can be email or mobile number
-    console.log({ email, password });
+    const { email, password } = req.body;
 
     // Find user by email or mobile number
     const user = await UserModel.scope("withPassword").findOne({
@@ -105,6 +103,10 @@ const loginUser = asyncHandler(async (req, res, next) => {
     if (!isMatch) {
       throw new ApiError(401, "Invalid credentials");
     }
+
+    // **Update lastLoginAt**
+    user.lastLoginAt = new Date();
+    await user.save();
 
     // Fetch and enrich permissions (same as your original code)
     const activityPermsRaw = await ActivityPermissionModel.findAll({

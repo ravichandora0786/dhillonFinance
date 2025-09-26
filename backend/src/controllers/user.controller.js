@@ -63,7 +63,7 @@ const createUser = asyncHandler(async (req, res, next) => {
 
     // Refresh profileImage URL if uploaded
     if (user.profileImage) {
-      await refreshFileUrl(user.profileImage, process.env.PROFILE_PIC_FOLDER);
+      await refreshFileUrl(user.profileImage, process.env.FOLDER_NAME);
     }
 
     await transaction.commit();
@@ -92,7 +92,7 @@ const getUsers = asyncHandler(async (req, res, next) => {
         if (user.profileImage) {
           user.profileImage = await refreshFileUrl(
             user.profileImage,
-            process.env.PROFILE_PIC_FOLDER
+            process.env.FOLDER_NAME
           );
         }
       })
@@ -118,10 +118,10 @@ const getUserById = asyncHandler(async (req, res, next) => {
 
     if (!user) return next(new ApiError(404, responseMessage.notFound("User")));
 
-    if (user.profileImage) {
-      user.profileImage = await refreshFileUrl(
-        user.profileImage,
-        process.env.PROFILE_PIC_FOLDER
+    if (user.profileFile) {
+      user.profileFile = await refreshFileUrl(
+        user.profileFile,
+        process.env.FOLDER_NAME
       );
     }
 
@@ -150,7 +150,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
     if (user.profileImage) {
       user.profileImage = await refreshFileUrl(
         user.profileImage,
-        process.env.PROFILE_PIC_FOLDER
+        process.env.FOLDER_NAME
       );
     }
 
