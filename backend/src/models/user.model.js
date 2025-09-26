@@ -4,6 +4,7 @@
 
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
+import UploadFileModel from "./uploadFile.model.js";
 
 const UserModel = sequelize.define(
   "User",
@@ -50,6 +51,33 @@ const UserModel = sequelize.define(
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
+    },
+    profileImage: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: UploadFileModel,
+      },
+    },
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    dob: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    lastLoginAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    gender: {
+      type: DataTypes.ENUM("Male", "Female", "Other"),
+      allowNull: true,
     },
   },
   {

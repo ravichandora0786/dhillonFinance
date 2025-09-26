@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import sequelize from "../config/db.js";
 import CustomerModel from "../models/customer.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -73,9 +73,21 @@ const getCustomers = asyncHandler(async (req, res, next) => {
     const searchCondition = search
       ? {
           [Op.or]: [
-            { firstName: { [Op.iLike]: `%${search}%` } },
-            { lastName: { [Op.iLike]: `%${search}%` } },
-            { mobileNumber: { [Op.iLike]: `%${search}%` } },
+            Sequelize.where(
+              Sequelize.fn("LOWER", Sequelize.col("firstName")),
+              "LIKE",
+              `%${search.toLowerCase()}%`
+            ),
+            Sequelize.where(
+              Sequelize.fn("LOWER", Sequelize.col("lastName")),
+              "LIKE",
+              `%${search.toLowerCase()}%`
+            ),
+            Sequelize.where(
+              Sequelize.fn("LOWER", Sequelize.col("mobileNumber")),
+              "LIKE",
+              `%${search.toLowerCase()}%`
+            ),
           ],
         }
       : {};

@@ -24,6 +24,16 @@ RoleModel.hasMany(UserModel, { foreignKey: "roleId", as: "users" });
 UserModel.belongsTo(RoleModel, { foreignKey: "roleId", as: "role" });
 
 /*
+ * =======================
+ * User & UploadFile Relation
+ * =======================
+ */
+UserModel.belongsTo(UploadFileModel, {
+  foreignKey: "profileImage",
+  as: "profileFile",
+});
+
+/*
  * ==============================
  * Role & ActivityPermission Relations
  * ==============================
@@ -69,6 +79,11 @@ CustomerModel.belongsTo(UploadFileModel, {
 CustomerModel.belongsTo(UploadFileModel, {
   foreignKey: "profileImage",
   as: "profileFile",
+});
+
+CustomerModel.belongsTo(UploadFileModel, {
+  foreignKey: "otherImage",
+  as: "otherFile",
 });
 
 /*

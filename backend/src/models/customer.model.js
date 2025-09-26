@@ -53,6 +53,10 @@ const CustomerModel = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    vehicleNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     aadharImage: {
       type: DataTypes.UUID,
       allowNull: true,
@@ -75,6 +79,13 @@ const CustomerModel = sequelize.define(
       },
     },
     profileImage: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: UploadFileModel,
+      },
+    },
+    otherImage: {
       type: DataTypes.UUID,
       allowNull: true,
       references: {

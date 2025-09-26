@@ -31,6 +31,18 @@ const userRouter = express.Router();
  *           type: string
  *         password:
  *           type: string
+ *         profileImage:
+ *           type: string
+ *         address:
+ *           type: string
+ *         gender:
+ *           type: Male
+ *         description:
+ *           type: string
+ *         lastLoginAt:
+ *           type: date
+ *         dob:
+ *           type: date
  *         roleId:
  *           type: string
  *           format: uuid

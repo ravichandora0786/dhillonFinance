@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { responseMessage } from "../utils/responseMessage.js";
 import TransactionModel from "../models/transaction.model.js";
+import { col, fn, Op, where } from "sequelize";
 
 /** Create Loan with initial Disbursement transaction */
 const createLoan = asyncHandler(async (req, res, next) => {
@@ -75,6 +76,7 @@ const createLoan = asyncHandler(async (req, res, next) => {
 /** Get all Loans with pagination, sorting, search, status filter, and next/previous flags */
 const getLoans = asyncHandler(async (req, res, next) => {
   try {
+    // Extract query params with defaults
     let {
       page = 1,
       limit = 10,
@@ -89,18 +91,33 @@ const getLoans = asyncHandler(async (req, res, next) => {
     limit = parseInt(limit);
     const offset = (page - 1) * limit;
 
+    // Validate order
+    order = order.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+    // Validate sortBy (ensure it's a column in LoanModel)
+    const validSortFields = [
+      "createdAt",
+      "updatedAt",
+      "totalPayableAmount",
+      "status",
+    ];
+    if (!validSortFields.includes(sortBy)) sortBy = "createdAt";
+
+    // Build WHERE condition
     const whereCondition = {};
     if (status) whereCondition.status = status;
     if (customerId) whereCondition.customerId = customerId;
 
+    // Dynamic search across customer fields
     if (search) {
-      whereCondition[Op.or] = [
-        { "$customer.firstName$": { [Op.iLike]: `%${search}%` } },
-        { "$customer.lastName$": { [Op.iLike]: `%${search}%` } },
-        { "$customer.mobileNumber$": { [Op.iLike]: `%${search}%` } },
-      ];
+      const searchLower = search.toLowerCase();
+      const searchableFields = ["firstName", "lastName", "mobileNumber"];
+      whereCondition[Op.or] = searchableFields.map((field) =>
+        where(fn("LOWER", col(`customer.${field}`)), "LIKE", `%${searchLower}%`)
+      );
     }
 
+    // Fetch loans with related customer and transactions
     const loans = await LoanModel.findAndCountAll({
       where: whereCondition,
       include: [
@@ -112,22 +129,23 @@ const getLoans = asyncHandler(async (req, res, next) => {
         {
           model: TransactionModel,
           as: "transactions",
-          attributes: ["amount", "transactionType"], // include type
-          separate: true,
-          order: [["createdAt", "DESC"]], // latest transaction first
+          attributes: ["amount", "transactionType", "createdAt"],
+          separate: true, // optional: can remove for large datasets
+          order: [["createdAt", "DESC"]],
         },
       ],
-      order: [[sortBy, order.toUpperCase()]],
+      order: [[sortBy, order]],
       limit,
       offset,
     });
 
     // Map loans with paymentsReceived and pendingAmount
     const loanData = loans.rows.map((loan) => {
-      // sum of repayments received
-      const paymentsReceived = loan.transactions
-        .filter((tx) => tx.transactionType === "Repayment")
-        .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+      const paymentsReceived = loan.transactions.reduce((sum, tx) => {
+        return tx.transactionType === "Repayment"
+          ? sum + parseFloat(tx.amount)
+          : sum;
+      }, 0);
 
       const pendingAmount =
         parseFloat(loan.totalPayableAmount) - paymentsReceived;
@@ -135,10 +153,11 @@ const getLoans = asyncHandler(async (req, res, next) => {
       return {
         ...loan.toJSON(),
         paymentsReceived,
-        pendingAmount: pendingAmount >= 0 ? pendingAmount : 0, // ensure no negative
+        pendingAmount: pendingAmount >= 0 ? pendingAmount : 0,
       };
     });
 
+    // Calculate pagination info
     const totalPages = Math.ceil(loans.count / limit);
 
     return res.status(200).json(

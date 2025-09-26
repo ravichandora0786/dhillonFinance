@@ -33,7 +33,7 @@ const registerUser = {
  */
 const loginUser = {
   body: Joi.object({
-    email: Joi.string().email().required(),
+    email: Joi.string().required(),
     password: Joi.string()
       .min(8)
       .max(30)

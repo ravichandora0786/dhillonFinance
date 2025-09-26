@@ -82,7 +82,7 @@ export default function SignIn() {
           <Formik
             initialValues={initialObject}
             enableReinitialize={true}
-            validationSchema={loginSchema}
+            // validationSchema={loginSchema}
             onSubmit={handleSubmitData}
           >
             {({

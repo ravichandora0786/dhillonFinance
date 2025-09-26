@@ -17,6 +17,7 @@ import ActivityPermissionModel from "../models/activityPermission.model.js";
 import PermissionModel from "../models/permission.model.js";
 import ActivityMasterModel from "../models/activityMaster.model.js";
 import { encryptData } from "../utils/encryptDecrypt.js";
+import { Op } from "sequelize";
 
 export const BASE_URL = process.env.BASE_URL;
 
@@ -69,15 +70,19 @@ const verifyUser = asyncHandler(async (req, res, next) => {
 });
 
 /**
- * Login User
+ * Login User (by email or mobile number)
  */
 const loginUser = asyncHandler(async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    
+    const { email, password } = req.body; // identifier can be email or mobile number
+    console.log({ email, password });
 
-    // Find user by email
+    // Find user by email or mobile number
     const user = await UserModel.scope("withPassword").findOne({
-      where: { email },
+      where: {
+        [Op.or]: [{ email: email }, { mobileNumber: email }],
+      },
       include: [
         {
           model: RoleModel,
@@ -86,6 +91,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
         },
       ],
     });
+
     if (!user) {
       throw new ApiError(401, "Invalid credentials");
     }
@@ -100,7 +106,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
       throw new ApiError(401, "Invalid credentials");
     }
 
-    // 1. Fetch raw activity-permission records with role and activity info
+    // Fetch and enrich permissions (same as your original code)
     const activityPermsRaw = await ActivityPermissionModel.findAll({
       where: { roleId: user.roleId },
       include: [
@@ -115,25 +121,21 @@ const loginUser = asyncHandler(async (req, res, next) => {
       nest: true,
     });
 
-    // 2. Aggregate all permission ID arrays into a unique list
     const allPermissionIds = activityPermsRaw.flatMap((item) =>
       Array.isArray(item.permissionIds) ? item.permissionIds : []
     );
     const uniquePermissionIds = [...new Set(allPermissionIds)];
 
-    // 3. Fetch permission records from permission master table
     const permissionRecords = await PermissionModel.findAll({
       where: { id: uniquePermissionIds },
       attributes: ["id", "name"],
     });
 
-    // 4. Build a lookup map: permission ID → permission name
     const idToNameMap = {};
     permissionRecords.forEach(({ id, name }) => {
       idToNameMap[id] = name;
     });
 
-    // 5. Transform original array: replace IDs with names
     const enrichedPermissions = activityPermsRaw.map((item) => {
       const permIds = Array.isArray(item.permissionIds)
         ? item.permissionIds
@@ -149,19 +151,19 @@ const loginUser = asyncHandler(async (req, res, next) => {
         permissionNames,
       };
     });
+
     // Generate JWT token
     const token = generateToken(user);
-    //TODO: remove this
     console.log({ token });
 
-    // Save token in the database
+    // Save refresh token
     user.refreshToken = token.refreshToken;
     await user.save();
 
-    // Convert user model to plain object and exclude sensitive fields
     const userPlain = user.get({ plain: true });
-    delete userPlain.password; // Remove password
-    delete userPlain.refreshToken; // Remove refreshToken
+    delete userPlain.password;
+    delete userPlain.refreshToken;
+
     const data = encryptData({
       token,
       user: userPlain,

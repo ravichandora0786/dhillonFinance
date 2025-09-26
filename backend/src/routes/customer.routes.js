@@ -52,6 +52,10 @@ const customerRouter = express.Router();
  *           type: string
  *         profileImage:
  *           type: string
+ *         otherImage:
+ *           type: string
+ *         vehicleNumber:
+ *           type: string
  *         description:
  *           type: string
  *         isActive:
