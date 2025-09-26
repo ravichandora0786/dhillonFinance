@@ -12,6 +12,7 @@ import {
   s3getUploadedFile,
 } from "../services/aws/s3.config.js";
 import UploadFileModel from "../models/uploadFile.model.js";
+import FileController from "./file.controller.js";
 
 /**
  * Refresh signed URL of a file if expired
@@ -137,16 +138,32 @@ const getUserById = asyncHandler(async (req, res, next) => {
 const updateUser = asyncHandler(async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
-    const user = await UserModel.findByPk(req.params.id);
+    const user = await UserModel.findByPk(req.params.id, {
+      include: [{ model: UploadFileModel, as: "profileFile" }],
+    });
+
     if (!user) return next(new ApiError(404, responseMessage.notFound("User")));
 
-    const { password, ...rest } = req.body;
+    const { password, profileImage, ...rest } = req.body;
 
     if (password) rest.password = await bcrypt.hash(password, 10);
 
+    // Delete old UploadFile row if new profileImage provided
+    if (profileImage && profileImage !== user.profileImage) {
+      if (user.profileImage) {
+        await UploadFileModel.destroy({
+          where: { id: user.profileImage }, // purani row delete
+          force: true, // ensure hard delete (ignore paranoid)
+          transaction,
+        });
+      }
+      rest.profileImage = profileImage;
+      // Refresh all customer files and clean up unused S3 files
+      await FileController.getAllFilesInternal();
+    }
+
     await user.update(rest, { transaction });
 
-    // Refresh profileFile URL if updated
     if (user.profileFile) {
       user.profileFile = await refreshFileUrl(
         user.profileFile,

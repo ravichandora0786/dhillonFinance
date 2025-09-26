@@ -12,7 +12,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 /**
  * Upload File to S3 and save to DB
  */
-const uploadFile = asyncHandler(async (req, res) => {
+const uploadFile = asyncHandler(async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
@@ -114,4 +114,36 @@ const getAllFiles = asyncHandler(async (req, res) => {
     );
 });
 
-export default { uploadFile, getFileById, getAllFiles };
+// Refresh all customer files and clean up unused S3 files
+const getAllFilesInternal = async () => {
+
+  const folderName = process.env.FOLDER_NAME || "uploads";
+
+  // List S3 files keys only
+  const s3Files = (await listAllS3Files(folderName)).map((file) =>
+    file.Key.replace(`${folderName}/`, "")
+  );
+
+  // Get DB files
+  const dbFiles = await UploadFileModel.findAll({ where: { isActive: true } });
+  const dbFileKeys = dbFiles.map((file) => file.imageKey);
+
+  // Delete S3 files not in DB
+  const filesToDelete = s3Files.filter((key) => !dbFileKeys.includes(key));
+  for (const key of filesToDelete) await s3DeleteFile(key, folderName);
+
+  // Refresh expired URLs
+  const refreshedFiles = await Promise.all(
+    dbFiles.map(async (file) => {
+      if (checkImageUrlExpired(file.image)) {
+        file.image = await s3getUploadedFile(file.imageKey, folderName);
+        await file.save();
+      }
+      return file;
+    })
+  );
+
+  return refreshedFiles;
+};
+
+export default { uploadFile, getFileById, getAllFiles, getAllFilesInternal };

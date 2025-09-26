@@ -44,6 +44,13 @@ const TRANSACTION_TYPE_ENUM = ["Disbursement", "Repayment"];
 
 const TRANSACTION_PAYMENT_MODE_ENUM = ["Cash", "Bank", "UPI", "Cheque"];
 
+const EMAIL_TEMPLATE = {
+  FORGOT_PASSWORD: {
+    SUBJECT: "Forgot Password",
+    TEMPLATE: "forgotPassword",
+  },
+};
+
 export {
   USER_ROLE,
   PHONE_REGEX,
@@ -51,4 +58,5 @@ export {
   LOAN_STATUS_ENUM,
   TRANSACTION_TYPE_ENUM,
   TRANSACTION_PAYMENT_MODE_ENUM,
+  EMAIL_TEMPLATE,
 };

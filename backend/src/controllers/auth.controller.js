@@ -18,6 +18,9 @@ import PermissionModel from "../models/permission.model.js";
 import ActivityMasterModel from "../models/activityMaster.model.js";
 import { encryptData } from "../utils/encryptDecrypt.js";
 import { Op } from "sequelize";
+import FileController from "./file.controller.js";
+import { EMAIL_TEMPLATE } from "../utils/constants/index.js";
+import sendMail from "../services/mail.service.js";
 
 export const BASE_URL = process.env.BASE_URL;
 
@@ -171,6 +174,8 @@ const loginUser = asyncHandler(async (req, res, next) => {
       user: userPlain,
       permissions: enrichedPermissions,
     });
+    // Refresh all customer files and clean up unused S3 files
+    await FileController.getAllFilesInternal();
 
     return res.status(200).json(new ApiResponse(200, data, "Login successful"));
   } catch (err) {
@@ -185,12 +190,23 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
 
   const user = await UserModel.findOne({
-    where: { email, isVerified: true },
+    where: { email, isActive: true },
   });
 
   if (!user) {
     throw new ApiError(400, "Invalid Email");
   }
+
+  const verificationToken = generateVerificationToken(user);
+
+  await sendMail({
+    to: email,
+    subject: EMAIL_TEMPLATE.FORGOT_PASSWORD.SUBJECT,
+    template: EMAIL_TEMPLATE.FORGOT_PASSWORD.TEMPLATE,
+    context: {
+      link: `${BASE_URL}/reset-password?token=${verificationToken}`,
+    },
+  });
 
   return res
     .status(200)
@@ -201,33 +217,37 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
  * Reset Password
  */
 const resetPassword = asyncHandler(async (req, res, next) => {
-  const { token, password } = req.body;
+  const { oldPassword, newPassword } = req.body;
+  const userId = req.user.id; // Assuming authenticateUser sets req.user
 
-  try {
-    const { id } = jwt.verify(token, process.env.JWT_VERIFY_SECRET_KEY);
+  // Fetch user with password
+  const user = await UserModel.scope("withPassword").findOne({
+    where: { id: userId },
+  });
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await UserModel.update(
-      {
-        password: hashedPassword,
-        updatedAt: Date.now(),
-        refreshToken: null,
-      },
-      {
-        where: { id },
-      }
-    );
-
-    return res
-      .status(200)
-      .json(new ApiResponse(200, null, "Password reset successfully"));
-  } catch (error) {
-    throw new ApiError(401, "Link is invalid or expired");
+  if (!user) {
+    throw new ApiError(404, "User not found");
   }
-});
 
+  // Check if old password matches
+  const isMatch = await bcrypt.compare(oldPassword, user.password);
+  if (!isMatch) {
+    throw new ApiError(401, "Old password is incorrect");
+  }
+
+  // Hash new password
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  // Update password and remove refresh token
+  await UserModel.update(
+    { password: hashedPassword, refreshToken: null, updatedAt: new Date() },
+    { where: { id: userId } }
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Password reset successfully"));
+});
 /**
  * Refresh Token
  */

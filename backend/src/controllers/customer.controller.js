@@ -12,6 +12,7 @@ import {
   checkImageUrlExpired,
   s3getUploadedFile,
 } from "../services/aws/s3.config.js";
+import FileController from "./file.controller.js";
 
 /**
  * Refresh signed URL of a file if expired
@@ -295,17 +296,76 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
     next(new ApiError(500, err.message));
   }
 });
+
 /** Update Customer */
 const updateCustomer = asyncHandler(async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
-    const customer = await CustomerModel.findByPk(req.params.id);
+    const customer = await CustomerModel.findByPk(req.params.id, {
+      include: [
+        { model: UploadFileModel, as: "aadharFile" },
+        { model: UploadFileModel, as: "panCardFile" },
+        { model: UploadFileModel, as: "agreementFile" },
+        { model: UploadFileModel, as: "profileFile" },
+      ],
+    });
+
     if (!customer)
       return next(new ApiError(404, responseMessage.notFound("Customer")));
 
-    await customer.update(req.body, { transaction });
+    const { aadharId, panCardId, agreementId, profileImageId, ...rest } =
+      req.body;
+
+    // If new files provided → delete old UploadFile row from DB
+    if (aadharId && aadharId !== customer.aadharFile?.id) {
+      if (customer.aadharFile?.id) {
+        await UploadFileModel.destroy({
+          where: { id: customer.aadharFile.id },
+          force: true,
+          transaction,
+        });
+      }
+      rest.aadharId = aadharId;
+    }
+
+    if (panCardId && panCardId !== customer.panCardFile?.id) {
+      if (customer.panCardFile?.id) {
+        await UploadFileModel.destroy({
+          where: { id: customer.panCardFile.id },
+          force: true,
+          transaction,
+        });
+      }
+      rest.panCardId = panCardId;
+    }
+
+    if (agreementId && agreementId !== customer.agreementFile?.id) {
+      if (customer.agreementFile?.id) {
+        await UploadFileModel.destroy({
+          where: { id: customer.agreementFile.id },
+          force: true,
+          transaction,
+        });
+      }
+      rest.agreementId = agreementId;
+    }
+
+    if (profileImageId && profileImageId !== customer.profileFile?.id) {
+      if (customer.profileFile?.id) {
+        await UploadFileModel.destroy({
+          where: { id: customer.profileFile.id },
+          force: true,
+          transaction,
+        });
+      }
+      rest.profileImageId = profileImageId;
+    }
+
+    await customer.update(rest, { transaction });
 
     await transaction.commit();
+    // Refresh all customer files and clean up unused S3 files
+    await FileController.getAllFilesInternal();
     return res
       .status(200)
       .json(

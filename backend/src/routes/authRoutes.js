@@ -78,7 +78,7 @@ authRouter.route("/verify").post(authController.verifyUser);
 
 /**
  * @swagger
- * /auth/forgot-password:
+ * /auth/forgotPassword:
  *   post:
  *     summary: send forgot password email
  *     tags: [Auth]
@@ -101,14 +101,16 @@ authRouter.route("/verify").post(authController.verifyUser);
  *       500:
  *         description: Internal Server Error
  */
-authRouter.route("/forgot-password").post(authController.forgotPassword);
+authRouter.route("/forgotPassword").post(authController.forgotPassword);
 
 /**
  * @swagger
- * /auth/reset-password:
+ * /auth/resetPassword:
  *   post:
  *     summary: Reset password
  *     tags: [Auth]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -116,26 +118,27 @@ authRouter.route("/forgot-password").post(authController.forgotPassword);
  *           schema:
  *             type: object
  *             properties:
- *               token:
- *                 type: string
- *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NDAxNDQ3MDAsImV4cCI6MTc0MDE1NTUwMH0.MJXdK8H2yacy5U_IrdlW9CQZTYQf0BixsijWgLfjnBt"
- *               password:
+ *               oldPassword:
  *                 type: string
  *                 format: password
- *               confirmPassword:
+ *               newPassword:
  *                 type: string
  *                 format: password
  *     responses:
  *       200:
- *         description: Password reset succesfully
+ *         description: Password reset successfully
  *       401:
  *         description: Link is invalid or expired
  *       500:
  *         description: Internal Server Error
  */
 authRouter
-  .route("/reset-password")
-  .post(validateSchema(resetPassword), authController.resetPassword);
+  .route("/resetPassword")
+  .post(
+    authenticateUser,
+    // validateSchema(resetPassword),
+    authController.resetPassword
+  );
 
 /**
  * @swagger
@@ -214,6 +217,8 @@ authRouter.route("/refreshToken").post(authController.refreshToken);
  *     summary: Logout user
  *     description: Logs out the authenticated user by invalidating their JWT (client should delete token).
  *     tags: [Auth]
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Logout successful

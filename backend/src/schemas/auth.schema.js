@@ -53,8 +53,7 @@ const loginUser = {
  */
 const resetPassword = {
   body: Joi.object({
-    token: Joi.string().required(),
-    password: Joi.string()
+    oldPassword: Joi.string()
       .min(8)
       .max(30)
       .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/)
@@ -65,7 +64,7 @@ const resetPassword = {
         "any.invalid": "Password must not contain emojis",
       })
       .required(),
-    confirmPassword: Joi.string()
+    newPassword: Joi.string()
       .valid(Joi.ref("password"))
       .required()
       .messages({
