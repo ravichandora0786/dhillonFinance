@@ -94,7 +94,6 @@ const getCustomers = asyncHandler(async (req, res, next) => {
             {
               model: TransactionModel,
               as: "transactions",
-              attributes: ["amount", "transactionType", "createdAt"],
               separate: true,
               order: [["createdAt", "DESC"]],
             },
@@ -547,18 +546,19 @@ const getCustomersNextEMI = asyncHandler(async (req, res, next) => {
     // Sort by EMI date ascending (overdue will come first automatically)
     result.sort((a, b) => new Date(a.nextEMIDate) - new Date(b.nextEMIDate));
 
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        result,
-        "Next EMI details for all active customers fetched and sorted successfully"
-      )
-    );
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          result,
+          "Next EMI details for all active customers fetched and sorted successfully"
+        )
+      );
   } catch (err) {
     next(new ApiError(500, err.message));
   }
 });
-
 
 export default {
   createCustomer,
@@ -569,5 +569,4 @@ export default {
   getCustomerOptions,
   getCustomerRepaymentStats,
   getCustomersNextEMI,
-
 };

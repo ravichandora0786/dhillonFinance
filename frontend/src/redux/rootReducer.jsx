@@ -10,7 +10,7 @@ import { persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
 import { commonReducer } from "@/app/common/slice";
-import { userReducer } from "@/app/users/slice";
+import { userReducer } from "@/app/user/slice";
 import { roleReducer } from "@/app/role/slice";
 import { activityMasterReducer } from "@/app/activityMaster/slice";
 import { permissionReducer } from "@/app/permissions/slice";
@@ -19,6 +19,8 @@ import { stateReducer } from "@/app/state/slice";
 import { districtReducer } from "@/app/district/slice";
 import { customerReducer } from "@/app/customer/slice";
 import { customerLoanReducer } from "@/app/loan/slice";
+import { transactionReducer } from "@/app/transaction/slice";
+import { dashboardReducer } from "@/app/dashboard/slice";
 
 const dummyReducer = (state = {}, action) => {
   switch (action.type) {
@@ -55,6 +57,8 @@ const appReducer = combineReducers({
   districtReducer,
   customerReducer,
   customerLoanReducer,
+  transactionReducer,
+  dashboardReducer,
   // Add other reducers here
 });
 

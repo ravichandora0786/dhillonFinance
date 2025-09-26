@@ -21,6 +21,7 @@ import {
 } from "@/app/loan/slice";
 import TitleAndDescription from "../titleAndDescription";
 import { getCustomerListForOptions } from "@/app/customer/slice";
+import BackButton from "../backButton";
 
 const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
   const dispatch = useDispatch();
@@ -235,6 +236,9 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
 
   return (
     <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6">
+      <div className="">
+        <BackButton />
+      </div>
       <div className="">
         <TitleAndDescription
           title={isEdit ? "Edit Customer Loan" : "Add New Customer Loan"}

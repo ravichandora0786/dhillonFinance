@@ -1,121 +1,225 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  FiUserPlus,
+  FiCreditCard,
+  FiBarChart2,
+  FiUsers,
+  FiDollarSign,
+  FiTrendingUp,
+  FiAlertCircle,
+} from "react-icons/fi";
+import ReceiveMoneyModal from "../customer/receiveMoneyModal";
+import { useDispatch, useSelector } from "react-redux";
+import { getDashboardData } from "./slice";
+import { selectDashboardData } from "./selectors";
+import { getAllTransactions } from "@/app/transaction/slice";
+import { selectAllTransactionList } from "@/app/transaction/selector";
+import NameAvatarColumn from "@/components/tableCollumnComponents/nameWithImageCol";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const [openReceivedMoneyModal, setOpenReceivedMoneyModal] = useState(false);
+
+  const data = useSelector(selectDashboardData);
+  const transactionData = useSelector(selectAllTransactionList);
+  console.log(transactionData);
+
+  const getDashboardDataList = () => {
+    dispatch(
+      getDashboardData({
+        onSuccess: () => {},
+        onFailure: () => {},
+      })
+    );
+  };
+  const getRecentTransactionsList = () => {
+    dispatch(
+      getAllTransactions({
+        data: { page: 1, limit: 5, sortBy: "createdAt", order: "DESC" },
+        onSuccess: () => {},
+        onFailure: () => {},
+      })
+    );
+  };
+
+  useEffect(() => {
+    getDashboardDataList();
+    getRecentTransactionsList();
+  }, [dispatch]);
   return (
     <>
       <div className="p-6 bg-gray-50 min-h-screen">
         {/* Title */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
+        <div className="flex flex-col gap-0 mb-6">
+          <span className="text-2xl font-bold text-gray-800">
             Dashboard Overview
-          </h1>
-          <p className="text-gray-500">
-            Manage your customers, keep track of every rupee.
-          </p>
+          </span>
+          <span className="text-sm text-gray-500">
+            Manage your borrowers and track all financial transactions.
+          </span>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Total Customers */}
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-gray-500">Total Customers</p>
-            <h2 className="text-2xl font-bold text-gray-800">45</h2>
-            <p className="text-sm text-gray-400">Active customers</p>
-          </div>
-
-          {/* Money to Receive */}
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-gray-500">Money to Receive</p>
-            <h2 className="text-2xl font-bold text-green-600">₹25,000</h2>
-            <p className="text-sm text-gray-400">Total credit</p>
-          </div>
-
-          {/* Money Given */}
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-gray-500">Money Given</p>
-            <h2 className="text-2xl font-bold text-orange-500">₹18,000</h2>
-            <p className="text-sm text-gray-400">Total debit</p>
-          </div>
-
-          {/* Pending Payments */}
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-gray-500">Pending Payments</p>
-            <h2 className="text-2xl font-bold text-red-500">₹7,000</h2>
-            <p className="text-sm text-gray-400">Needs follow-up</p>
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <Card
+            icon={<FiUsers className="text-3xl text-blue-500" />}
+            title="Total Borrowers"
+            value={data?.customerStats?.totalCustomers}
+            subtitle="Loan Customers"
+          />
+          <Card
+            icon={<FiDollarSign className="text-3xl text-green-500" />}
+            title="Disbursed Amount"
+            value={`₹${data?.repaymentStats?.totalDisbursedAmount}`}
+            subtitle="Principal Amount"
+          />
+          <Card
+            icon={<FiTrendingUp className="text-3xl text-orange-500" />}
+            title="Collection Amount"
+            value={`₹${data?.repaymentStats?.totalRepaymentsReceived}`}
+            subtitle="Collection Amount With Intrest"
+          />
+          <Card
+            icon={<FiAlertCircle className="text-3xl text-red-500" />}
+            title="Receivables Amount"
+            value={`₹${data?.repaymentStats?.totalRepaymentsPending}`}
+            subtitle="Pending Amount With Intrest"
+          />
         </div>
 
         {/* Quick Actions + Recent Transactions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Quick Actions */}
           <div className="bg-white rounded-lg shadow p-4">
             <h3 className="text-lg font-semibold text-gray-800">
               Quick Actions
             </h3>
             <p className="text-sm text-gray-500 mb-4">
-              Common tasks to manage your business
+              Perform common operations quickly
             </p>
 
-            <div className="flex flex-col gap-3">
-              <button className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium flex items-center gap-2">
-                ➕ Add New Customer
+            <div className="grid grid-cols-2 gap-4">
+              {/* Card Button */}
+              <button
+                className="flex flex-col items-center justify-center gap-2 p-6 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 shadow-sm"
+                onClick={() => {
+                  router.push("/customer/add");
+                }}
+              >
+                <FiUserPlus className="text-2xl" />
+                <span className="text-sm font-medium">Add Borrower</span>
               </button>
-              <button className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-medium flex items-center gap-2">
-                📈 Record Payment Received
+              <button
+                className="flex flex-col items-center justify-center gap-2 p-6 
+          bg-green-50 text-green-600 rounded-lg hover:bg-green-100 shadow-md transition"
+                onClick={() => {
+                  router.push("/loan/add");
+                }}
+              >
+                <FiDollarSign className="text-2xl" />
+                <span className="text-sm font-medium">Add Borrower Loan</span>
               </button>
-              <button className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 text-sm font-medium flex items-center gap-2">
-                📊 View Reports
+
+              <button
+                className="flex flex-col items-center justify-center gap-2 p-6 bg-orange-50 text-orange-500 rounded-lg hover:bg-orange-100 shadow-sm"
+                onClick={() => {
+                  setOpenReceivedMoneyModal(true);
+                }}
+              >
+                <FiCreditCard className="text-2xl" />
+                <span className="text-sm font-medium">Record Payment</span>
               </button>
+
+              <button
+                className="flex flex-col items-center justify-center gap-2 p-6 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 shadow-sm"
+                onClick={() => {
+                  router.push("/customer");
+                }}
+              >
+                <FiUsers className="text-2xl" />
+                <span className="text-sm font-medium">View Borrowers</span>
+              </button>
+
+              {/* <button className="flex flex-col items-center justify-center gap-2 p-6 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 shadow-sm">
+                <FiBarChart2 className="text-2xl" />
+                <span className="text-sm font-medium">View Reports</span>
+              </button> */}
             </div>
           </div>
-
-          {/* Recent Transactions */}
-          <div className="bg-white rounded-lg shadow p-4">
-            <h3 className="text-lg font-semibold text-gray-800">
-              Recent Transactions
-            </h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Latest customer transactions
-            </p>
-
-            <div className="flex flex-col divide-y">
-              <div className="flex justify-between py-3">
-                <div>
-                  <p className="font-medium text-gray-800">Rajesh Kumar</p>
-                  <p className="text-sm text-gray-500">Today</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-green-600 font-semibold">+₹500</p>
-                  <p className="text-sm text-gray-500">Received</p>
-                </div>
-              </div>
-
-              <div className="flex justify-between py-3">
-                <div>
-                  <p className="font-medium text-gray-800">Priya Sharma</p>
-                  <p className="text-sm text-gray-500">Yesterday</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-red-500 font-semibold">-₹1200</p>
-                  <p className="text-sm text-gray-500">Given</p>
-                </div>
-              </div>
-
-              <div className="flex justify-between py-3">
-                <div>
-                  <p className="font-medium text-gray-800">Amit Singh</p>
-                  <p className="text-sm text-gray-500">2 days ago</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-green-600 font-semibold">+₹800</p>
-                  <p className="text-sm text-gray-500">Received</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <RecentTransactions transactions={transactionData?.transactions} />
         </div>
       </div>
+
+      <ReceiveMoneyModal
+        openModal={openReceivedMoneyModal}
+        onBack={() => {
+          setOpenReceivedMoneyModal(false);
+        }}
+        data={{}}
+        callBackFunc={() => {
+          getDashboardDataList();
+          getRecentTransactionsList();
+        }}
+      />
     </>
+  );
+}
+
+function Card({ icon, title, value, subtitle }) {
+  return (
+    <div className="flex flex-col bg-white rounded-lg shadow p-4 items-center gap-4">
+      {icon}
+      <div>
+        <label className="text-gray-500 text-sm">{title}</label>
+        <h2 className="text-2xl font-bold text-gray-800">{value}</h2>
+        <span className="text-[10px] text-gray-400">{subtitle}</span>
+      </div>
+    </div>
+  );
+}
+
+function RecentTransactions({ transactions = [] }) {
+  return (
+    <div className="bg-white rounded-lg shadow p-4">
+      <h3 className="text-lg font-semibold text-gray-800">
+        Recent Transactions
+      </h3>
+      <p className="text-sm text-gray-500 mb-4">Latest borrower activities</p>
+
+      <div className="flex flex-col divide-y">
+        {transactions?.map((t, idx) => (
+          <div key={idx} className="flex justify-between py-3">
+            <div>
+              <NameAvatarColumn
+                name={`${t?.customer?.firstName} ${t?.customer?.lastName}`}
+                mobileNumber={`${t.customer.mobileNumber}`}
+                showImage={true}
+                showMobile={true}
+                imageUrl={t.customer?.profileFile?.image}
+              />
+              {/* <p className="text-sm text-gray-500">{t?.transactionDate}</p> */}
+            </div>
+            <div className="text-right">
+              <p
+                className={`${
+                  t?.transactionType === "Repayment"
+                    ? "text-green-600"
+                    : "text-red-500"
+                } font-semibold`}
+              >
+                {t?.transactionType === "Repayment" ? "+" : "-"}₹{t?.amount}
+              </p>
+              <p className="text-sm text-gray-500">
+                {t?.transactionType === "Repayment"
+                  ? "Received"
+                  : "Disbursed Loan"}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

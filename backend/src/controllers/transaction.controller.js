@@ -7,6 +7,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { responseMessage } from "../utils/responseMessage.js";
 import { Op } from "sequelize";
+import UploadFileModel from "../models/uploadFile.model.js";
 
 /** Create Transaction with Loan Update Logic */
 const createTransaction = asyncHandler(async (req, res, next) => {
@@ -180,7 +181,13 @@ const getTransactions = asyncHandler(async (req, res, next) => {
         {
           model: CustomerModel,
           as: "customer",
-          attributes: ["id", "firstName", "lastName", "mobileNumber"],
+          include: [
+            {
+              model: UploadFileModel,
+              as: "profileFile",
+            },
+          ],
+          // attributes: ["id", "firstName", "lastName", "mobileNumber"],
         },
       ],
       order: [[sortBy, order.toUpperCase()]],

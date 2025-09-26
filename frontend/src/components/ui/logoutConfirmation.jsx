@@ -7,6 +7,7 @@ import LoadingButton from "./loadingButton";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { logoutApp } from "@/app/common/slice";
 import { AuthRoutes } from "@/Services/routes";
+import { FiLogOut } from "react-icons/fi";
 
 const LogoutConfirmation = () => {
   const dispatch = useDispatch();
@@ -30,10 +31,10 @@ const LogoutConfirmation = () => {
         isLoading={false}
         disabled={false}
         variant={"custom"}
-        className=""
+        className="px-0 py-2"
         onClick={() => openModal()}
       >
-        <LogoutOutlinedIcon className="text-danger" />
+        <FiLogOut size={16} className="text-danger" />
       </LoadingButton>
 
       {/* Modal */}

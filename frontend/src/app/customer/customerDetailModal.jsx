@@ -99,6 +99,101 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
               )}
             </div>
           </div>
+          {/* Loan Details Section */}
+          {customer?.loans?.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-slate-700 mb-3">
+                Loan Details
+              </h3>
+
+              {customer?.loans.map((loan) => (
+                <div
+                  key={loan?.id}
+                  className="p-4 mb-4 rounded-lg border border-slate-200 bg-white shadow-sm"
+                >
+                  {/* Basic Loan Info */}
+                  <div className="grid grid-cols-2 md:grid-cols-2 sm:grid-cols-2 gap-4">
+                    <Field label="Loan Amount" value={`₹ ${loan?.amount}`} />
+                    <Field
+                      label="Interest Rate"
+                      value={`${loan?.interestRate}%`}
+                    />
+                    <Field label="EMIs (Months)" value={loan?.tenureMonths} />
+                    <Field label="EMI Amount" value={`₹ ${loan?.emiAmount}`} />
+                    <Field
+                      label="Total Payable"
+                      value={`₹ ${loan?.totalPayableAmount}`}
+                    />
+                    <Field label="Status" value={loan?.status} />
+                    <Field label="Start Date" value={loan?.startDate} />
+                    <Field label="End Date" value={loan?.endDate} />
+                    <Field
+                      label="Next Installment Date"
+                      value={loan?.installmentDate}
+                    />
+                    <Field
+                      label="Next EMI Amount"
+                      value={`₹ ${loan?.nextEmiAmount}`}
+                    />
+                    <Field label="Paid EMIs" value={loan?.paidEmis} />
+                    <Field label="Pending EMIs" value={loan?.pendingEmis} />
+                    <Field
+                      label="Received Payments"
+                      value={`₹ ${loan?.repaymentsReceived}`}
+                    />
+                    <Field
+                      label="Pending Payments"
+                      value={`₹ ${loan?.repaymentsPending}`}
+                    />
+                  </div>
+
+                  {/* Description */}
+                  {loan?.description && (
+                    <div className="mt-3">
+                      <Field
+                        label="Description"
+                        value={`${loan?.description}`}
+                      />
+                      {/* <div className="text-xs text-slate-400">Description</div>
+                      <div className="mt-1 text-sm text-slate-800 font-medium">
+                        {loan?.description}
+                      </div> */}
+                    </div>
+                  )}
+
+                  {/* Transactions */}
+                  {loan?.transactions?.length > 0 && (
+                    <div className="mt-4">
+                      <div className="text-sm font-semibold text-slate-700 mb-2">
+                        Transactions
+                      </div>
+                      <div className="space-y-2">
+                        {loan?.transactions.map((txn, idx) => (
+                          <div
+                            key={idx}
+                            className="flex justify-between items-center p-2 rounded-md bg-slate-50 border border-slate-100"
+                          >
+                            <span className="text-sm text-slate-600">
+                              {"Payment"}
+                            </span>
+                            <span className="text-sm font-medium text-slate-800">
+                              ₹ {txn.amount}
+                            </span>
+                            <span className="text-xs text-slate-400">
+                              {txn.paymentMode}
+                            </span>
+                            <span className="text-xs text-slate-400">
+                              {txn.transactionDate}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       }
     />

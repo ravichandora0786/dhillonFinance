@@ -21,6 +21,7 @@ import {
 import TitleAndDescription from "../titleAndDescription";
 import { getUploadedFile, imageUpload } from "@/app/common/slice";
 import InputBox from "../inputBox";
+import BackButton from "../backButton";
 
 // Field Configuration Array
 
@@ -227,9 +228,12 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
   return (
     <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6">
       <div className="">
+        <BackButton />
+      </div>
+      <div className="">
         <TitleAndDescription
-          title="Add New Customer"
-          description="Manage your Customer"
+          title={isEdit ? "Edit Customer" : "Add New Customer"}
+          description=""
         />
       </div>
       {/* Formik */}
@@ -249,7 +253,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
           resetForm,
         }) => (
           <>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="">
               <RenderFields
                 fields={fields}
                 values={values}

@@ -1,0 +1,71 @@
+"use client";
+import React, { useState } from "react";
+import { FiMenu, FiUser, FiSettings } from "react-icons/fi";
+import { RiMenu3Fill } from "react-icons/ri";
+import { useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { selectUser } from "@/app/common/selectors";
+import LogoutConfirmation from "@/components/ui/logoutConfirmation";
+import LoadingButton from "../ui/loadingButton";
+
+export default function Header({ handleDrawerToggle, isMobile, menu }) {
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  // Redux user data
+  const user = useSelector(selectUser);
+  console.log(user);
+
+  return (
+    <header className="w-full bg-primary/70 shadow px-4 py-1 flex justify-between items-center">
+      {/* Left - Logo */}
+      <div
+        className="text-xl font-bold text-black cursor-pointer"
+        onClick={() => router.push("/dashboard")}
+      >
+        MyFinanceApp
+      </div>
+
+      {/* Right - Profile Section */}
+      <div className="relative flex items-center gap-2">
+        <div className="">
+          <LoadingButton
+            type="button"
+            isLoading={false}
+            disabled={false}
+            variant={"custom"}
+            className="px-0 py-2"
+            onClick={() => {
+              handleDrawerToggle();
+            }}
+          >
+            {menu ? (
+              <FiMenu className="mr-2" />
+            ) : (
+              <RiMenu3Fill className="mr-2" />
+            )}
+          </LoadingButton>
+        </div>
+
+        <div className="">
+          <button
+            className=""
+            onClick={() => {
+              router.push(`/user/profile/${user?.id}`);
+            }}
+          >
+            <FiUser className="" />
+          </button>
+        </div>
+        <div className="">
+          <button className="">
+            <FiSettings className="" />
+          </button>
+        </div>
+        <div className="">
+          <LogoutConfirmation />
+        </div>
+      </div>
+    </header>
+  );
+}

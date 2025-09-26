@@ -49,8 +49,7 @@ module.exports = {
         "CUSTOMER",
         "LOAN",
         "TRANSACTION",
-        "INVOICE",
-        "STAFF",
+        "USER",
       ];
 
       const activities = activityNames.map((name) => ({

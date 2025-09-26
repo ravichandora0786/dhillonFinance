@@ -10,16 +10,16 @@ const LoadingButton = ({
   variant = "primary",
   ...props
 }) => {
-  const baseClasses = `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md 
+  const baseClasses = `inline-flex items-center justify-center gap-2 whitespace-nowrap 
         text-sm font-semibold transition-colors focus-visible:outline-none 
         focus-visible:ring-2 focus-visible:ring-primary/50 
         disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
-        px-4 py-2`;
+        `;
 
   const variantClasses = {
-    primary: "bg-primary text-white hover:bg-primary-hover w-full",
-    secondary: "bg-gray-200 hover:bg-gray-300 text-gray-700",
-    danger: "bg-danger text-white hover:bg-danger",
+    primary: "bg-primary text-white hover:bg-primary-hover w-full px-4 py-2 rounded-md",
+    secondary: "bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md",
+    danger: "bg-danger text-white hover:bg-danger px-4 py-2 rounded-md",
     custom: className,
   };
   return (

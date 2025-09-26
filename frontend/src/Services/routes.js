@@ -14,7 +14,7 @@ export const AuthRoutes = {
 
 export const ProtectedRoutes = {
   ROLE: "/role",
-  USERS: "/users",
+  USER: "/user",
   DASHBOARD: "/dashboard",
   PERMISSIONS: "/permissions",
   INVOICE: "/invoice",
@@ -23,6 +23,4 @@ export const ProtectedRoutes = {
   CUSTOMER: "/customer",
   CUSTOMER_ADD: "/customer/add",
   CUSTOMER_EDIT: "/customer/edit",
-
-  STAFF: "/users/staff",
 };

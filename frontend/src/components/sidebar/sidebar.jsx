@@ -60,25 +60,24 @@ const menuData = [
     icon: <FaHandHoldingUsd size={22} />,
     link: ProtectedRoutes.LOAN,
   },
-
-  {
-    id: "transactions",
-    label: "Transaction",
-    icon: <GrTransaction size={22} />,
-    link: ProtectedRoutes.TRANSATION,
-  },
-  {
-    id: "invoices",
-    label: "Invoice",
-    icon: <FaFileInvoiceDollar size={22} />,
-    link: ProtectedRoutes.INVOICE,
-  },
-  {
-    id: "permissions",
-    label: "Permission",
-    icon: <PermissionsIcon />,
-    link: ProtectedRoutes.PERMISSIONS,
-  },
+  // {
+  //   id: "transactions",
+  //   label: "Transaction",
+  //   icon: <GrTransaction size={22} />,
+  //   link: ProtectedRoutes.TRANSATION,
+  // },
+  // {
+  //   id: "invoices",
+  //   label: "Invoice",
+  //   icon: <FaFileInvoiceDollar size={22} />,
+  //   link: ProtectedRoutes.INVOICE,
+  // },
+  // {
+  //   id: "permissions",
+  //   label: "Permission",
+  //   icon: <PermissionsIcon />,
+  //   link: ProtectedRoutes.PERMISSIONS,
+  // },
 ];
 
 const Sidebar = ({ isMobile = false, mobileViewToggle = () => {} }) => {
@@ -191,7 +190,7 @@ const Sidebar = ({ isMobile = false, mobileViewToggle = () => {} }) => {
             ) : (
               <div className="flex flex-row px-4 py-2 items-center justify-between w-full">
                 <h5 className=" font-semibold text-sidebar-text">Finance</h5>
-                {isMobile ? (
+                {/* {isMobile ? (
                   <IconButton
                     icon={
                       <CloseOutlinedIcon
@@ -209,7 +208,15 @@ const Sidebar = ({ isMobile = false, mobileViewToggle = () => {} }) => {
                     }
                     onClick={toggleSidebar}
                   />
-                )}
+                )} */}
+                <IconButton
+                  icon={
+                    <CloseOutlinedIcon
+                      sx={{ color: "var(--color-sidebar-text)" }}
+                    />
+                  }
+                  onClick={mobileViewToggle}
+                />
               </div>
             )}
           </div>
@@ -252,7 +259,7 @@ const Sidebar = ({ isMobile = false, mobileViewToggle = () => {} }) => {
                   pathname === menu.link || pathname.startsWith(menu.link + "/")
                 }
                 component={<Link href={menu.link} />}
-                onClick={isMobile && mobileViewToggle}
+                onClick={mobileViewToggle}
               >
                 {!collapsed && menu.label}
               </MenuItem>

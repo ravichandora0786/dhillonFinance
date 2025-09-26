@@ -8,7 +8,7 @@ import { createAction, createSlice } from "@reduxjs/toolkit";
 const initialState = {
   allCustomerList: {},
   customerData: {},
-  pagination: { pageIndex: 0, pageSize: 10 },
+  pagination: { pageIndex: 0, pageSize: 12 },
   customerSearchData: { search: "" },
   customerOptions: [],
   customerId: "",

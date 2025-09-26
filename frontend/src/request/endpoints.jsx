@@ -19,6 +19,7 @@ const endPoints = {
   District: "/district",
   CommonImageUpload: "/file",
   Transaction: "/transaction",
+  DashboardData: "/customer/dashboard/customerRepaymentStats",
 };
 
 export default endPoints;

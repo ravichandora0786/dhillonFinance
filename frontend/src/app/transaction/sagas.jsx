@@ -11,6 +11,7 @@ import {
   deleteTransaction,
   getAllTransactions,
   getTransactionDetailById,
+  setAllTransactionList,
   setTransactionData,
   updateTransaction,
   updateTransactionStatus,
@@ -26,6 +27,7 @@ function* getAllTransactionListSaga(action) {
     const response = yield httpRequest.get(endPoints.Transaction, {
       params: data,
     });
+    yield put(setAllTransactionList(response?.data));
     yield onSuccess({ message: response?.data?.message, data: response?.data });
   } catch (err) {
     const errorMessage = err.message || "Something went wrong!";
@@ -41,7 +43,10 @@ function* getAllTransactionListSaga(action) {
 function* getTransactionDetailByIdSaga(action) {
   const { id, onSuccess, onFailure } = action.payload;
   try {
-    const response = yield call(httpRequest.get, `${endPoints.Transaction}/${id}`);
+    const response = yield call(
+      httpRequest.get,
+      `${endPoints.Transaction}/${id}`
+    );
 
     yield put(setTransactionData(response?.data));
     yield onSuccess({ resp: response });
@@ -59,7 +64,10 @@ function* getTransactionDetailByIdSaga(action) {
 function* deleteTransactionByIdSaga(action) {
   const { id, onSuccess, onFailure } = action.payload;
   try {
-    const response = yield call(httpRequest.delete, `${endPoints.Transaction}/${id}`);
+    const response = yield call(
+      httpRequest.delete,
+      `${endPoints.Transaction}/${id}`
+    );
 
     yield onSuccess({ resp: response });
   } catch (error) {

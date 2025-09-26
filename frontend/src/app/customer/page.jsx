@@ -10,9 +10,11 @@ import {
   Add as AddIcon,
 } from "@mui/icons-material";
 import DataTableComponent from "@/components/dataTableComponent";
+import CustomerCardComponent from "@/components/ui/customerCard";
 import Status from "@/components/ui/status";
 import InputBox from "@/components/ui/inputBox";
 import LoadingButton from "@/components/ui/loadingButton";
+import CustomPagination from "@/components/ui/pagination";
 import TitleAndDescription from "@/components/ui/titleAndDescription";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -40,6 +42,16 @@ import DeleteConfirmationModal from "@/components/ui/deleteConfirmation";
 import CustomerDetailModal from "./customerDetailModal";
 import ReceiveMoneyModal from "./receiveMoneyModal";
 import { toast } from "react-toastify";
+import {
+  FiMoreVertical,
+  FiEdit,
+  FiEye,
+  FiArrowRight,
+  FiTrash2,
+  FiMessageCircle,
+  FiPhone,
+  FiMail,
+} from "react-icons/fi";
 
 const columns = (handleDelete, handleView, handleReceivedMoneyBtn) => [
   {
@@ -51,6 +63,7 @@ const columns = (handleDelete, handleView, handleReceivedMoneyBtn) => [
         mobileNumber={`${row.original.mobileNumber}`}
         showImage={true}
         showMobile={true}
+        imageUrl={row.original?.profileFile?.image}
       />
     ),
   },
@@ -68,7 +81,7 @@ const columns = (handleDelete, handleView, handleReceivedMoneyBtn) => [
     accessorKey: "recieved",
     cell: ({ row }) => (
       <SingleParagraphColumn
-        value={`${row.original.loans?.[0]?.totalPayableAmount || 0}`}
+        value={`${row.original.loans?.[0]?.repaymentsReceived || 0}`}
       />
     ),
   },
@@ -77,7 +90,7 @@ const columns = (handleDelete, handleView, handleReceivedMoneyBtn) => [
     accessorKey: "pending",
     cell: ({ row }) => (
       <SingleParagraphColumn
-        value={`${row.original.loans?.[0]?.totalPayableAmount || 0}`}
+        value={`${row.original.loans?.[0]?.repaymentsPending || 0}`}
       />
     ),
   },
@@ -86,7 +99,7 @@ const columns = (handleDelete, handleView, handleReceivedMoneyBtn) => [
     accessorKey: "t",
     cell: ({ row }) => (
       <SingleParagraphColumn
-        value={`${row.original.loansloans?.[0]?.transactions?.length || 0}`}
+        value={`${row.original.loans?.[0]?.transactions?.length || 0}`}
       />
     ),
   },
@@ -128,6 +141,7 @@ const Customer = (permissions) => {
   const create = true;
   const navigate = useRouter();
   const dispatch = useDispatch();
+  const [menuOpen, setMenuOpen] = useState(false);
   const { confirm, ModalContent } = DeleteConfirmationModal();
   const [loading, setLoading] = useState(false);
   const [customerId, setCustomerId] = useState(null);
@@ -205,7 +219,27 @@ const Customer = (permissions) => {
   useEffect(() => {
     getAllCustomersList(customerSearchData, pagination);
   }, [customerSearchData, pagination]);
-
+  const students = [
+    {
+      id: "AD9892433",
+      name: "Joann Michael",
+      avatar: "/assets/img/students/student-02.jpg",
+      class: "IV, B",
+      rollNo: "35012",
+      gender: "Male",
+      joinedOn: "19 Aug 2014",
+    },
+    {
+      id: "AD9892434",
+      name: "Sophia Khan",
+      avatar: "/assets/img/students/student-03.jpg",
+      class: "V, A",
+      rollNo: "35013",
+      gender: "Female",
+      joinedOn: "20 Aug 2015",
+    },
+    // aur bhi students add kar sakte ho...
+  ];
   return (
     <>
       <div className="w-full flex flex-col gap-4 justify-between  p-4">
@@ -261,17 +295,42 @@ const Customer = (permissions) => {
           </div>
         </div>
         <div className="w-full">
-          <DataTableComponent
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            {customerList?.customers?.map((item, index) => (
+              <CustomerCardComponent
+                key={index}
+                customer={item}
+                handleDelete={handleDelete}
+                handleView={handleView}
+                handleReceivedMoneyBtn={handleReceivedMoneyBtn}
+              />
+            ))}
+          </div>
+          {/* Common Pagination */}
+          <CustomPagination
+            pageIndex={pagination.pageIndex}
+            pageSize={pagination.pageSize}
+            total={customerList?.total}
+            onPageChange={(newPage) =>
+              dispatch(
+                setCustomerPagination({
+                  ...pagination,
+                  pageIndex: newPage,
+                })
+              )
+            }
+          />
+          {/* <DataTableComponent
             columns={columns(handleDelete, handleView, handleReceivedMoneyBtn)}
             data={customerList?.customers || []}
             pagination={pagination}
             setPagination={(newPagination) =>
               dispatch(setCustomerPagination(newPagination))
             }
-            totalRows={customerList?.customers?.length}
+            totalRows={customerList?.total}
             columnVisibility={columnVisibility}
             setColumnVisibility={setColumnVisibility}
-          />
+          /> */}
         </div>
       </div>
       {/* Delete Confirmation Modal */}
@@ -292,6 +351,9 @@ const Customer = (permissions) => {
           setOpenReceivedMoneyModal(false);
         }}
         data={rowData}
+        callBackFunc={() => {
+          getAllCustomersList(customerSearchData, pagination);
+        }}
       />
     </>
   );
