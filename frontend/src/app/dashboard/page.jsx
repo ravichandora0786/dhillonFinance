@@ -16,6 +16,7 @@ import { selectDashboardData } from "./selectors";
 import { getAllTransactions } from "@/app/transaction/slice";
 import { selectAllTransactionList } from "@/app/transaction/selector";
 import NameAvatarColumn from "@/components/tableCollumnComponents/nameWithImageCol";
+import RecentTransactions from "@/components/ui/recentTransactions";
 import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
@@ -24,8 +25,7 @@ export default function Dashboard() {
   const [openReceivedMoneyModal, setOpenReceivedMoneyModal] = useState(false);
 
   const data = useSelector(selectDashboardData);
-  const transactionData = useSelector(selectAllTransactionList);
-  console.log(transactionData);
+  // const transactionData = useSelector(selectAllTransactionList);
 
   const getDashboardDataList = () => {
     dispatch(
@@ -35,19 +35,19 @@ export default function Dashboard() {
       })
     );
   };
-  const getRecentTransactionsList = () => {
-    dispatch(
-      getAllTransactions({
-        data: { page: 1, limit: 5, sortBy: "createdAt", order: "DESC" },
-        onSuccess: () => {},
-        onFailure: () => {},
-      })
-    );
-  };
+  // const getRecentTransactionsList = () => {
+  //   dispatch(
+  //     getAllTransactions({
+  //       data: { page: 1, limit: 5, sortBy: "createdAt", order: "DESC" },
+  //       onSuccess: () => {},
+  //       onFailure: () => {},
+  //     })
+  //   );
+  // };
 
   useEffect(() => {
     getDashboardDataList();
-    getRecentTransactionsList();
+    // getRecentTransactionsList();
   }, [dispatch]);
   return (
     <>
@@ -148,7 +148,7 @@ export default function Dashboard() {
               </button> */}
             </div>
           </div>
-          <RecentTransactions transactions={transactionData?.transactions} />
+          <RecentTransactions/>
         </div>
       </div>
 
@@ -180,46 +180,46 @@ function Card({ icon, title, value, subtitle }) {
   );
 }
 
-function RecentTransactions({ transactions = [] }) {
-  return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h3 className="text-lg font-semibold text-gray-800">
-        Recent Transactions
-      </h3>
-      <p className="text-sm text-gray-500 mb-4">Latest borrower activities</p>
+// function RecentTransactions({ transactions = [] }) {
+//   return (
+//     <div className="bg-white rounded-lg shadow p-4">
+//       <h3 className="text-lg font-semibold text-gray-800">
+//         Recent Transactions
+//       </h3>
+//       <p className="text-sm text-gray-500 mb-4">Latest borrower activities</p>
 
-      <div className="flex flex-col divide-y">
-        {transactions?.map((t, idx) => (
-          <div key={idx} className="flex justify-between py-3">
-            <div>
-              <NameAvatarColumn
-                name={`${t?.customer?.firstName} ${t?.customer?.lastName}`}
-                mobileNumber={`${t.customer.mobileNumber}`}
-                showImage={true}
-                showMobile={true}
-                imageUrl={t.customer?.profileFile?.image}
-              />
-              {/* <p className="text-sm text-gray-500">{t?.transactionDate}</p> */}
-            </div>
-            <div className="text-right">
-              <p
-                className={`${
-                  t?.transactionType === "Repayment"
-                    ? "text-green-600"
-                    : "text-red-500"
-                } font-semibold`}
-              >
-                {t?.transactionType === "Repayment" ? "+" : "-"}₹{t?.amount}
-              </p>
-              <p className="text-sm text-gray-500">
-                {t?.transactionType === "Repayment"
-                  ? "Received"
-                  : "Disbursed Loan"}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+//       <div className="flex flex-col divide-y">
+//         {transactions?.map((t, idx) => (
+//           <div key={idx} className="flex justify-between py-3">
+//             <div>
+//               <NameAvatarColumn
+//                 name={`${t?.customer?.firstName} ${t?.customer?.lastName}`}
+//                 mobileNumber={`${t.customer.mobileNumber}`}
+//                 showImage={true}
+//                 showMobile={true}
+//                 imageUrl={t.customer?.profileFile?.image}
+//               />
+//               {/* <p className="text-sm text-gray-500">{t?.transactionDate}</p> */}
+//             </div>
+//             <div className="text-right">
+//               <p
+//                 className={`${
+//                   t?.transactionType === "Repayment"
+//                     ? "text-green-600"
+//                     : "text-red-500"
+//                 } font-semibold`}
+//               >
+//                 {t?.transactionType === "Repayment" ? "+" : "-"}₹{t?.amount}
+//               </p>
+//               <p className="text-sm text-gray-500">
+//                 {t?.transactionType === "Repayment"
+//                   ? "Received"
+//                   : "Disbursed Loan"}
+//               </p>
+//             </div>
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }

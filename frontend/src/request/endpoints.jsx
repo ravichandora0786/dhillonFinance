@@ -11,7 +11,7 @@ const endPoints = {
   ActivityMaster: "/activity",
   Permission: "/permission",
   ActivityPermission: "/activityPermission",
-  User: "/users",
+  User: "/user",
   Customer: "/customer",
   CustomerLoan: "/loan",
   Country: "/country",

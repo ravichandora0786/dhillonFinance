@@ -101,6 +101,13 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       required: true,
       disabled: false,
     },
+    {
+      name: CustomerFields.VEHICLE_NUMBER,
+      label: "Vehicle Number",
+      type: "text",
+      required: false,
+      disabled: false,
+    },
 
     {
       name: CommonFields.IS_ACTIVE,
@@ -266,6 +273,13 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 py-4">
                 {[
                   {
+                    name: CustomerFields.PROFILE_IMAGE,
+                    label: "Profile Image",
+                    type: "file",
+                    required: false,
+                    disabled: false,
+                  },
+                  {
                     name: CustomerFields.AADHAR_IMAGE,
                     label: "Aadhar Image",
                     type: "file",
@@ -274,32 +288,8 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                     onChange: (e) => {
                       setSelectedImage(e.target.files[0]);
                     },
-                    // onChange: (e) => {
-                    //   if (selectedImage) {
-                    //     dispatch(
-                    //       imageUpload({
-                    //         file: selectedImage,
-                    //         onSuccess: (response) => {
-                    //           const { message, data } = response;
-                    //           if (data) {
-                    //             setFieldValue(ExpenseTrackerFields.RECEIPT_ID, data?.id);
-                    //             getFileDetail(data?.id);
-                    //           }
-                    //           toast.success(message);
-                    //         },
-                    //         onFailure: () => {},
-                    //       })
-                    //     );
-                    //   }
-                    // },
                   },
-                  {
-                    name: CustomerFields.PAN_CARD_IMAGE,
-                    label: "PAN Card Image",
-                    type: "file",
-                    required: false,
-                    disabled: false,
-                  },
+
                   {
                     name: CustomerFields.AGREEMENT_IMAGE,
                     label: "Agreement Image",
@@ -308,8 +298,8 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                     disabled: false,
                   },
                   {
-                    name: CustomerFields.PROFILE_IMAGE,
-                    label: "Profile Image",
+                    name: CustomerFields.ANY_PRUF_IMAGE,
+                    label: "Pruf",
                     type: "file",
                     required: false,
                     disabled: false,

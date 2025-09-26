@@ -62,8 +62,8 @@ const createUser = asyncHandler(async (req, res, next) => {
     );
 
     // Refresh profileImage URL if uploaded
-    if (user.profileImage) {
-      await refreshFileUrl(user.profileImage, process.env.FOLDER_NAME);
+    if (user.profileFile) {
+      await refreshFileUrl(user.profileFile, process.env.FOLDER_NAME);
     }
 
     await transaction.commit();
@@ -89,9 +89,9 @@ const getUsers = asyncHandler(async (req, res, next) => {
     // Refresh profile images
     await Promise.all(
       users.map(async (user) => {
-        if (user.profileImage) {
-          user.profileImage = await refreshFileUrl(
-            user.profileImage,
+        if (user.profileFile) {
+          user.profileFile = await refreshFileUrl(
+            user.profileFile,
             process.env.FOLDER_NAME
           );
         }
@@ -146,10 +146,10 @@ const updateUser = asyncHandler(async (req, res, next) => {
 
     await user.update(rest, { transaction });
 
-    // Refresh profileImage URL if updated
-    if (user.profileImage) {
-      user.profileImage = await refreshFileUrl(
-        user.profileImage,
+    // Refresh profileFile URL if updated
+    if (user.profileFile) {
+      user.profileFile = await refreshFileUrl(
+        user.profileFile,
         process.env.FOLDER_NAME
       );
     }

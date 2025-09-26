@@ -219,27 +219,7 @@ const Customer = (permissions) => {
   useEffect(() => {
     getAllCustomersList(customerSearchData, pagination);
   }, [customerSearchData, pagination]);
-  const students = [
-    {
-      id: "AD9892433",
-      name: "Joann Michael",
-      avatar: "/assets/img/students/student-02.jpg",
-      class: "IV, B",
-      rollNo: "35012",
-      gender: "Male",
-      joinedOn: "19 Aug 2014",
-    },
-    {
-      id: "AD9892434",
-      name: "Sophia Khan",
-      avatar: "/assets/img/students/student-03.jpg",
-      class: "V, A",
-      rollNo: "35013",
-      gender: "Female",
-      joinedOn: "20 Aug 2015",
-    },
-    // aur bhi students add kar sakte ho...
-  ];
+
   return (
     <>
       <div className="w-full flex flex-col gap-4 justify-between  p-4">

@@ -14,7 +14,6 @@ export default function Header({ handleDrawerToggle, isMobile, menu }) {
 
   // Redux user data
   const user = useSelector(selectUser);
-  console.log(user);
 
   return (
     <header className="w-full bg-primary/70 shadow px-4 py-1 flex justify-between items-center">
