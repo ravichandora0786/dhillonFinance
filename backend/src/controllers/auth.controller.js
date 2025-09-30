@@ -68,7 +68,7 @@ const verifyUser = asyncHandler(async (req, res, next) => {
       .status(200)
       .json(new ApiResponse(200, null, "User verified successfully"));
   } catch (error) {
-    throw new ApiError(401, "Link is invalid or expired");
+    throw new ApiError(400, "Link is invalid or expired");
   }
 });
 
@@ -94,17 +94,17 @@ const loginUser = asyncHandler(async (req, res, next) => {
     });
 
     if (!user) {
-      throw new ApiError(401, "Invalid credentials");
+      throw new ApiError(400, "Invalid credentials");
     }
 
     if (!user.isActive) {
-      throw new ApiError(401, "User is not active");
+      throw new ApiError(400, "User is not active");
     }
 
     // Validate password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      throw new ApiError(401, "Invalid credentials");
+      throw new ApiError(400, "Invalid credentials");
     }
 
     // **Update lastLoginAt**
@@ -204,7 +204,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
     subject: EMAIL_TEMPLATE.FORGOT_PASSWORD.SUBJECT,
     template: EMAIL_TEMPLATE.FORGOT_PASSWORD.TEMPLATE,
     context: {
-      link: `${BASE_URL}/reset-password?token=${verificationToken}`,
+      link: `http://localhost:3000/forgotPassword?token=${verificationToken}`,
     },
   });
 
@@ -232,7 +232,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
   // Check if old password matches
   const isMatch = await bcrypt.compare(oldPassword, user.password);
   if (!isMatch) {
-    throw new ApiError(401, "Old password is incorrect");
+    throw new ApiError(400, "Old password is incorrect");
   }
 
   // Hash new password
@@ -248,6 +248,57 @@ const resetPassword = asyncHandler(async (req, res, next) => {
     .status(200)
     .json(new ApiResponse(200, null, "Password reset successfully"));
 });
+
+/**
+ * Forgot  Password
+ */
+const resetForgotPassword = asyncHandler(async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    throw new ApiError(400, "Token and new password are required");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_VERIFY_SECRET_KEY);
+  } catch (err) {
+    throw new ApiError(401, "Invalid or expired token");
+  }
+
+  // Fetch user along with role
+  const user = await UserModel.findByPk(decoded.id, {
+    include: [
+      {
+        model: RoleModel,
+        as: "role",
+        attributes: ["id", "name"],
+      },
+    ],
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Hash password
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  // Update and clear refresh token
+  await UserModel.update(
+    {
+      password: hashedPassword,
+      refreshToken: null,
+      updatedAt: new Date(),
+    },
+    { where: { id: user.id } }
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Password reset successfully"));
+});
+
 /**
  * Refresh Token
  */
@@ -277,7 +328,7 @@ const refreshToken = asyncHandler(async (req, res, next) => {
     });
 
     if (!user || user.refreshToken !== refreshToken) {
-      throw new ApiError(401, "Invalid or expired refresh token");
+      throw new ApiError(400, "Invalid or expired refresh token");
     }
 
     // Generate new access token with roleId and roleName
@@ -330,4 +381,5 @@ export default {
   forgotPassword,
   resetPassword,
   logoutUser,
+  resetForgotPassword,
 };

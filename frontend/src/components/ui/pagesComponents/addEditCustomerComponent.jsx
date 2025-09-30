@@ -22,6 +22,7 @@ import TitleAndDescription from "../titleAndDescription";
 import { getUploadedFile, imageUpload } from "@/app/common/slice";
 import InputBox from "../inputBox";
 import BackButton from "../backButton";
+import { createCustomerSchema } from "@/validationSchema/customerSchema";
 
 // Field Configuration Array
 
@@ -98,14 +99,14 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       name: CustomerFields.PAN_CARD_NUMBER,
       label: "PAN Card Number",
       type: "text",
-      required: true,
+      required: false,
       disabled: false,
     },
     {
       name: CustomerFields.VEHICLE_NUMBER,
       label: "Vehicle Number",
       type: "text",
-      required: false,
+      required: true,
       disabled: false,
     },
 
@@ -117,7 +118,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       disabled: false,
     },
   ];
-  const initialValues = fields.reduce((acc, f) => {
+  let initialValues = fields.reduce((acc, f) => {
     if (f.name === CommonFields.IS_ACTIVE) {
       acc[f.name] = true;
     } else {
@@ -125,6 +126,15 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
     }
     return acc;
   }, {});
+
+  const defaultImage = {
+    [CustomerFields.AADHAR_IMAGE]: "",
+    [CustomerFields.ANY_PRUF_IMAGE]: "",
+    [CustomerFields.AGREEMENT_IMAGE]: "",
+    [CustomerFields.PROFILE_IMAGE]: "",
+  };
+
+  initialValues = { ...initialValues, ...defaultImage };
 
   const pagination = useSelector(selectCustomerPagination);
 
@@ -246,7 +256,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       {/* Formik */}
       <Formik
         initialValues={initialObject}
-        // validationSchema={createCustomerSchema}
+        validationSchema={createCustomerSchema}
         enableReinitialize={true}
         onSubmit={handleSubmitData}
       >
@@ -276,14 +286,14 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                     name: CustomerFields.PROFILE_IMAGE,
                     label: "Profile Image",
                     type: "file",
-                    required: false,
+                    required: true,
                     disabled: false,
                   },
                   {
                     name: CustomerFields.AADHAR_IMAGE,
                     label: "Aadhar Image",
                     type: "file",
-                    required: false,
+                    required: true,
                     disabled: false,
                     onChange: (e) => {
                       setSelectedImage(e.target.files[0]);
@@ -294,14 +304,14 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                     name: CustomerFields.AGREEMENT_IMAGE,
                     label: "Agreement Image",
                     type: "file",
-                    required: false,
+                    required: true,
                     disabled: false,
                   },
                   {
                     name: CustomerFields.ANY_PRUF_IMAGE,
                     label: "Pruf",
                     type: "file",
-                    required: false,
+                    required: true,
                     disabled: false,
                   },
                 ]?.map((field) => {
@@ -313,7 +323,11 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                           <span className="text-danger">*</span>
                         )}
                       </label>
-                      <UploadImage fieldName={field?.name} />
+                      <UploadImage
+                        fieldName={field?.name}
+                        error={errors[field?.name]}
+                        touched={touched[field?.name]}
+                      />
                     </div>
                   );
                 })}
@@ -355,7 +369,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
   );
 };
 
-const UploadImage = ({ fieldName }) => {
+const UploadImage = ({ fieldName, error, touched }) => {
   const { setFieldValue, values } = useFormikContext();
   const dispatch = useDispatch();
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -382,12 +396,16 @@ const UploadImage = ({ fieldName }) => {
   };
 
   useEffect(() => {
-    if (values[fieldName] && isUploaded) {
+    if (
+      values[fieldName] &&
+      typeof values[fieldName] === "string" &&
+      isUploaded
+    ) {
+      console.log(values[fieldName], isUploaded, 11111111111111);
       updateFileField(fieldName, values[fieldName]);
       setIsUploaded(false);
     }
   }, [values[fieldName], isUploaded]);
-
   return uploadedImage && values[fieldName] ? (
     <div className="relative w-32 p-2 rounded border">
       <img
@@ -408,52 +426,59 @@ const UploadImage = ({ fieldName }) => {
       </button>
     </div>
   ) : (
-    <div className="flex items-center justify-between rounded-md w-full gap-3">
-      <InputBox
-        accept="image/jpeg,image/png"
-        name={fieldName}
-        type="file"
-        id={fieldName}
-        onChange={(e) => {
-          setSelectedImage(e.target.files[0]);
-        }}
-        // error={fieldError}
-        // touched={fieldTouched}
-        // disabled={disabled}
-        // onBlur={handleBlur}
-      />
-      <div>
-        <LoadingButton
-          type="button"
-          isLoading={false}
-          disabled={!selectedImage}
-          onClick={() => {
-            if (selectedImage) {
-              try {
-                dispatch(
-                  imageUpload({
-                    file: selectedImage,
-                    // type: fieldName,
-                    onSuccess: (response) => {
-                      const { message, data } = response;
-                      if (data) {
-                        setFieldValue(fieldName, data?.id);
-                        setSelectedImage(null);
-                      }
-                      toast.success(message);
-                    },
-                    onFailure: () => {},
-                  })
-                );
-              } catch (error) {
-                console.error(error);
-              }
-            }
+    <div className="">
+      <div className="flex items-center justify-between rounded-md w-full gap-3">
+        <InputBox
+          accept="image/jpeg,image/png"
+          name={fieldName}
+          type="file"
+          id={fieldName}
+          onChange={(e) => {
+            const file = e.target.files[0];
+            setSelectedImage(file);
+            setFieldValue(fieldName, file);
           }}
-        >
-          Upload
-        </LoadingButton>
+          // error={error}
+          // touched={touched}
+          // disabled={disabled}
+          // onBlur={handleBlur}
+        />
+        <div>
+          <LoadingButton
+            type="button"
+            isLoading={false}
+            disabled={!selectedImage}
+            onClick={() => {
+              if (selectedImage) {
+                try {
+                  dispatch(
+                    imageUpload({
+                      file: selectedImage,
+                      // type: fieldName,
+                      onSuccess: (response) => {
+                        const { message, data } = response;
+                        if (data) {
+                          setFieldValue(fieldName, data?.id);
+                          setSelectedImage(null);
+                        }
+                        toast.success(message);
+                      },
+                      onFailure: () => {},
+                    })
+                  );
+                } catch (error) {
+                  console.error(error);
+                }
+              }
+            }}
+          >
+            Upload
+          </LoadingButton>
+        </div>
       </div>
+      {touched && error && (
+        <div className="mt-1 text-xs text-danger">{error}</div>
+      )}
     </div>
   );
 };

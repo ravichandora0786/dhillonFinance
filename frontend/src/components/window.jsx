@@ -106,7 +106,7 @@ export default function App({ children }) {
           )}
 
           <RouteGuard>
-            {children}
+            <div className="mt-8">{children}</div>
             <ToastContainer />
           </RouteGuard>
         </Box>

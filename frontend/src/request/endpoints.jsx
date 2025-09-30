@@ -20,6 +20,9 @@ const endPoints = {
   CommonImageUpload: "/file",
   Transaction: "/transaction",
   DashboardData: "/customer/dashboard/customerRepaymentStats",
+  RestPassword: "/auth/resetPassword",
+  SendMailForgotPassword: "/auth/forgotPassword",
+  ResetForgotPassword: "/auth/resetForgotPassword",
 };
 
 export default endPoints;

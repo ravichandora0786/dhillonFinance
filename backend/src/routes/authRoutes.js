@@ -132,13 +132,42 @@ authRouter.route("/forgotPassword").post(authController.forgotPassword);
  *       500:
  *         description: Internal Server Error
  */
-authRouter
-  .route("/resetPassword")
-  .post(
-    authenticateUser,
-    // validateSchema(resetPassword),
-    authController.resetPassword
-  );
+authRouter.route("/resetPassword").post(
+  authenticateUser,
+  // validateSchema(resetPassword),
+  authController.resetPassword
+);
+/**
+ * @swagger
+ * /auth/resetForgotPassword:
+ *   post:
+ *     summary: Reset password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 format: string
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       401:
+ *         description: Link is invalid or expired
+ *       500:
+ *         description: Internal Server Error
+ */
+authRouter.route("/resetForgotPassword").post(
+  // validateSchema(resetPassword),
+  authController.resetForgotPassword
+);
 
 /**
  * @swagger

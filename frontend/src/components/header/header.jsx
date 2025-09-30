@@ -16,7 +16,7 @@ export default function Header({ handleDrawerToggle, isMobile, menu }) {
   const user = useSelector(selectUser);
 
   return (
-    <header className="w-full bg-primary/70 shadow px-4 py-1 flex justify-between items-center">
+    <header className="w-full z-50 fixed bg-primary/70 shadow px-4 py-1 flex justify-between items-center">
       {/* Left - Logo */}
       <div
         className="text-xl font-bold text-black cursor-pointer"
@@ -47,20 +47,33 @@ export default function Header({ handleDrawerToggle, isMobile, menu }) {
         </div>
 
         <div className="">
-          <button
-            className=""
+          <LoadingButton
+            type="button"
+            isLoading={false}
+            disabled={false}
+            variant={"custom"}
+            className="px-0 py-2"
             onClick={() => {
               router.push(`/user/profile/${user?.id}`);
             }}
           >
             <FiUser className="" />
-          </button>
+          </LoadingButton>
         </div>
-        <div className="">
-          <button className="">
+        {/* <div className="">
+          <LoadingButton
+            type="button"
+            isLoading={false}
+            disabled={false}
+            variant={"custom"}
+            className="px-0 py-2"
+            onClick={() => {
+              router.push(`/user/profile/${user?.id}`);
+            }}
+          >
             <FiSettings className="" />
-          </button>
-        </div>
+          </LoadingButton>
+        </div> */}
         <div className="">
           <LogoutConfirmation />
         </div>

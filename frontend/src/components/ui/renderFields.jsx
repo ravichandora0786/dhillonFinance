@@ -4,8 +4,11 @@ import CustomSwitch from "./customSwitch";
 import InputBox from "./inputBox";
 import SelectDropDown from "./selectDropDown";
 import { getIn } from "formik";
-import LoadingButton from "./loadingButton";
 import { LoanFields } from "@/constants/fieldsName";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useState } from "react";
 
 const RenderFields = ({
   fields,
@@ -16,17 +19,16 @@ const RenderFields = ({
   handleBlur,
   columns = 4,
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
   const today = todayDate();
   const variantClasses = {
     4: "lg:grid-cols-4",
     3: "lg:grid-cols-3",
-    2: "lg:grid-cols-2",
-    1: "lg:grid-cols-1",
+    2: "lg:grid-cols-2 md:grid-cols-2",
+    1: "lg:grid-cols-1 md:grid-cols-1",
   };
   return (
-    <div
-      className={`grid grid-cols-1 md:grid-cols-2 ${variantClasses[columns]} gap-4`}
-    >
+    <div className={`grid grid-cols-1 ${variantClasses[columns]} gap-4`}>
       {fields.map(
         ({
           name,
@@ -124,9 +126,35 @@ const RenderFields = ({
                   dateFormat="dd MMM yyyy"
                   minDate={today}
                 />
-              ) : ["text", "email", "number", "password", "textarea"].includes(
-                  type
-                ) ? (
+              ) : type === "password" ? (
+                <div className="relative">
+                  <LockOutlinedIcon className="absolute left-3 top-2 w-5 h-5 text-muted-foreground" />
+                  <InputBox
+                    id={name}
+                    name={name}
+                    type={showPassword ? "text" : "password"}
+                    className="pl-10 pr-10 w-full"
+                    value={fieldValue}
+                    onChange={(e) => setFieldValue(name, e.target.value)}
+                    placeholder={`Enter ${label}`}
+                    error={fieldError}
+                    touched={fieldTouched}
+                    disabled={disabled}
+                    onBlur={handleBlur}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? (
+                      <VisibilityOff className="w-5 h-5 sm:w-6 sm:h-6" />
+                    ) : (
+                      <Visibility className="w-5 h-5 sm:w-6 sm:h-6" />
+                    )}
+                  </button>
+                </div>
+              ) : ["text", "email", "number", "textarea"].includes(type) ? (
                 <InputBox
                   type={type}
                   name={name}

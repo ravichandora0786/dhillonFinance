@@ -64,3 +64,8 @@ export const getUploadedFile = createAction("COMMON/GET_UPLOADED_FILE");
 export const getPermissionsByRoleId = createAction(
   "COMMON/GET_PERMISSIONS_BY_ROLE_ID"
 );
+export const sendMailForgotPassword = createAction(
+  "COMMON/SEND_MAIL_FOR_PASSWORD"
+);
+export const resetPassword = createAction("COMMON/RESET_PASSWORD");
+export const resetForgotPassword = createAction("COMMON/RESET_FORGOT_PASSWORD");

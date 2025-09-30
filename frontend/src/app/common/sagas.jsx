@@ -11,6 +11,9 @@ import {
   getUploadedFile,
   imageUpload,
   loginApp,
+  resetForgotPassword,
+  resetPassword,
+  sendMailForgotPassword,
   setAccessToken,
   setRefreshToken,
   setRolePermissionsMap,
@@ -118,9 +121,69 @@ function* getPermissionsByRoleIdSaga(action) {
   }
 }
 
+/**
+ * semd mai for forgot password
+ * @param {*}
+ */
+function* sendMailForgotPasswordSaga(action) {
+  const { data, onSuccess, onFailure } = action.payload;
+  try {
+    // Make the API request with custom headers
+    const response = yield httpRequest.post(endPoints.SendMailForgotPassword, {
+      ...data,
+    });
+    yield onSuccess({ message: response?.message, data: response?.data });
+  } catch (error) {
+    const errorMessage = error?.message || "Something went wrong!";
+    toast.error(errorMessage);
+    yield onFailure({ message: errorMessage });
+  }
+}
+
+/**
+ * reset password
+ * @param {*}
+ */
+function* resetPasswordSaga(action) {
+  const { data, onSuccess, onFailure } = action.payload;
+  try {
+    // Make the API request with custom headers
+    const response = yield httpRequest.post(endPoints.RestPassword, {
+      ...data,
+    });
+    yield onSuccess({ message: response?.message, data: response?.data });
+  } catch (error) {
+    const errorMessage = error?.message || "Something went wrong!";
+    toast.error(errorMessage);
+    yield onFailure({ message: errorMessage });
+  }
+}
+
+/**
+ * reset Forgot password
+ * @param {*}
+ */
+function* resetForgotPasswordSaga(action) {
+  const { data, onSuccess, onFailure } = action.payload;
+  try {
+    // Make the API request with custom headers
+    const response = yield httpRequest.post(endPoints.ResetForgotPassword, {
+      ...data,
+    });
+    yield onSuccess({ message: response?.message, data: response?.data });
+  } catch (error) {
+    const errorMessage = error?.message || "Something went wrong!";
+    toast.error(errorMessage);
+    yield onFailure({ message: errorMessage });
+  }
+}
+
 export function* commonSagas() {
   yield takeLatest(loginApp, loginAppSaga);
   yield takeLatest(imageUpload, imageUploadSaga);
   yield takeEvery(getUploadedFile, getUploadedFileSaga);
   yield takeLatest(getPermissionsByRoleId, getPermissionsByRoleIdSaga);
+  yield takeLatest(sendMailForgotPassword, sendMailForgotPasswordSaga);
+  yield takeLatest(resetPassword, resetPasswordSaga);
+  yield takeLatest(resetForgotPassword, resetForgotPasswordSaga);
 }

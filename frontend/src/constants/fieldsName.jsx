@@ -13,6 +13,9 @@ export const UserFields = {
   MOBILE_NUMBER: "mobileNumber",
   STATUS: "status",
   PROFILE_IMAGE: "profileImage",
+  OLD_PASSWORD: "oldPassword",
+  NEW_PASSWORD: "newPassword",
+  CONFIRM_NEW_PASSWORD: "confirmPassword",
 };
 
 export const RoleFields = {

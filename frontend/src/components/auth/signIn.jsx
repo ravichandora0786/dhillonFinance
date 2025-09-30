@@ -156,7 +156,7 @@ export default function SignIn() {
                   </label> */}
                   <div></div>
                   <Link
-                    href="#"
+                    href="/forgotPassword/sendMail"
                     className="text-primary hover:text-primary/80 transition-colors"
                   >
                     Forgot password?

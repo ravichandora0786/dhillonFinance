@@ -4,7 +4,6 @@ export default function GenericModal({
   modalTitle = "",
   modalBody,
 }) {
-  console.log(modalTitle, "modalTitle");
   return (
     <>
       {showModal && (

@@ -8,8 +8,8 @@ export const AuthRoutes = {
   LoginScreen: "/login",
   Verification: "/verification",
   Verify: "/verify",
-  ForgotPassword: "/forgot-password",
-  ResetPassword: "/reset-password",
+  SendMailForgotPassword: "/forgotPassword/sendMail",
+  ForgotPassword: "/forgotPassword",
 };
 
 export const ProtectedRoutes = {
