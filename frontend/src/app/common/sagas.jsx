@@ -89,13 +89,15 @@ function* getUploadedFileSaga(action) {
   const { id, onSuccess, onFailure } = action.payload;
   try {
     const response = yield httpRequest.get(
-      `${endPoints.CommonImageUpload}/${id}`
-      // {
-      //   responseType: "blob",
-      // }
+      `${endPoints.CommonImageUpload}/${id}`,
+      {
+        responseType: "blob",
+      }
     );
-
-    yield call(onSuccess, { data: response?.data });
+    if (response) {
+      const url = URL.createObjectURL(response);
+      yield call(onSuccess, { data: { url } });
+    }
   } catch (error) {
     const errorMessage = error?.message || "Something went wrong!";
     toast.error(errorMessage);

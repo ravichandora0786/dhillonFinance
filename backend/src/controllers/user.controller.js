@@ -63,9 +63,9 @@ const createUser = asyncHandler(async (req, res, next) => {
     );
 
     // Refresh profileImage URL if uploaded
-    if (user.profileFile) {
-      await refreshFileUrl(user.profileFile, process.env.FOLDER_NAME);
-    }
+    // if (user.profileFile) {
+    //   await refreshFileUrl(user.profileFile, process.env.FOLDER_NAME);
+    // }
 
     await transaction.commit();
     return res
@@ -88,16 +88,16 @@ const getUsers = asyncHandler(async (req, res, next) => {
     });
 
     // Refresh profile images
-    await Promise.all(
-      users.map(async (user) => {
-        if (user.profileFile) {
-          user.profileFile = await refreshFileUrl(
-            user.profileFile,
-            process.env.FOLDER_NAME
-          );
-        }
-      })
-    );
+    // await Promise.all(
+    //   users.map(async (user) => {
+    //     if (user.profileFile) {
+    //       user.profileFile = await refreshFileUrl(
+    //         user.profileFile,
+    //         process.env.FOLDER_NAME
+    //       );
+    //     }
+    //   })
+    // );
 
     return res
       .status(200)
@@ -119,12 +119,12 @@ const getUserById = asyncHandler(async (req, res, next) => {
 
     if (!user) return next(new ApiError(404, responseMessage.notFound("User")));
 
-    if (user.profileFile) {
-      user.profileFile = await refreshFileUrl(
-        user.profileFile,
-        process.env.FOLDER_NAME
-      );
-    }
+    // if (user.profileFile) {
+    //   user.profileFile = await refreshFileUrl(
+    //     user.profileFile,
+    //     process.env.FOLDER_NAME
+    //   );
+    // }
 
     return res
       .status(200)
@@ -159,17 +159,17 @@ const updateUser = asyncHandler(async (req, res, next) => {
       }
       rest.profileImage = profileImage;
       // Refresh all customer files and clean up unused S3 files
-      await FileController.getAllFilesInternal();
+      // await FileController.getAllFilesInternal();
     }
 
     await user.update(rest, { transaction });
 
-    if (user.profileFile) {
-      user.profileFile = await refreshFileUrl(
-        user.profileFile,
-        process.env.FOLDER_NAME
-      );
-    }
+    // if (user.profileFile) {
+    //   user.profileFile = await refreshFileUrl(
+    //     user.profileFile,
+    //     process.env.FOLDER_NAME
+    //   );
+    // }
 
     await transaction.commit();
     return res

@@ -47,7 +47,7 @@ router.post(
   "/",
   authenticateUser,
   uploadImage("file"),
-  fileUploadController.uploadFile
+  fileUploadController.uploadFileToDrive
 );
 
 /**
@@ -91,7 +91,7 @@ router.post(
  *         description: Internal Server Error
  */
 
-router.get("/:id", authenticateUser, fileUploadController.getFileById);
+router.get("/:id", authenticateUser, fileUploadController.getFileByIdFromDrive);
 
 /**
  * @swagger

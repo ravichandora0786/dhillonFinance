@@ -21,6 +21,12 @@ import { Op } from "sequelize";
 import FileController from "./file.controller.js";
 import { EMAIL_TEMPLATE } from "../utils/constants/index.js";
 import sendMail from "../services/mail.service.js";
+import {
+  oAuth2Client,
+  loadTokens,
+  saveTokens,
+} from "../services/googleDrive.js";
+
 
 export const BASE_URL = process.env.BASE_URL;
 
@@ -107,6 +113,24 @@ const loginUser = asyncHandler(async (req, res, next) => {
       throw new ApiError(400, "Invalid credentials");
     }
 
+    // ===== Google token handling =====
+    const tokens = loadTokens();
+    if (!tokens) {
+      return res.status(400).json({
+        message: "Google Drive not authorized. Please login with Google first.",
+      });
+    }
+    oAuth2Client.setCredentials(tokens);
+
+    // Check if token expired and refresh
+    const now = new Date();
+    if (!tokens.expiry_date || tokens.expiry_date < now.getTime()) {
+      console.log("Google token expired. Refreshing...");
+      const newTokens = await oAuth2Client.refreshAccessToken(); // refresh
+      oAuth2Client.setCredentials(newTokens.credentials);
+      saveTokens(newTokens.credentials);
+    }
+
     // **Update lastLoginAt**
     user.lastLoginAt = new Date();
     await user.save();
@@ -175,7 +199,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
       permissions: enrichedPermissions,
     });
     // Refresh all customer files and clean up unused S3 files
-    await FileController.getAllFilesInternal();
+    // await FileController.getAllFilesInternal();
 
     return res.status(200).json(new ApiResponse(200, data, "Login successful"));
   } catch (err) {

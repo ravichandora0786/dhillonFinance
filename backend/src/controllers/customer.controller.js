@@ -365,7 +365,7 @@ const updateCustomer = asyncHandler(async (req, res, next) => {
 
     await transaction.commit();
     // Refresh all customer files and clean up unused S3 files
-    await FileController.getAllFilesInternal();
+    // await FileController.getAllFilesInternal();
     return res
       .status(200)
       .json(

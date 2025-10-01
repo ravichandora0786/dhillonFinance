@@ -1,3 +1,4 @@
+import { google } from "googleapis";
 import UploadFileModel from "../models/uploadFile.model.js";
 import {
   checkImageUrlExpired,
@@ -6,6 +7,10 @@ import {
   s3UploadFile,
   s3getUploadedFile,
 } from "../services/aws/s3.config.js";
+import {
+  getGoogleDriveClient,
+  uploadToDrive,
+} from "../services/googleDrive.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -116,7 +121,6 @@ const getAllFiles = asyncHandler(async (req, res) => {
 
 // Refresh all customer files and clean up unused S3 files
 const getAllFilesInternal = async () => {
-
   const folderName = process.env.FOLDER_NAME || "uploads";
 
   // List S3 files keys only
@@ -146,4 +150,74 @@ const getAllFilesInternal = async () => {
   return refreshedFiles;
 };
 
-export default { uploadFile, getFileById, getAllFiles, getAllFilesInternal };
+/**
+ * Upload File to gmail drive and save to DB
+ */
+const uploadFileToDrive = asyncHandler(async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const file = req.file;
+
+    // Upload file to Google Drive
+    const uploadedFile = await uploadToDrive(file.path, file.originalname);
+
+    // Save file info in DB
+    const uploadedFileRecord = await UploadFileModel.create({
+      image: `https://drive.google.com/uc?id=${uploadedFile.id}`,
+      imageKey: uploadedFile.id, // Drive fileId
+      isActive: true,
+    });
+
+    return res
+      .status(201)
+      .json(
+        new ApiResponse(
+          201,
+          uploadedFileRecord,
+          "File uploaded to Google Drive successfully"
+        )
+      );
+  } catch (error) {
+    console.error("Upload File Error:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+/**
+ * Get File URL by ID from drive
+ */
+export const getFileByIdFromDrive = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const fileRecord = await UploadFileModel.findOne({ where: { id } });
+  if (!fileRecord) return res.status(404).json({ message: "File not found" });
+
+  const drive = await getGoogleDriveClient();
+
+  const url = new URL(fileRecord.image);
+  const fileId =
+    url.searchParams.get("id") ||
+    fileRecord.image.split("/d/")[1]?.split("/")[0];
+
+  if (!fileId) return res.status(400).json({ message: "Invalid Drive URL" });
+
+  const meta = await drive.files.get({ fileId, fields: "mimeType, name" });
+  const driveFile = await drive.files.get(
+    { fileId, alt: "media" },
+    { responseType: "stream" }
+  );
+
+  res.setHeader("Content-Type", meta.data.mimeType);
+  driveFile.data.pipe(res); // send as stream
+});
+
+export default {
+  uploadFile,
+  getFileById,
+  getAllFiles,
+  getAllFilesInternal,
+  uploadFileToDrive,
+  getFileByIdFromDrive,
+};
