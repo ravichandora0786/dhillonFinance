@@ -4,18 +4,23 @@ import sequelize, { umzugSeeding } from "./config/db.js";
 
 const PORT = process.env.PORT || 8000;
 
-try {
-  await sequelize.authenticate();
-  // await sequelize.sync({ alter: true });
-  await umzugSeeding.up();
-  logger.info("Successfully connected to the database");
-  httpServer.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
-  });
+// Start HTTP server immediately so Render detects it
+httpServer.listen(PORT, "0.0.0.0", () => {
+  logger.info(`Server running on port ${PORT}`);
+});
 
-  // Start cron jobs
-  // scheduleCron();
-} catch (err) {
-  logger.error("Error connecting to the database: " + err.message);
-  process.exit(1);
-}
+// Connect to DB asynchronously
+(async () => {
+  try {
+    await sequelize.authenticate();
+    logger.info("Successfully connected to the database");
+
+    // Run seeders
+    await umzugSeeding.up();
+    logger.info("Database seeding complete");
+
+  } catch (err) {
+    logger.error("Error connecting to the database: " + err.message);
+    // Do not exit here; server is already listening
+  }
+})();
