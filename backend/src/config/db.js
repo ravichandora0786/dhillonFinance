@@ -7,9 +7,15 @@ import { Umzug, SequelizeStorage } from "umzug";
 import mysql from "mysql2/promise";
 
 // Environment variables
-const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, NODE_ENV, DB_PORT } =
-  process.env;
-
+const {
+  DB_HOST,
+  DB_USER,
+  DB_PASSWORD,
+  DB_NAME,
+  NODE_ENV,
+  DB_PORT = 13661,
+} = process.env;
+console.log(DB_PORT, "DB_PORT");
 // Step 1: Ensure database exists
 async function ensureDatabaseExists() {
   const connection = await mysql.createConnection({
