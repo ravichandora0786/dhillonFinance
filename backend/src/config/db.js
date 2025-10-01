@@ -1,16 +1,11 @@
-/**
- * Database Configuration File with Auto-Creation
- */
-
 import { Sequelize } from "sequelize";
 import { Umzug, SequelizeStorage } from "umzug";
 import mysql from "mysql2/promise";
 
-// Environment variables
 const { DB_PORT, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, NODE_ENV } =
   process.env;
-console.log(DB_PORT, "DB_PORT");
-// Step 1: Ensure database exists
+console.log("DB_PORT:", DB_PORT);
+
 async function ensureDatabaseExists() {
   const connection = await mysql.createConnection({
     host: DB_HOST,
@@ -23,8 +18,12 @@ async function ensureDatabaseExists() {
   await connection.end();
 }
 
-// Step 2: Create Sequelize instance
-await ensureDatabaseExists();
+// Run DB create only in dev/local
+if (NODE_ENV !== "production") {
+  (async () => {
+    await ensureDatabaseExists();
+  })();
+}
 
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   host: DB_HOST,
@@ -33,7 +32,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: false, // Aiven CA cert not needed
+      rejectUnauthorized: false,
     },
   },
   logging: NODE_ENV === "production" ? false : console.log,
@@ -45,7 +44,6 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   },
 });
 
-// Step 3: Configure Umzug for seeding
 export const umzugSeeding = new Umzug({
   migrations: { glob: "src/seeders/*.{js,cjs}" },
   context: sequelize.getQueryInterface(),
