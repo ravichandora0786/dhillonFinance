@@ -16,7 +16,7 @@ async function ensureDatabaseExists() {
     host: DB_HOST,
     user: DB_USER,
     password: DB_PASSWORD,
-    port: Number(DB_PORT),
+    port: Number(DB_PORT) || 3306,
   });
 
   await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
@@ -28,7 +28,7 @@ await ensureDatabaseExists();
 
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   host: DB_HOST,
-  port: Number(DB_PORT),
+  port: Number(DB_PORT) || 3306,
   dialect: "mysql",
   logging: NODE_ENV === "production" ? false : console.log,
   pool: {
