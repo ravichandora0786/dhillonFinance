@@ -8,12 +8,12 @@ import mysql from "mysql2/promise";
 
 // Environment variables
 const {
+  DB_PORT,
   DB_HOST,
   DB_USER,
   DB_PASSWORD,
   DB_NAME,
   NODE_ENV,
-  DB_PORT = 13661,
 } = process.env;
 console.log(DB_PORT, "DB_PORT");
 // Step 1: Ensure database exists
@@ -22,7 +22,7 @@ async function ensureDatabaseExists() {
     host: DB_HOST,
     user: DB_USER,
     password: DB_PASSWORD,
-    port: DB_PORT || 3306,
+    port: DB_PORT,
   });
 
   await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
@@ -34,8 +34,14 @@ await ensureDatabaseExists();
 
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   host: DB_HOST,
-  port: DB_PORT || 3306,
+  port: DB_PORT,
   dialect: "mysql",
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, // Aiven CA cert not needed
+    },
+  },
   logging: NODE_ENV === "production" ? false : console.log,
   pool: {
     max: 5,
