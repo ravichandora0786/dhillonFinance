@@ -121,26 +121,26 @@ const getCustomers = asyncHandler(async (req, res, next) => {
     });
 
     // Refresh file URLs for all customers
-    await Promise.all(
-      customers.rows.map(async (customer) => {
-        customer.aadharFile = await refreshFileUrl(
-          customer.aadharFile,
-          process.env.AADHAR_FOLDER
-        );
-        customer.panCardFile = await refreshFileUrl(
-          customer.panCardFile,
-          process.env.PANCARD_FOLDER
-        );
-        customer.agreementFile = await refreshFileUrl(
-          customer.agreementFile,
-          process.env.AGREEMENT_FOLDER
-        );
-        customer.profileFile = await refreshFileUrl(
-          customer.profileFile,
-          process.env.PROFILE_PIC_FOLDER
-        );
-      })
-    );
+    // await Promise.all(
+    //   customers.rows.map(async (customer) => {
+    //     customer.aadharFile = await refreshFileUrl(
+    //       customer.aadharFile,
+    //       process.env.AADHAR_FOLDER
+    //     );
+    //     customer.panCardFile = await refreshFileUrl(
+    //       customer.panCardFile,
+    //       process.env.PANCARD_FOLDER
+    //     );
+    //     customer.agreementFile = await refreshFileUrl(
+    //       customer.agreementFile,
+    //       process.env.AGREEMENT_FOLDER
+    //     );
+    //     customer.profileFile = await refreshFileUrl(
+    //       customer.profileFile,
+    //       process.env.PROFILE_PIC_FOLDER
+    //     );
+    //   })
+    // );
 
     // Map customers with loan/payment stats
     const customerData = customers.rows.map((customer) => {
@@ -231,23 +231,23 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
     if (!customer)
       return next(new ApiError(404, responseMessage.notFound("Customer")));
 
-    // Refresh file URLs
-    customer.aadharFile = await refreshFileUrl(
-      customer.aadharFile,
-      process.env.AADHAR_FOLDER
-    );
-    customer.panCardFile = await refreshFileUrl(
-      customer.panCardFile,
-      process.env.PANCARD_FOLDER
-    );
-    customer.agreementFile = await refreshFileUrl(
-      customer.agreementFile,
-      process.env.AGREEMENT_FOLDER
-    );
-    customer.profileFile = await refreshFileUrl(
-      customer.profileFile,
-      process.env.PROFILE_PIC_FOLDER
-    );
+    // // Refresh file URLs
+    // customer.aadharFile = await refreshFileUrl(
+    //   customer.aadharFile,
+    //   process.env.AADHAR_FOLDER
+    // );
+    // customer.panCardFile = await refreshFileUrl(
+    //   customer.panCardFile,
+    //   process.env.PANCARD_FOLDER
+    // );
+    // customer.agreementFile = await refreshFileUrl(
+    //   customer.agreementFile,
+    //   process.env.AGREEMENT_FOLDER
+    // );
+    // customer.profileFile = await refreshFileUrl(
+    //   customer.profileFile,
+    //   process.env.PROFILE_PIC_FOLDER
+    // );
 
     const loans = customer.loans || [];
 

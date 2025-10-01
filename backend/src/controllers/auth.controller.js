@@ -27,9 +27,6 @@ import {
   saveTokens,
 } from "../services/googleDrive.js";
 
-
-export const BASE_URL = process.env.BASE_URL;
-
 /**
  * Generate JWT Token
  */
@@ -228,7 +225,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
     subject: EMAIL_TEMPLATE.FORGOT_PASSWORD.SUBJECT,
     template: EMAIL_TEMPLATE.FORGOT_PASSWORD.TEMPLATE,
     context: {
-      link: `http://localhost:3000/forgotPassword?token=${verificationToken}`,
+      link: `${process.env.CLIENT_URL}/forgotPassword?token=${verificationToken}`,
     },
   });
 

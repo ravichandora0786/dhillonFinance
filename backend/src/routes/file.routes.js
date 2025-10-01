@@ -93,39 +93,4 @@ router.post(
 
 router.get("/:id", authenticateUser, fileUploadController.getFileByIdFromDrive);
 
-/**
- * @swagger
- * /file/url/all:
- *   get:
- *     summary: Get all uploaded files
- *     tags: [File]
- *     security:
- *      - BearerAuth: []
- *     responses:
- *       200:
- *         description: List of all files
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   image:
- *                     type: string
- *                   imageKey:
- *                     type: string
- *                   isActive:
- *                     type: boolean
- *                   createdAt:
- *                     type: string
- *                   updatedAt:
- *                     type: string
- *       500:
- *         description: Internal Server Error
- */
-router.get("/url/all", authenticateUser, fileUploadController.getAllFiles);
-
 export default router;
