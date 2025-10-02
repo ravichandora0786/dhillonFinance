@@ -1,10 +1,31 @@
+// ES Module imports
 import { Sequelize } from "sequelize";
 import mysql from "mysql2/promise";
-import { Umzug, SequelizeStorage } from "umzug";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import fs from "fs";
 
+// Get environment variables
 const { DB_PORT, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, NODE_ENV } =
   process.env;
 
+// Define __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Define path to the CA certificate
+const caPath = join(__dirname, "../certs/ca.pem");
+
+// Read the CA certificate
+let caCert;
+try {
+  caCert = fs.readFileSync(caPath, "utf8");
+} catch (err) {
+  console.error("Could not read CA cert from:", caPath, err);
+  throw err;
+}
+
+// Function to ensure the database exists
 async function ensureDatabaseExists() {
   try {
     const connOptions = {
@@ -26,12 +47,14 @@ async function ensureDatabaseExists() {
   }
 }
 
+// Create the database if not in production
 if (NODE_ENV !== "production") {
   (async () => {
     await ensureDatabaseExists();
   })();
 }
 
+// Initialize Sequelize with SSL options
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   host: DB_HOST,
   port: Number(DB_PORT),
@@ -49,13 +72,6 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
     acquire: 30000,
     idle: 10000,
   },
-});
-
-export const umzugSeeding = new Umzug({
-  migrations: { glob: "src/seeders/*.{js,cjs}" },
-  context: sequelize.getQueryInterface(),
-  storage: new SequelizeStorage({ sequelize }),
-  logger: console,
 });
 
 export default sequelize;
