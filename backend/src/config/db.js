@@ -17,18 +17,21 @@ const __dirname = dirname(__filename);
 // Define path to the CA certificate
 const caPath = join(__dirname, "../certs/ca.pem");
 
-// Read the CA certificate
+// Read the CA certificate (optional in dev)
 let caCert;
 try {
   caCert = fs.readFileSync(caPath, "utf8");
+  console.log("CA certificate loaded.");
 } catch (err) {
-  console.error("Could not read CA cert from:", caPath, err);
-  throw err;
+  console.warn("Could not read CA cert. (This is fine in dev)");
 }
 
 // Function to ensure the database exists (only for local/dev)
 async function ensureDatabaseExists() {
-  if (NODE_ENV === "production") return; // Skip in production
+  if (NODE_ENV === "production") {
+    console.log("Skipping DB creation in production.");
+    return; // Skip in production
+  }
 
   try {
     const connOptions = {
@@ -37,28 +40,23 @@ async function ensureDatabaseExists() {
       password: DB_PASSWORD,
       port: Number(DB_PORT),
       connectTimeout: 10000,
-      ssl: {
-        ca: caCert,
-      },
+      ssl: caCert
+        ? { ca: caCert } // Use cert if available
+        : undefined, // else no SSL for local
     };
 
     const connection = await mysql.createConnection(connOptions);
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
     await connection.end();
-    console.log(`Database '${DB_NAME}' ensured.`);
+    console.log(` Database '${DB_NAME}' ensured (dev only).`);
   } catch (err) {
-    console.error("Error in ensureDatabaseExists:", err);
+    console.error(" Error in ensureDatabaseExists:", err);
     throw err;
   }
 }
 
-// Ensure DB exists (for non-production)
-// if (NODE_ENV !== "production") {
-//   ensureDatabaseExists().catch((err) => {
-//     console.error("DB initialization failed:", err);
-//     process.exit(1); // Exit app if DB can't be created
-//   });
-// }
+// Run DB ensure step only in dev/local
+await ensureDatabaseExists();
 
 // Initialize Sequelize with SSL options
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
@@ -66,10 +64,12 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   port: Number(DB_PORT),
   dialect: "mysql",
   dialectOptions: {
-    ssl: {
-      ca: caCert,
-      rejectUnauthorized: true, // Required for Aiven
-    },
+    ssl:
+      NODE_ENV === "production"
+        ? { ca: caCert, rejectUnauthorized: true } // Force SSL in prod
+        : caCert
+        ? { ca: caCert } // Use cert if available in dev
+        : undefined, // No SSL for plain local MySQL
   },
   logging: NODE_ENV === "production" ? false : console.log,
   pool: {
