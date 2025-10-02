@@ -11,7 +11,6 @@ import {
 import validateSchema from "../middlewares/validationMiddleware.js";
 import {
   authenticateUser,
-  authorizeUser,
 } from "../middlewares/authMiddleware.js";
 
 const districtRouter = express.Router();

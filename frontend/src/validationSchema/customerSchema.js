@@ -10,10 +10,6 @@ import {
 
 import { CustomerFields, CommonFields } from "@/constants/fieldsName";
 
-// File validation helper (30 KB - 100 KB)
-const FILE_SIZE_MIN = 30 * 1024; // 30 KB
-const FILE_SIZE_MAX = 100 * 1024; // 100 KB
-
 const fileValidation = Yup.mixed()
   .required("Please upload a file")
   .test("fileCheck", "Please select a valid file under 100KB", (value) => {

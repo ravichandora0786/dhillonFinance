@@ -23,8 +23,7 @@ export default function NotFound() {
                   Oops! Page not found
                 </p>
                 <p className="mt-4 mb-8 text-gray-600">
-                  The page you're looking for doesn&apos;t exist or has been
-                  moved.
+                  {`The page you're looking for doesn't exist or has been moved.`}
                 </p>
                 <Link
                   href="/dashboard"
