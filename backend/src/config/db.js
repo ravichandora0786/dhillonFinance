@@ -4,6 +4,7 @@ import mysql from "mysql2/promise";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import fs from "fs";
+import { Umzug, SequelizeStorage } from "umzug";
 
 // Get environment variables
 const { DB_PORT, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, NODE_ENV } =
@@ -72,6 +73,14 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
     acquire: 30000,
     idle: 10000,
   },
+});
+
+// Initialize Umzug for migrations
+export const umzugSeeding = new Umzug({
+  migrations: { glob: "src/seeders/*.{js,cjs}" },
+  context: sequelize.getQueryInterface(),
+  storage: new SequelizeStorage({ sequelize }),
+  logger: console,
 });
 
 export default sequelize;
