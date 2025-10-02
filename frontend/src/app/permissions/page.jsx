@@ -3,18 +3,15 @@ import { useEffect, useState } from "react";
 import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
-  KeyboardArrowDown as KeyboardArrowDownIcon,
   Add as AddIcon,
 } from "@mui/icons-material";
 import DataTableComponent from "@/components/dataTableComponent";
 import Status from "@/components/ui/status";
 import InputBox from "@/components/ui/inputBox";
-import Label from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loadingButton";
 import TitleAndDescription from "@/components/ui/titleAndDescription";
 import { useRouter } from "next/navigation";
-import GenericModal from "@/components/ui/genericModal";
-import AddEditPermission from "./add/page";
+import AddEditPermission from "@/components/ui/pagesComponents/addEditPermissionComponent";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deletePermission,

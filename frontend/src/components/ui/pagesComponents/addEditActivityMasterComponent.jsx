@@ -2,23 +2,24 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Formik } from "formik";
-import * as Yup from "yup";
 
 import LoadingButton from "@/components/ui/loadingButton";
 import InputBox from "@/components/ui/inputBox";
 import SelectDropDown from "@/components/ui/selectDropDown";
 import { ActivityMasterFields, CommonFields } from "@/constants/fieldsName";
 import { createActivityMasterSchema } from "@/validationSchema/activityMasterSchema";
-import { Switch } from "@mui/material";
 import CustomSwitch from "@/components/ui/customSwitch";
 import { toast } from "react-toastify";
-import { createActivityMaster, updateActivityMaster } from "../slice";
+import {
+  createActivityMaster,
+  updateActivityMaster,
+} from "@/app/activityMaster/slice";
 import { useDispatch, useSelector } from "react-redux";
 import GenericModal from "@/components/ui/genericModal";
 import {
   selectActivityMasterPagination,
   selectActivityMasterSearchData,
-} from "../selector";
+} from "@/app/activityMaster/selector";
 
 // Field Configuration Array
 const fields = [

@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Formik } from "formik";
-import * as Yup from "yup";
 
 import LoadingButton from "@/components/ui/loadingButton";
 import InputBox from "@/components/ui/inputBox";
@@ -11,13 +10,13 @@ import { PermissionFields } from "@/constants/fieldsName";
 import { createPermissionSchema } from "@/validationSchema/permissionSchema";
 import CustomSwitch from "@/components/ui/customSwitch";
 import { toast } from "react-toastify";
-import { createPermission, updatePermission } from "../slice";
+import { createPermission, updatePermission } from "@/app/permissions/slice";
 import { useDispatch, useSelector } from "react-redux";
 import GenericModal from "@/components/ui/genericModal";
 import {
   selectPermissionPagination,
   selectPermissionSearchData,
-} from "../selector";
+} from "@/app/permissions/selector";
 
 // Field Configuration Array
 const fields = [
@@ -204,10 +203,7 @@ const AddEditPermission = ({
                                 disabled={disabled}
                                 checked={values?.[name]}
                                 onChange={(event) => {
-                                  setFieldValue(
-                                    name,
-                                    event.target.checked
-                                  );
+                                  setFieldValue(name, event.target.checked);
                                 }}
                               />
                             </div>

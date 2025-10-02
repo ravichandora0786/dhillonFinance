@@ -9,11 +9,10 @@ import {
 import DataTableComponent from "@/components/dataTableComponent";
 import Status from "@/components/ui/status";
 import InputBox from "@/components/ui/inputBox";
-import Label from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loadingButton";
 import TitleAndDescription from "@/components/ui/titleAndDescription";
 import { useRouter } from "next/navigation";
-import AddEditActivityMaster from "./add/page";
+import AddEditActivityMaster from "@/components/ui/pagesComponents/addEditActivityMasterComponent";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteActivityMaster,
