@@ -5,8 +5,8 @@ import sequelize, { umzugSeeding } from "./config/db.js";
 const PORT = process.env.PORT || 8000;
 
 try {
-  // await sequelize.authenticate();
-  await sequelize.sync({ alter: true });
+  await sequelize.authenticate();
+  // await sequelize.sync({ alter: true });
   await umzugSeeding.up();
   logger.info("Successfully connected to the database");
   httpServer.listen(PORT, () => {
