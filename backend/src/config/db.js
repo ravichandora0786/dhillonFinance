@@ -53,12 +53,12 @@ async function ensureDatabaseExists() {
 }
 
 // Ensure DB exists (for non-production)
-if (NODE_ENV !== "production") {
-  ensureDatabaseExists().catch((err) => {
-    console.error("DB initialization failed:", err);
-    process.exit(1); // Exit app if DB can't be created
-  });
-}
+// if (NODE_ENV !== "production") {
+//   ensureDatabaseExists().catch((err) => {
+//     console.error("DB initialization failed:", err);
+//     process.exit(1); // Exit app if DB can't be created
+//   });
+// }
 
 // Initialize Sequelize with SSL options
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
