@@ -9,11 +9,10 @@ import {
 import DataTableComponent from "@/components/dataTableComponent";
 import Status from "@/components/ui/status";
 import InputBox from "@/components/ui/inputBox";
-import Label from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loadingButton";
 import TitleAndDescription from "@/components/ui/titleAndDescription";
 import { useRouter } from "next/navigation";
-import AddEditRole from "./add/page";
+import AddEditRole from "@/components/ui/pagesComponents/addEditRoleComponent";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteRole,
@@ -34,7 +33,7 @@ import SingleParagraphColumn from "@/components/tableCollumnComponents/singlePar
 import { removeTimeFromDate } from "@/Services/utils";
 import DeleteConfirmationModal from "@/components/ui/deleteConfirmation";
 import { toast } from "react-toastify";
-import ActivityPermissionManage from "./activityPermissionManage";
+import ActivityPermissionManage from "@/components/ui/pagesComponents/activityPermissionManage";
 
 const columns = (handleDelete, handleEdit, handleActivityPermissions) => [
   {

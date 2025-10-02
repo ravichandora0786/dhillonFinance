@@ -23,17 +23,17 @@ import {
   setModulePagination,
   setModuleSearchData,
   setRoleId,
-} from "./slice";
+} from "../../../app/role/slice";
 import {
   selectActivityModuleData,
   selectActivityPermissionData,
   selectAllModuleList,
   selectModulePagination,
   selectModuleSearchData,
-} from "./selector";
+} from "../../../app/role/selector";
 import { getAllActivityMasters } from "@/app/activityMaster/slice";
 import SelectDropDown from "@/components/ui/selectDropDown";
-import { getAllPermissions } from "../permissions/slice";
+import { getAllPermissions } from "../../../app/permissions/slice";
 
 const ActivityPermissionManage = ({ roleId, permissions }) => {
   const create = true;

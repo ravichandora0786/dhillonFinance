@@ -1,9 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Formik } from "formik";
 import { toast } from "react-toastify";
-import * as Yup from "yup";
 
 import LoadingButton from "@/components/ui/loadingButton";
 import InputBox from "@/components/ui/inputBox";
@@ -11,10 +9,13 @@ import SelectDropDown from "@/components/ui/selectDropDown";
 import { CommonFields, RoleFields } from "@/constants/fieldsName";
 import { createRoleSchema } from "@/validationSchema/roleValidationSchema";
 import CustomSwitch from "@/components/ui/customSwitch";
-import { createRole, updateRole } from "../slice";
+import { createRole, updateRole } from "@/app/role/slice";
 import { useDispatch, useSelector } from "react-redux";
 import GenericModal from "@/components/ui/genericModal";
-import { selectRolePagination, selectRoleSearchData } from "../selector";
+import {
+  selectRolePagination,
+  selectRoleSearchData,
+} from "@/app/role/selector";
 
 // Field Configuration Array
 const fields = [
