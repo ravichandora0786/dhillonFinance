@@ -26,8 +26,10 @@ try {
   throw err;
 }
 
-// Function to ensure the database exists
+// Function to ensure the database exists (only for local/dev)
 async function ensureDatabaseExists() {
+  if (NODE_ENV === "production") return; // Skip in production
+
   try {
     const connOptions = {
       host: DB_HOST,
@@ -39,20 +41,23 @@ async function ensureDatabaseExists() {
         ca: caCert,
       },
     };
+
     const connection = await mysql.createConnection(connOptions);
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
     await connection.end();
+    console.log(`Database '${DB_NAME}' ensured.`);
   } catch (err) {
     console.error("Error in ensureDatabaseExists:", err);
     throw err;
   }
 }
 
-// Create the database if not in production
+// Ensure DB exists (for non-production)
 if (NODE_ENV !== "production") {
-  (async () => {
-    await ensureDatabaseExists();
-  })();
+  ensureDatabaseExists().catch((err) => {
+    console.error("DB initialization failed:", err);
+    process.exit(1); // Exit app if DB can't be created
+  });
 }
 
 // Initialize Sequelize with SSL options
@@ -63,7 +68,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   dialectOptions: {
     ssl: {
       ca: caCert,
-      rejectUnauthorized: true,
+      rejectUnauthorized: true, // Required for Aiven
     },
   },
   logging: NODE_ENV === "production" ? false : console.log,
@@ -75,7 +80,18 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   },
 });
 
-// Initialize Umzug for migrations
+// Test the connection immediately
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("Sequelize connected successfully.");
+  } catch (err) {
+    console.error("Sequelize connection failed:", err);
+    process.exit(1); // Stop app if DB is unreachable
+  }
+})();
+
+// Initialize Umzug for migrations/seeders
 export const umzugSeeding = new Umzug({
   migrations: { glob: "src/seeders/*.{js,cjs}" },
   context: sequelize.getQueryInterface(),
