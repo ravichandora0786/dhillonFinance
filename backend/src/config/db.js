@@ -1,30 +1,9 @@
-import fs from "fs";
-import path from "path";
-import mysql from "mysql2/promise";
 import { Sequelize } from "sequelize";
+import mysql from "mysql2/promise";
 import { Umzug, SequelizeStorage } from "umzug";
 
-const {
-  DB_PORT,
-  DB_HOST,
-  DB_USER,
-  DB_PASSWORD,
-  DB_NAME,
-  NODE_ENV,
-} = process.env;
-
-// Determine path to cert file
-const caPath = path.join(__dirname, "../certs/ca.pem"); 
-// Note: __dirname refers to folder of current file (like src/config if db.js is there)
-
-let caCert;
-try {
-  caCert = fs.readFileSync(caPath, "utf8");
-} catch (err) {
-  console.error("Could not read CA cert from:", caPath, err);
-  // Maybe throw error, because without CA, SSL connection may fail
-  throw err;
-}
+const { DB_PORT, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, NODE_ENV } =
+  process.env;
 
 async function ensureDatabaseExists() {
   try {
@@ -47,7 +26,6 @@ async function ensureDatabaseExists() {
   }
 }
 
-// Only run create DB if not production (or adjust as you like)
 if (NODE_ENV !== "production") {
   (async () => {
     await ensureDatabaseExists();
