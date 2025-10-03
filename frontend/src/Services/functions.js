@@ -1,7 +1,7 @@
-import { setCountryOptions } from "./slice";
-import { getAllCountrys } from "../country/slice";
-import { getAllStates, setStateOptions } from "../state/slice";
-import { getAllDistricts, setDistrictOptions } from "../district/slice";
+import { setCountryOptions } from "../app/common/slice";
+import { getAllCountrys } from "../app/country/slice";
+import { getAllStates, setStateOptions } from "../app/state/slice";
+import { getAllDistricts, setDistrictOptions } from "../app/district/slice";
 
 export const getAllCountryOptions = ({ dispatch }) => {
   dispatch(

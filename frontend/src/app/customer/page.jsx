@@ -34,13 +34,11 @@ import {
 } from "./selector";
 import ActionColumnsComponent from "@/components/tableCollumnComponents/actionColumn";
 import SingleParagraphColumn from "@/components/tableCollumnComponents/singleParagraphCol";
-import DoubleParagraphColumn from "@/components/tableCollumnComponents/doubleParagraphCol";
 import NameAvatarColumn from "@/components/tableCollumnComponents/nameWithImageCol";
 import ButtonColumn from "@/components/tableCollumnComponents/buttonCol";
-import { removeTimeFromDate } from "@/Services/utils";
 import DeleteConfirmationModal from "@/components/ui/deleteConfirmation";
-import CustomerDetailModal from "./customerDetailModal";
-import ReceiveMoneyModal from "./receiveMoneyModal";
+import CustomerDetailModal from "@/components/ui/pagesComponents/customerDetailModal";
+import ReceiveMoneyModal from "@/components/ui/pagesComponents/receiveMoneyModal";
 import { toast } from "react-toastify";
 import {
   FiMoreVertical,

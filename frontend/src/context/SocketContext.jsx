@@ -2,12 +2,12 @@
 
 import { createContext, useEffect, useMemo, useState } from "react";
 import socketio from "socket.io-client";
-import  store  from "@/redux/store";
+import store from "@/redux/store";
 import PropTypes from "prop-types";
 
 const getSocket = () => {
   const token = store.getState().common.accessToken;
-  return socketio(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:9000", {
+  return socketio(process.env.NEXT_PUBLIC_SOCKET_URL, {
     auth: { token },
   });
 };

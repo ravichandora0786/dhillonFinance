@@ -9,7 +9,7 @@ import { CommonFields, TransactionFields } from "@/constants/fieldsName";
 import { createTransaction } from "@/app/transaction/slice";
 import LoadingButton from "@/components/ui/loadingButton";
 import RenderFields from "@/components/ui/renderFields";
-import { getCustomerListForOptions } from "./slice";
+import { getCustomerListForOptions } from "@/app/customer/slice";
 
 const ReceiveMoneyModal = ({
   openModal,

@@ -8,7 +8,7 @@ import {
   FiTrendingUp,
   FiAlertCircle,
 } from "react-icons/fi";
-import ReceiveMoneyModal from "../customer/receiveMoneyModal";
+import ReceiveMoneyModal from "@/components/ui/pagesComponents/receiveMoneyModal";
 import { useDispatch, useSelector } from "react-redux";
 import { getDashboardData } from "./slice";
 import { selectDashboardData } from "./selectors";
