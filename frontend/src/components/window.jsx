@@ -106,7 +106,7 @@ export default function App({ children }) {
           )}
 
           <RouteGuard>
-            <div className="mt-8">{children}</div>
+            <div className={`${!hideSidebar ? "mt-8" : ""}`}>{children}</div>
             <ToastContainer />
           </RouteGuard>
         </Box>

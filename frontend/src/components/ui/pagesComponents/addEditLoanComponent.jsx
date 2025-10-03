@@ -22,6 +22,7 @@ import {
 import TitleAndDescription from "../titleAndDescription";
 import { getCustomerListForOptions } from "@/app/customer/slice";
 import BackButton from "../backButton";
+import { createCustomerLoanSchema } from "@/validationSchema/loanSchema";
 
 const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
   const dispatch = useDispatch();
@@ -249,7 +250,7 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       {/* Formik */}
       <Formik
         initialValues={initialObject}
-        // validationSchema={createCustomerLoanSchema}
+        validationSchema={createCustomerLoanSchema}
         enableReinitialize={true}
         onSubmit={handleSubmitData}
       >

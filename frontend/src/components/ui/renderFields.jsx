@@ -125,6 +125,8 @@ const RenderFields = ({
                   isClearable={true}
                   dateFormat="dd MMM yyyy"
                   minDate={today}
+                  error={fieldError}
+                  touched={fieldTouched}
                 />
               ) : type === "password" ? (
                 <div className="relative">

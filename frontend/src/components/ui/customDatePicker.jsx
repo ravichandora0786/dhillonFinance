@@ -62,17 +62,22 @@ const CustomDatePicker = (props) => {
   };
 
   return dateMode === "single" ? (
-    <DatePicker
-      name={name}
-      selected={parseDate(value)}
-      onChange={handleSingleChange}
-      placeholderText={placeholderText}
-      className={classes}
-      isClearable={isClearable}
-      dateFormat={dateFormat}
-      minDate={minDate}
-      disabled={disabled || false}
-    />
+    <div>
+      <DatePicker
+        name={name}
+        selected={parseDate(value)}
+        onChange={handleSingleChange}
+        placeholderText={placeholderText}
+        className={classes}
+        isClearable={isClearable}
+        dateFormat={dateFormat}
+        minDate={minDate}
+        disabled={disabled || false}
+      />
+      {touched && error && (
+        <div className="mt-1 text-xs text-danger">{error}</div>
+      )}
+    </div>
   ) : (
     <DatePicker
       selected={parseDate(startDate)}

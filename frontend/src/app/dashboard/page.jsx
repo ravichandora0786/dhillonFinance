@@ -52,25 +52,25 @@ export default function Dashboard() {
           <Card
             icon={<FiUsers className="text-3xl text-blue-500" />}
             title="Total Borrowers"
-            value={data?.customerStats?.totalCustomers}
+            value={data?.customerStats?.totalCustomers || 0}
             subtitle="Loan Customers"
           />
           <Card
             icon={<FiDollarSign className="text-3xl text-green-500" />}
             title="Disbursed Amount"
-            value={`₹${data?.repaymentStats?.totalDisbursedAmount}`}
+            value={`₹${data?.repaymentStats?.totalDisbursedAmount || 0}`}
             subtitle="Principal Amount"
           />
           <Card
             icon={<FiTrendingUp className="text-3xl text-orange-500" />}
             title="Collection Amount"
-            value={`₹${data?.repaymentStats?.totalRepaymentsReceived}`}
+            value={`₹${data?.repaymentStats?.totalRepaymentsReceived || 0}`}
             subtitle="Collection Amount With Intrest"
           />
           <Card
             icon={<FiAlertCircle className="text-3xl text-red-500" />}
             title="Receivables Amount"
-            value={`₹${data?.repaymentStats?.totalRepaymentsPending}`}
+            value={`₹${data?.repaymentStats?.totalRepaymentsPending || 0}`}
             subtitle="Pending Amount With Intrest"
           />
         </div>
@@ -152,7 +152,7 @@ function Card({ icon, title, value, subtitle }) {
       {icon}
       <div>
         <label className="text-gray-500 text-sm">{title}</label>
-        <h2 className="text-2xl font-bold text-gray-800">{value}</h2>
+        <h2 className="text-2xl font-bold text-gray-800">{value || 0}</h2>
         <span className="text-[10px] text-gray-400">{subtitle}</span>
       </div>
     </div>

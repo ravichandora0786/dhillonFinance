@@ -1,12 +1,14 @@
 "use client";
 import React, { useState } from "react";
 import { FiMenu, FiUser, FiSettings } from "react-icons/fi";
+import { TfiHome } from "react-icons/tfi";
 import { RiMenu3Fill } from "react-icons/ri";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { selectUser } from "@/app/common/selectors";
 import LogoutConfirmation from "@/components/ui/logoutConfirmation";
 import LoadingButton from "../ui/loadingButton";
+import { ProtectedRoutes } from "@/Services/routes";
 
 export default function Header({ handleDrawerToggle, isMobile, menu }) {
   const router = useRouter();
@@ -46,6 +48,20 @@ export default function Header({ handleDrawerToggle, isMobile, menu }) {
           </LoadingButton>
         </div>
 
+        <div className="">
+          <LoadingButton
+            type="button"
+            isLoading={false}
+            disabled={false}
+            variant={"custom"}
+            className="px-0 py-2"
+            onClick={() => {
+              router.push(`${ProtectedRoutes?.DASHBOARD}`);
+            }}
+          >
+            <TfiHome className="" />
+          </LoadingButton>
+        </div>
         <div className="">
           <LoadingButton
             type="button"
