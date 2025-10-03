@@ -48,8 +48,8 @@ export default function Header({ handleDrawerToggle, isMobile, menu }) {
           </LoadingButton>
         </div>
 
-        <div className="">
-          {/* <LoadingButton
+        {/* <div className="">
+          <LoadingButton
             type="button"
             isLoading={false}
             disabled={false}
@@ -60,8 +60,8 @@ export default function Header({ handleDrawerToggle, isMobile, menu }) {
             }}
           >
             <TfiHome className="" />
-          </LoadingButton> */}
-        </div>
+          </LoadingButton>
+        </div> */}
         <div className="">
           <LoadingButton
             type="button"
