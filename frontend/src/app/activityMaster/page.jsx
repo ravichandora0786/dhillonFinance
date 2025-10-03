@@ -129,7 +129,7 @@ const ActivityMaster = (permissions) => {
           limit: pagination?.pageSize,
           name: activityMasterSearchData?.name,
         },
-        onSuccess: ({ message, data }) => {},
+        onSuccess: () => {},
         onFailure: () => {},
       })
     );

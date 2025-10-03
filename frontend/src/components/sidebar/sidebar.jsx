@@ -107,7 +107,7 @@ const Sidebar = ({ isMobile = false, mobileViewToggle = () => {} }) => {
       getPermissionsByRoleId({
         id: roleId,
         onSuccess: ({ data }) => {},
-        onFailure: ({ message }) => {},
+        onFailure: () => {},
       })
     );
   };
