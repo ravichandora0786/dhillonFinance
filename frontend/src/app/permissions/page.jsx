@@ -131,6 +131,7 @@ const Permission = (permissions) => {
           name: permissionSearchData?.name,
         },
         onSuccess: ({ message, data }) => {
+          console.log(message);
           dispatch(setAllPermissionList(data));
         },
         onFailure: () => {},

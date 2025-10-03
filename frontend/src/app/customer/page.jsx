@@ -209,6 +209,7 @@ const Customer = (permissions) => {
           search: customerSearchData?.search,
         },
         onSuccess: ({ message, data }) => {
+          console.log(message);
           dispatch(setAllCustomerList(data));
         },
         onFailure: () => {},

@@ -72,7 +72,7 @@ const ForgotPasswordComponent = () => {
       dispatch(
         resetForgotPassword({
           data: { ...filteredValues, token },
-          onSuccess: ({ message, data }) => {
+          onSuccess: ({ message}) => {
             toast.success(message);
             resolve();
             setButtonLoading(false);

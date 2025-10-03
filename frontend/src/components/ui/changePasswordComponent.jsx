@@ -75,7 +75,7 @@ const ChangePasswordComponent = ({ openModal, onBack = () => {}, data }) => {
       dispatch(
         resetPassword({
           data: filteredValues,
-          onSuccess: ({ message, data }) => {
+          onSuccess: ({ message }) => {
             toast.success(message);
             resolve();
             setButtonLoading(false);

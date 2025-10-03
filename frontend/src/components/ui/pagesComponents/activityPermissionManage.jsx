@@ -256,6 +256,7 @@ const ActivityPermissionManage = ({ roleId, permissions }) => {
           name: activityMasterSearchData?.name,
         },
         onSuccess: ({ message, data }) => {
+          console.log(message);
           dispatch(setActivityModuleData(data));
         },
         onFailure: () => {},
@@ -271,6 +272,7 @@ const ActivityPermissionManage = ({ roleId, permissions }) => {
           name: "",
         },
         onSuccess: ({ message, data }) => {
+          console.log(message);
           dispatch(setAllModuleList(data));
         },
         onFailure: () => {},
@@ -285,6 +287,7 @@ const ActivityPermissionManage = ({ roleId, permissions }) => {
           name: "",
         },
         onSuccess: ({ message, data }) => {
+          console.log(message);
           const roles = data?.roles?.map((item) => {
             return {
               label: item.name,

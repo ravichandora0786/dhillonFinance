@@ -202,6 +202,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
         getCustomerDetailById({
           id: customerId,
           onSuccess: ({ message, data }) => {
+            console.log(message);
             if (data) {
               const obj = {
                 [CommonFields.ID]: data[CommonFields.ID],

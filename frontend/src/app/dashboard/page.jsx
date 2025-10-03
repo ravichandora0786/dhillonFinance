@@ -21,7 +21,6 @@ export default function Dashboard() {
   const [openReceivedMoneyModal, setOpenReceivedMoneyModal] = useState(false);
 
   const data = useSelector(selectDashboardData);
-  // const transactionData = useSelector(selectAllTransactionList);
 
   const getDashboardDataList = () => {
     dispatch(
@@ -127,14 +126,9 @@ export default function Dashboard() {
                 <FiUsers className="text-2xl" />
                 <span className="text-sm font-medium">View Borrowers</span>
               </button>
-
-              {/* <button className="flex flex-col items-center justify-center gap-2 p-6 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 shadow-sm">
-                <FiBarChart2 className="text-2xl" />
-                <span className="text-sm font-medium">View Reports</span>
-              </button> */}
             </div>
           </div>
-          <RecentTransactions/>
+          <RecentTransactions />
         </div>
       </div>
 
@@ -146,7 +140,6 @@ export default function Dashboard() {
         data={{}}
         callBackFunc={() => {
           getDashboardDataList();
-          getRecentTransactionsList();
         }}
       />
     </>

@@ -144,6 +144,7 @@ const AddEditUserComponent = ({ userId, isEdit }) => {
       getUserDetailById({
         id,
         onSuccess: ({ message, data }) => {
+          console.log(message);
           if (data) {
             const obj = {
               [CommonFields.ID]: data[CommonFields.ID],

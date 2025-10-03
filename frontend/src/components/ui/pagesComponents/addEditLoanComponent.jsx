@@ -190,6 +190,7 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
         getCustomerLoanDetailById({
           id: customerLoanId,
           onSuccess: ({ message, data }) => {
+            console.log(message);
             if (data) {
               const obj = {
                 [CommonFields.ID]: data[CommonFields.ID],

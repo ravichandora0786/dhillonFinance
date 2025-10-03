@@ -8,6 +8,7 @@ export const getAllCountryOptions = ({ dispatch }) => {
     getAllCountrys({
       data: {},
       onSuccess: ({ message, data }) => {
+        console.log(message);
         const options = data?.countries?.map((item) => {
           return {
             label: item.name,
@@ -26,6 +27,7 @@ export const getAllStateOptions = ({ dispatch, data = {} }) => {
     getAllStates({
       data,
       onSuccess: ({ message, data }) => {
+        console.log(message);
         const options = data?.states?.map((item) => {
           return {
             label: item.name,
@@ -44,6 +46,7 @@ export const getAllDistrictOptions = ({ dispatch, data = {} }) => {
     getAllDistricts({
       data,
       onSuccess: ({ message, data }) => {
+        console.log(message);
         const options = data?.districts?.map((item) => {
           return {
             label: item.name,

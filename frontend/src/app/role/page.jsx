@@ -141,6 +141,7 @@ const Role = (permissions) => {
           name: roleSearchData?.name,
         },
         onSuccess: ({ message, data }) => {
+          console.log(message);
           dispatch(setAllRoleList(data));
         },
         onFailure: () => {},

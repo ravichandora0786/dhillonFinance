@@ -178,6 +178,7 @@ const CustomerLoan = (permissions) => {
           name: customerLoanSearchData?.search,
         },
         onSuccess: ({ message, data }) => {
+          console.log(message);
           dispatch(setAllCustomerLoanList(data));
         },
         onFailure: () => {},
