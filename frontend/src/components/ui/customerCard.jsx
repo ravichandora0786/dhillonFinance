@@ -57,7 +57,7 @@ const CustomerCardComponent = ({
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-3 px-1 py-0">
                 <div className="flex-shrink-0">
-                  <img
+                  <iframe
                     alt={"PI"}
                     src={
                       customer?.profileFile?.image ||

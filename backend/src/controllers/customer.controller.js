@@ -100,6 +100,7 @@ const getCustomers = asyncHandler(async (req, res, next) => {
         { model: UploadFileModel, as: "panCardFile" },
         { model: UploadFileModel, as: "agreementFile" },
         { model: UploadFileModel, as: "profileFile" },
+        { model: UploadFileModel, as: "otherFile" },
         {
           model: LoanModel,
           as: "loans",
@@ -210,6 +211,7 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
         { model: UploadFileModel, as: "panCardFile" },
         { model: UploadFileModel, as: "agreementFile" },
         { model: UploadFileModel, as: "profileFile" },
+        { model: UploadFileModel, as: "otherFile" },
         {
           model: LoanModel,
           as: "loans",
@@ -307,6 +309,7 @@ const updateCustomer = asyncHandler(async (req, res, next) => {
         { model: UploadFileModel, as: "panCardFile" },
         { model: UploadFileModel, as: "agreementFile" },
         { model: UploadFileModel, as: "profileFile" },
+        { model: UploadFileModel, as: "otherFile" },
       ],
     });
 

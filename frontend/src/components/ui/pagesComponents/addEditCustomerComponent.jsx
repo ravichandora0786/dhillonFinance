@@ -343,6 +343,8 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                   data[CustomerFields.AGREEMENT_IMAGE],
                 [CustomerFields.PROFILE_IMAGE]:
                   data[CustomerFields.PROFILE_IMAGE],
+                [CustomerFields.ANY_PRUF_IMAGE]:
+                  data[CustomerFields.ANY_PRUF_IMAGE],
                 [CustomerFields.START_DATE]: data[CustomerFields.START_DATE],
                 [CustomerFields.END_DATE]: data[CustomerFields.END_DATE],
                 [CommonFields.DESCRIPTION]: data[CommonFields.DESCRIPTION],
@@ -517,7 +519,7 @@ const UploadImage = ({ fieldName, error, touched }) => {
       isUploaded
     ) {
       updateFileField(fieldName, values[fieldName]);
-      setIsUploaded(false);
+      // setIsUploaded(false);
     }
   }, [values[fieldName], isUploaded]);
   return uploadedImage && values[fieldName] ? (
@@ -564,6 +566,7 @@ const UploadImage = ({ fieldName, error, touched }) => {
             disabled={!selectedImage}
             onClick={() => {
               if (selectedImage) {
+                setIsUploaded(true);
                 try {
                   dispatch(
                     imageUpload({

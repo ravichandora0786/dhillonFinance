@@ -166,7 +166,7 @@ const uploadFileToDrive = asyncHandler(async (req, res, next) => {
 
     // Save file info in DB
     const uploadedFileRecord = await UploadFileModel.create({
-      image: `https://drive.google.com/uc?id=${uploadedFile.id}`,
+      image: `https://drive.google.com/file/d/${uploadedFile.id}/preview`,
       imageKey: uploadedFile.id, // Drive fileId
       isActive: true,
     });

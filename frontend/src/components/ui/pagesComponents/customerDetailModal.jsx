@@ -19,7 +19,7 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
               {/* Avatar */}
               <div className="flex-shrink-0">
                 {customer?.profileFile ? (
-                  <img
+                  <iframe
                     src={customer?.profileFile?.image}
                     alt="Profile"
                     className="w-24 h-24 rounded-full object-cover shadow-md border"
@@ -95,6 +95,12 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
                 <ImageCard
                   label="Agreement"
                   src={customer?.agreementFile.image}
+                />
+              )}
+              {customer?.otherFile && (
+                <ImageCard
+                  label="Other Image"
+                  src={customer?.otherFile.image}
                 />
               )}
             </div>
@@ -215,7 +221,7 @@ function ImageCard({ label, src }) {
   return (
     <div className="rounded-lg border border-gray-200 p-4 bg-slate-50 shadow-sm">
       <div className="text-xs text-slate-500 mb-2">{label}</div>
-      <img
+      <iframe
         src={src}
         alt={label}
         className="w-full h-48 object-contain rounded-md bg-white"

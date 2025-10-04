@@ -54,7 +54,7 @@ export const CustomerFields = {
   AGREEMENT_IMAGE: "agreementImage",
   PROFILE_IMAGE: "profileImage",
   VEHICLE_NUMBER: "vechileNumber",
-  ANY_PRUF_IMAGE: "other",
+  ANY_PRUF_IMAGE: "otherImage",
 };
 
 export const LoanFields = {

@@ -40,16 +40,6 @@ import DeleteConfirmationModal from "@/components/ui/deleteConfirmation";
 import CustomerDetailModal from "@/components/ui/pagesComponents/customerDetailModal";
 import ReceiveMoneyModal from "@/components/ui/pagesComponents/receiveMoneyModal";
 import { toast } from "react-toastify";
-import {
-  FiMoreVertical,
-  FiEdit,
-  FiEye,
-  FiArrowRight,
-  FiTrash2,
-  FiMessageCircle,
-  FiPhone,
-  FiMail,
-} from "react-icons/fi";
 
 const columns = (handleDelete, handleView, handleReceivedMoneyBtn) => [
   {
