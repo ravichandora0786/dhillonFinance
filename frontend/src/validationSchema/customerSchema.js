@@ -80,7 +80,7 @@ export const createCustomerSchema = Yup.object().shape({
   // Image fields
   [CustomerFields.PROFILE_IMAGE]: fileValidation,
   [CustomerFields.AADHAR_IMAGE]: fileValidation,
-  [CustomerFields.PAN_CARD_IMAGE]: fileValidation,
+  // [CustomerFields.PAN_CARD_IMAGE]: fileValidation,
   [CustomerFields.AGREEMENT_IMAGE]: fileValidation,
   [CustomerFields.ANY_PRUF_IMAGE]: fileValidation,
 
