@@ -53,7 +53,7 @@ export const CustomerFields = {
   PAN_CARD_IMAGE: "panCardImage",
   AGREEMENT_IMAGE: "agreementImage",
   PROFILE_IMAGE: "profileImage",
-  VEHICLE_NUMBER: "vechileNumber",
+  VEHICLE_NUMBER: "vehicleNumber",
   ANY_PRUF_IMAGE: "otherImage",
 };
 
