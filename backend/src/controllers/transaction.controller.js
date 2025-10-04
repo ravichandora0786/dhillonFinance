@@ -96,7 +96,7 @@ const createTransaction = asyncHandler(async (req, res, next) => {
           pendingEmis: newPendingEmis > 0 ? newPendingEmis : 0,
           nextEmiAmount: newNextEmiAmount,
           installmentDate: newInstallmentDate,
-          status: newPendingEmis === 0 ? "Completed" : loanToUpdate.status,
+          status: newPendingEmis === 0 ? "Closed" : loanToUpdate.status,
         },
         { transaction: t }
       );

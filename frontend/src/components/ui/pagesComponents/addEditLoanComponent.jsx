@@ -20,6 +20,7 @@ import { getCustomerListForOptions } from "@/app/customer/slice";
 import BackButton from "../backButton";
 import { createCustomerLoanSchema } from "@/validationSchema/loanSchema";
 import FullScreenLoader from "@/components/ui/fullScreenLoader";
+import { loanStatusOptions } from "@/constants/dropdown";
 
 const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
   const dispatch = useDispatch();
@@ -218,7 +219,8 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
     {
       name: CommonFields.STATUS,
       label: "Status",
-      type: "text",
+      type: "select",
+      options: loanStatusOptions,
       required: true,
       disabled: false,
     },
