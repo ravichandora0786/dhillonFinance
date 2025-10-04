@@ -41,6 +41,8 @@ const RenderFields = ({
           selectOnChange,
           dateMode = "single",
           onChange = () => {},
+          onKeyDown,
+          maxLength,
         }) => {
           const fieldValue = getIn(values, name);
           const fieldError = getIn(errors, name);
@@ -203,6 +205,8 @@ const RenderFields = ({
                   touched={fieldTouched}
                   disabled={disabled}
                   onBlur={handleBlur}
+                  onKeyDown={onKeyDown}
+                  maxLength={maxLength}
                 />
               ) : null}
             </div>

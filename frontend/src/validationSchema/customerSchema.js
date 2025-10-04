@@ -37,6 +37,8 @@ export const createCustomerSchema = Yup.object().shape({
 
   [CustomerFields.MOBILE_NUMBER]: Yup.string()
     .matches(new RegExp(PHONE_NUMBER_REGEX), "Enter a valid mobile number")
+    .min(10, "Mobile number must be 10 digits")
+    .max(10, "Mobile number must be 10 digits")
     .required("Mobile Number is required"),
 
   [CustomerFields.ADDRESS]: Yup.string().required("Address is required"),
@@ -51,18 +53,23 @@ export const createCustomerSchema = Yup.object().shape({
 
   [CustomerFields.PIN_CODE]: Yup.string()
     .matches(new RegExp(INDIAN_PINCODE_REGEX), "Enter valid 6-digit PIN Code")
+    .min(6, "PIN Code must be 6 digits")
+    .max(6, "PIN Code must be 6 digits")
     .required("Pin Code is required"),
 
   [CustomerFields.AADHAR_NUMBER]: Yup.string()
     .matches(new RegExp(AADHAR_REGEX), "Enter valid 12-digit Aadhar Number")
+    .min(12, "Aadhar Number must be 12 digits")
+    .max(12, "Aadhar Number must be 12 digits")
     .required("Aadhar Number is required"),
 
   [CustomerFields.PAN_CARD_NUMBER]: Yup.string()
-    .matches(
-      new RegExp(PAN_CARD_REGEX),
-      "Enter valid PAN Card Number (e.g. ABCDE1234F)"
-    )
-    .optional(),
+    .matches(PAN_CARD_REGEX, {
+      message: "Enter valid PAN Card Number (e.g. ABCDE1234F)",
+      excludeEmptyString: true,
+    })
+    .nullable()
+    .notRequired(),
   [CustomerFields.VEHICLE_NUMBER]: Yup.string()
     .matches(
       new RegExp(ALPHANUMERIC_REGEX),

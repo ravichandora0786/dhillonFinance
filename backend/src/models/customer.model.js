@@ -51,7 +51,7 @@ const CustomerModel = sequelize.define(
     },
     panCardNumber: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     vehicleNumber: {
       type: DataTypes.STRING,

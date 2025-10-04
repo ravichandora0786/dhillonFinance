@@ -37,6 +37,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      maxLength: 30,
     },
     {
       name: CustomerFields.LAST_NAME,
@@ -44,6 +45,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: false,
       disabled: false,
+      maxLength: 30,
     },
     {
       name: CustomerFields.MOBILE_NUMBER,
@@ -51,6 +53,34 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      maxLength: 10,
+      onKeyDown: (e) => {
+        const value = e.target.value;
+        if (
+          [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+          ].includes(e.key)
+        ) {
+          return;
+        }
+        // Sirf digits allow
+        if (!/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+
+        // Max length = 12
+        if (value.length >= 10) {
+          e.preventDefault();
+          return;
+        }
+      },
     },
     {
       name: CustomerFields.ADDRESS,
@@ -58,6 +88,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "textarea",
       required: true,
       disabled: false,
+      maxLength: 100,
     },
     {
       name: CustomerFields.STATE,
@@ -65,6 +96,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      maxLength: 30,
     },
     {
       name: CustomerFields.CITY,
@@ -72,6 +104,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      maxLength: 50,
     },
     // {
     //   name: CustomerFields.DISTRICT,
@@ -87,6 +120,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      maxLength: 6,
     },
     {
       name: CustomerFields.AADHAR_NUMBER,
@@ -94,6 +128,37 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      maxLength: 12,
+      onKeyDown: (e) => {
+        const value = e.target.value;
+
+        // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
+        if (
+          [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+          ].includes(e.key)
+        ) {
+          return;
+        }
+
+        // Sirf digits allow
+        if (!/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+
+        // Max length = 12
+        if (value.length >= 12) {
+          e.preventDefault();
+          return;
+        }
+      },
     },
     {
       name: CustomerFields.PAN_CARD_NUMBER,
@@ -101,6 +166,37 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: false,
       disabled: false,
+      maxLength: 10,
+      onKeyDown: (e) => {
+        const value = e.target.value;
+
+        // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
+        if (
+          [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+          ].includes(e.key)
+        ) {
+          return;
+        }
+
+        // Allow only A-Z or a-z or 0-9
+        if (!/^[a-zA-Z0-9]$/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+
+        // Max length = 10
+        if (value.length >= 10) {
+          e.preventDefault();
+          return;
+        }
+      },
     },
     {
       name: CustomerFields.VEHICLE_NUMBER,
@@ -108,6 +204,27 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      maxLength: 15,
+      onKeyDown: (e) => {
+        const value = e.target.value;
+        if (
+          [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+          ].includes(e.key)
+        ) {
+          return;
+        }
+        if (!/^[a-zA-Z0-9]$/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+      },
     },
 
     {
@@ -384,14 +501,11 @@ const UploadImage = ({ fieldName, error, touched }) => {
       getUploadedFile({
         id: fileId,
         onSuccess: ({ data }) => {
-          console.log(data?.url, "response");
           if (data?.url) {
             setUploadedImage(data?.url);
           }
         },
-        onFailure: () => {
-          console.error(`Failed to fetch file for ${fieldKey}`);
-        },
+        onFailure: () => {},
       })
     );
   };
@@ -402,7 +516,6 @@ const UploadImage = ({ fieldName, error, touched }) => {
       typeof values[fieldName] === "string" &&
       isUploaded
     ) {
-      console.log(values[fieldName], isUploaded, 11111111111111);
       updateFileField(fieldName, values[fieldName]);
       setIsUploaded(false);
     }

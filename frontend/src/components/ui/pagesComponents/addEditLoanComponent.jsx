@@ -46,6 +46,28 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      onKeyDown: (e) => {
+        const value = e.target.value;
+        // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
+        if (
+          [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+          ].includes(e.key)
+        ) {
+          return;
+        }
+        // Sirf digits allow
+        if (!/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+      },
     },
     {
       name: LoanFields.TOTAL_PAY_AMOUNT,
@@ -53,6 +75,28 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      onKeyDown: (e) => {
+        const value = e.target.value;
+        // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
+        if (
+          [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+          ].includes(e.key)
+        ) {
+          return;
+        }
+        // Sirf digits allow
+        if (!/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+      },
     },
     {
       name: LoanFields.MONTHS,
@@ -60,6 +104,29 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      maxLength: 3,
+      onKeyDown: (e) => {
+        const value = e.target.value;
+        // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
+        if (
+          [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+          ].includes(e.key)
+        ) {
+          return;
+        }
+        // Sirf digits allow
+        if (!/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+      },
     },
     {
       name: LoanFields.EMI_AMOUNT,
@@ -67,6 +134,28 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       type: "text",
       required: true,
       disabled: true,
+      onKeyDown: (e) => {
+        const value = e.target.value;
+        // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
+        if (
+          [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+          ].includes(e.key)
+        ) {
+          return;
+        }
+        // Sirf digits allow
+        if (!/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+      },
     },
     {
       name: LoanFields.INTREST_RATE,
@@ -74,6 +163,28 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
+      onKeyDown: (e) => {
+        const value = e.target.value;
+        // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
+        if (
+          [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+          ].includes(e.key)
+        ) {
+          return;
+        }
+        // Sirf digits allow
+        if (!/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+      },
     },
     {
       name: LoanFields.PAY_INSTALLMENT_DATE,
@@ -105,6 +216,7 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       type: "textarea",
       required: false,
       disabled: false,
+      maxLength: 300,
     },
     {
       name: CommonFields.STATUS,
