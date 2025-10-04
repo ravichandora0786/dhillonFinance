@@ -8,10 +8,7 @@ import { Formik, useFormikContext } from "formik";
 import LoadingButton from "@/components/ui/loadingButton";
 import { CommonFields, CustomerFields } from "@/constants/fieldsName";
 import RenderFields from "@/components/ui/renderFields";
-import {
-  selectCustomerData,
-  selectCustomerPagination,
-} from "@/app/customer/selector";
+import { selectCustomerPagination } from "@/app/customer/selector";
 import {
   createCustomer,
   getCustomerDetailById,
@@ -23,6 +20,7 @@ import { getUploadedFile, imageUpload } from "@/app/common/slice";
 import InputBox from "../inputBox";
 import BackButton from "../backButton";
 import { createCustomerSchema } from "@/validationSchema/customerSchema";
+import FullScreenLoader from "@/components/ui/fullScreenLoader";
 
 // Field Configuration Array
 
@@ -363,129 +361,132 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
   useEffect(() => {}, []);
 
   return (
-    <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6">
-      <div className="">
-        <BackButton />
-      </div>
-      <div className="">
-        <TitleAndDescription
-          title={isEdit ? "Edit Customer" : "Add New Customer"}
-          description=""
-        />
-      </div>
-      {/* Formik */}
-      <Formik
-        initialValues={initialObject}
-        validationSchema={createCustomerSchema}
-        enableReinitialize={true}
-        onSubmit={handleSubmitData}
-      >
-        {({
-          values,
-          errors,
-          touched,
-          handleBlur,
-          handleSubmit,
-          setFieldValue,
-          resetForm,
-        }) => (
-          <>
-            <form onSubmit={handleSubmit} className="">
-              <RenderFields
-                fields={fields}
-                values={values}
-                errors={errors}
-                touched={touched}
-                setFieldValue={setFieldValue}
-                handleBlur={handleBlur}
-                columns={2}
-              />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 py-4">
-                {[
-                  {
-                    name: CustomerFields.PROFILE_IMAGE,
-                    label: "Profile Image",
-                    type: "file",
-                    required: true,
-                    disabled: false,
-                  },
-                  {
-                    name: CustomerFields.AADHAR_IMAGE,
-                    label: "Aadhar Image",
-                    type: "file",
-                    required: true,
-                    disabled: false,
-                    onChange: (e) => {
-                      setSelectedImage(e.target.files[0]);
+    <>
+      <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6">
+        <div className="">
+          <BackButton />
+        </div>
+        <div className="">
+          <TitleAndDescription
+            title={isEdit ? "Edit Customer" : "Add New Customer"}
+            description=""
+          />
+        </div>
+        {/* Formik */}
+        <Formik
+          initialValues={initialObject}
+          validationSchema={createCustomerSchema}
+          enableReinitialize={true}
+          onSubmit={handleSubmitData}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleBlur,
+            handleSubmit,
+            setFieldValue,
+            resetForm,
+          }) => (
+            <>
+              <form onSubmit={handleSubmit} className="">
+                <RenderFields
+                  fields={fields}
+                  values={values}
+                  errors={errors}
+                  touched={touched}
+                  setFieldValue={setFieldValue}
+                  handleBlur={handleBlur}
+                  columns={2}
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 py-4">
+                  {[
+                    {
+                      name: CustomerFields.PROFILE_IMAGE,
+                      label: "Profile Image",
+                      type: "file",
+                      required: true,
+                      disabled: false,
                     },
-                  },
+                    {
+                      name: CustomerFields.AADHAR_IMAGE,
+                      label: "Aadhar Image",
+                      type: "file",
+                      required: true,
+                      disabled: false,
+                      onChange: (e) => {
+                        setSelectedImage(e.target.files[0]);
+                      },
+                    },
 
-                  {
-                    name: CustomerFields.AGREEMENT_IMAGE,
-                    label: "Agreement Image",
-                    type: "file",
-                    required: true,
-                    disabled: false,
-                  },
-                  {
-                    name: CustomerFields.ANY_PRUF_IMAGE,
-                    label: "Pruf",
-                    type: "file",
-                    required: true,
-                    disabled: false,
-                  },
-                ]?.map((field) => {
-                  return (
-                    <div key={field.name} className="">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {field.label}{" "}
-                        {field.required && (
-                          <span className="text-danger">*</span>
-                        )}
-                      </label>
-                      <UploadImage
-                        fieldName={field?.name}
-                        error={errors[field?.name]}
-                        touched={touched[field?.name]}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-              {/* Buttons */}
-              <div className="flex justify-end gap-3 mt-6">
-                <div>
-                  <LoadingButton
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      resetForm();
-                      goBack();
-                    }}
-                  >
-                    Cancel
-                  </LoadingButton>
+                    {
+                      name: CustomerFields.AGREEMENT_IMAGE,
+                      label: "Agreement Image",
+                      type: "file",
+                      required: true,
+                      disabled: false,
+                    },
+                    {
+                      name: CustomerFields.ANY_PRUF_IMAGE,
+                      label: "Pruf",
+                      type: "file",
+                      required: true,
+                      disabled: false,
+                    },
+                  ]?.map((field) => {
+                    return (
+                      <div key={field.name} className="">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {field.label}{" "}
+                          {field.required && (
+                            <span className="text-danger">*</span>
+                          )}
+                        </label>
+                        <UploadImage
+                          fieldName={field?.name}
+                          error={errors[field?.name]}
+                          touched={touched[field?.name]}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
-                <div>
-                  <LoadingButton
-                    type="submit"
-                    isLoading={buttonLoading}
-                    disabled={buttonLoading}
-                    onClick={() => {
-                      isEdit
-                        ? setFieldValue("actionType", "UPDATE")
-                        : setFieldValue("actionType", "ADD");
-                    }}
-                  >
-                    {isEdit ? "Update" : "Save & Submit"}
-                  </LoadingButton>
+                {/* Buttons */}
+                <div className="flex justify-end gap-3 mt-6">
+                  <div>
+                    <LoadingButton
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        resetForm();
+                        goBack();
+                      }}
+                    >
+                      Cancel
+                    </LoadingButton>
+                  </div>
+                  <div>
+                    <LoadingButton
+                      type="submit"
+                      isLoading={buttonLoading}
+                      disabled={buttonLoading}
+                      onClick={() => {
+                        isEdit
+                          ? setFieldValue("actionType", "UPDATE")
+                          : setFieldValue("actionType", "ADD");
+                      }}
+                    >
+                      {isEdit ? "Update" : "Save & Submit"}
+                    </LoadingButton>
+                  </div>
                 </div>
-              </div>
-            </form>
-          </>
-        )}
-      </Formik>
-    </div>
+              </form>
+            </>
+          )}
+        </Formik>
+      </div>
+      <FullScreenLoader showLoader={buttonLoading} message="Please Wait..." />
+    </>
   );
 };
 
@@ -495,6 +496,7 @@ const UploadImage = ({ fieldName, error, touched }) => {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploaded, setIsUploaded] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   // Function to fetch and update file fields
   const updateFileField = async (fieldKey, fileId) => {
     if (!fileId) return;
@@ -522,81 +524,91 @@ const UploadImage = ({ fieldName, error, touched }) => {
       // setIsUploaded(false);
     }
   }, [values[fieldName], isUploaded]);
-  return uploadedImage && values[fieldName] ? (
-    <div className="relative w-32 p-2 rounded border">
-      <img
-        src={uploadedImage}
-        className="w-full h-20 object-cover rounded"
-        alt="Preview"
-      />
-      <button
-        type="button"
-        className="absolute top-1 right-1 bg-white text-red-500 font-bold rounded-full w-6 h-6 flex items-center justify-center shadow"
-        onClick={() => {
-          setIsUploaded(false);
-          setUploadedImage(null);
-          setSelectedImage(null);
-        }}
-      >
-        ×
-      </button>
-    </div>
-  ) : (
-    <div className="">
-      <div className="flex items-center justify-between rounded-md w-full gap-3">
-        <InputBox
-          accept="image/jpeg,image/png"
-          name={fieldName}
-          type="file"
-          id={fieldName}
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setSelectedImage(file);
-            setFieldValue(fieldName, file);
-          }}
-          // error={error}
-          // touched={touched}
-          // disabled={disabled}
-          // onBlur={handleBlur}
-        />
-        <div>
-          <LoadingButton
+  return (
+    <>
+      <FullScreenLoader showLoader={isUploading} message="Uploading image..." />
+      {uploadedImage && values[fieldName] ? (
+        <div className="relative w-32 p-2 rounded border">
+          <img
+            src={uploadedImage}
+            className="w-full h-20 object-cover rounded"
+            alt="Preview"
+          />
+          <button
             type="button"
-            isLoading={false}
-            disabled={!selectedImage}
+            className="absolute top-1 right-1 bg-white text-red-500 font-bold rounded-full w-6 h-6 flex items-center justify-center shadow"
             onClick={() => {
-              if (selectedImage) {
-                setIsUploaded(true);
-                try {
-                  dispatch(
-                    imageUpload({
-                      file: selectedImage,
-                      // type: fieldName,
-                      onSuccess: (response) => {
-                        const { message, data } = response;
-                        if (data) {
-                          setFieldValue(fieldName, data?.id);
-                          setSelectedImage(null);
-                        }
-                        toast.success(message);
-                      },
-                      onFailure: () => {},
-                    })
-                  );
-                } catch (error) {
-                  console.error(error);
-                }
-              }
+              setIsUploaded(false);
+              setUploadedImage(null);
+              setSelectedImage(null);
             }}
           >
-            Upload
-          </LoadingButton>
+            ×
+          </button>
         </div>
-      </div>
-      {touched && error && (
-        <div className="mt-1 text-xs text-danger">{error}</div>
+      ) : (
+        <div className="">
+          <div className="flex items-center justify-between rounded-md w-full gap-3">
+            <InputBox
+              accept="image/jpeg,image/png"
+              name={fieldName}
+              type="file"
+              id={fieldName}
+              onChange={(e) => {
+                const file = e.target.files[0];
+                setSelectedImage(file);
+                setFieldValue(fieldName, file);
+              }}
+              // error={error}
+              // touched={touched}
+              // disabled={disabled}
+              // onBlur={handleBlur}
+            />
+            <div>
+              <LoadingButton
+                type="button"
+                isLoading={isUploading}
+                disabled={!selectedImage || isUploading}
+                onClick={() => {
+                  if (selectedImage) {
+                    setIsUploading(true);
+                    setIsUploaded(true);
+                    try {
+                      dispatch(
+                        imageUpload({
+                          file: selectedImage,
+                          // type: fieldName,
+                          onSuccess: (response) => {
+                            const { message, data } = response;
+                            if (data) {
+                              setFieldValue(fieldName, data?.id);
+                              setSelectedImage(null);
+                              setIsUploading(false);
+                            }
+                            toast.success(message);
+                          },
+                          onFailure: () => {
+                            setIsUploading(false);
+                          },
+                        })
+                      );
+                    } catch (error) {
+                      console.error(error);
+                      setIsUploading(false);
+                    }
+                  }
+                }}
+              >
+                Upload
+              </LoadingButton>
+            </div>
+          </div>
+          {touched && error && (
+            <div className="mt-1 text-xs text-danger">{error}</div>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

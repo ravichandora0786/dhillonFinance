@@ -7,12 +7,8 @@ import { Formik } from "formik";
 
 import LoadingButton from "@/components/ui/loadingButton";
 import { CommonFields, LoanFields } from "@/constants/fieldsName";
-import GenericModal from "@/components/ui/genericModal";
 import RenderFields from "@/components/ui/renderFields";
-import {
-  selectCustomerLoanData,
-  selectCustomerLoanPagination,
-} from "@/app/loan/selector";
+import { selectCustomerLoanPagination } from "@/app/loan/selector";
 import {
   createCustomerLoan,
   getCustomerLoanDetailById,
@@ -23,6 +19,7 @@ import TitleAndDescription from "../titleAndDescription";
 import { getCustomerListForOptions } from "@/app/customer/slice";
 import BackButton from "../backButton";
 import { createCustomerLoanSchema } from "@/validationSchema/loanSchema";
+import FullScreenLoader from "@/components/ui/fullScreenLoader";
 
 const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
   const dispatch = useDispatch();
@@ -349,77 +346,80 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
   }, [dispatch]);
 
   return (
-    <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6">
-      <div className="">
-        <BackButton />
-      </div>
-      <div className="">
-        <TitleAndDescription
-          title={isEdit ? "Edit Customer Loan" : "Add New Customer Loan"}
-          description="Manage your Customer Loan"
-        />
-      </div>
-      {/* Formik */}
-      <Formik
-        initialValues={initialObject}
-        validationSchema={createCustomerLoanSchema}
-        enableReinitialize={true}
-        onSubmit={handleSubmitData}
-      >
-        {({
-          values,
-          errors,
-          touched,
-          handleBlur,
-          handleSubmit,
-          setFieldValue,
-          resetForm,
-        }) => (
-          <>
-            <form onSubmit={handleSubmit}>
-              <RenderFields
-                fields={fields}
-                values={values}
-                errors={errors}
-                touched={touched}
-                setFieldValue={setFieldValue}
-                handleBlur={handleBlur}
-                columns={2}
-              />
-              {/* Buttons */}
-              <div className="flex justify-end gap-3 mt-6">
-                <div>
-                  <LoadingButton
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      resetForm();
-                      goBack();
-                    }}
-                  >
-                    Cancel
-                  </LoadingButton>
+    <>
+      <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6">
+        <div className="">
+          <BackButton />
+        </div>
+        <div className="">
+          <TitleAndDescription
+            title={isEdit ? "Edit Customer Loan" : "Add New Customer Loan"}
+            description="Manage your Customer Loan"
+          />
+        </div>
+        {/* Formik */}
+        <Formik
+          initialValues={initialObject}
+          validationSchema={createCustomerLoanSchema}
+          enableReinitialize={true}
+          onSubmit={handleSubmitData}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleBlur,
+            handleSubmit,
+            setFieldValue,
+            resetForm,
+          }) => (
+            <>
+              <form onSubmit={handleSubmit}>
+                <RenderFields
+                  fields={fields}
+                  values={values}
+                  errors={errors}
+                  touched={touched}
+                  setFieldValue={setFieldValue}
+                  handleBlur={handleBlur}
+                  columns={2}
+                />
+                {/* Buttons */}
+                <div className="flex justify-end gap-3 mt-6">
+                  <div>
+                    <LoadingButton
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        resetForm();
+                        goBack();
+                      }}
+                    >
+                      Cancel
+                    </LoadingButton>
+                  </div>
+                  <div>
+                    <LoadingButton
+                      type="submit"
+                      isLoading={buttonLoading}
+                      disabled={buttonLoading}
+                      onClick={() => {
+                        isEdit
+                          ? setFieldValue("actionType", "UPDATE")
+                          : setFieldValue("actionType", "ADD");
+                      }}
+                    >
+                      {isEdit ? "Update" : "Save & Submit"}
+                    </LoadingButton>
+                  </div>
                 </div>
-                <div>
-                  <LoadingButton
-                    type="submit"
-                    isLoading={buttonLoading}
-                    disabled={buttonLoading}
-                    onClick={() => {
-                      isEdit
-                        ? setFieldValue("actionType", "UPDATE")
-                        : setFieldValue("actionType", "ADD");
-                    }}
-                  >
-                    {isEdit ? "Update" : "Save & Submit"}
-                  </LoadingButton>
-                </div>
-              </div>
-            </form>
-          </>
-        )}
-      </Formik>
-    </div>
+              </form>
+            </>
+          )}
+        </Formik>
+      </div>
+      <FullScreenLoader showLoader={buttonLoading} message="Please Wait..." />
+    </>
   );
 };
 

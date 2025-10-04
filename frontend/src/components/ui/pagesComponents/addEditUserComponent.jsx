@@ -2,26 +2,18 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
-import { Formik, useFormikContext } from "formik";
+import { useDispatch } from "react-redux";
+import { Formik } from "formik";
 
 import LoadingButton from "@/components/ui/loadingButton";
 import { CommonFields, UserFields } from "@/constants/fieldsName";
 import RenderFields from "@/components/ui/renderFields";
-import { selectUserData, selectUserPagination } from "@/app/user/selector";
-import {
-  createUser,
-  getUserDetailById,
-  setUserPagination,
-  updateUser,
-} from "@/app/user/slice";
+import { getUserDetailById, updateUser } from "@/app/user/slice";
 import TitleAndDescription from "../titleAndDescription";
-import { getUploadedFile, imageUpload } from "@/app/common/slice";
-import InputBox from "../inputBox";
 import BackButton from "../backButton";
 import { genderOptions } from "@/constants/dropdown";
-import { ImPencil } from "react-icons/im";
 import { UserProfileUploadImage } from "../userProfileUploardImage";
+import FullScreenLoader from "@/components/ui/fullScreenLoader";
 
 // Field Configuration Array
 
@@ -175,85 +167,88 @@ const AddEditUserComponent = ({ userId, isEdit }) => {
 
   useEffect(() => {}, []);
   return (
-    <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6">
-      <div className="">
-        <BackButton />
-      </div>
-      <div className="">
-        <TitleAndDescription
-          title={isEdit ? "Edit User" : "Add New User"}
-          description=""
-        />
-      </div>
-      {/* Formik */}
-      <Formik
-        initialValues={initialObject}
-        // validationSchema={createUserSchema}
-        enableReinitialize={true}
-        onSubmit={handleSubmitData}
-      >
-        {({
-          values,
-          errors,
-          touched,
-          handleBlur,
-          handleSubmit,
-          setFieldValue,
-          resetForm,
-        }) => (
-          <>
-            <form onSubmit={handleSubmit} className="">
-              <div>
-                <UserProfileUploadImage
-                  fileId={values[UserFields.PROFILE_IMAGE]}
-                  userId={userId}
-                  fieldName={UserFields.PROFILE_IMAGE}
+    <>
+      <div className="flex flex-col gap-6 justify-start w-full mx-auto bg-white rounded-2xl p-6">
+        <div className="">
+          <BackButton />
+        </div>
+        <div className="">
+          <TitleAndDescription
+            title={isEdit ? "Edit User" : "Add New User"}
+            description=""
+          />
+        </div>
+        {/* Formik */}
+        <Formik
+          initialValues={initialObject}
+          // validationSchema={createUserSchema}
+          enableReinitialize={true}
+          onSubmit={handleSubmitData}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleBlur,
+            handleSubmit,
+            setFieldValue,
+            resetForm,
+          }) => (
+            <>
+              <form onSubmit={handleSubmit} className="">
+                <div>
+                  <UserProfileUploadImage
+                    fileId={values[UserFields.PROFILE_IMAGE]}
+                    userId={userId}
+                    fieldName={UserFields.PROFILE_IMAGE}
+                  />
+                </div>
+                <RenderFields
+                  fields={fields}
+                  values={values}
+                  errors={errors}
+                  touched={touched}
+                  setFieldValue={setFieldValue}
+                  handleBlur={handleBlur}
+                  columns={2}
                 />
-              </div>
-              <RenderFields
-                fields={fields}
-                values={values}
-                errors={errors}
-                touched={touched}
-                setFieldValue={setFieldValue}
-                handleBlur={handleBlur}
-                columns={2}
-              />
 
-              {/* Buttons */}
-              <div className="flex justify-end gap-3 mt-6">
-                <div>
-                  <LoadingButton
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      resetForm();
-                      goBack();
-                    }}
-                  >
-                    Cancel
-                  </LoadingButton>
+                {/* Buttons */}
+                <div className="flex justify-end gap-3 mt-6">
+                  <div>
+                    <LoadingButton
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        resetForm();
+                        goBack();
+                      }}
+                    >
+                      Cancel
+                    </LoadingButton>
+                  </div>
+                  <div>
+                    <LoadingButton
+                      type="submit"
+                      isLoading={buttonLoading}
+                      disabled={buttonLoading}
+                      onClick={() => {
+                        isEdit
+                          ? setFieldValue("actionType", "UPDATE")
+                          : setFieldValue("actionType", "ADD");
+                      }}
+                    >
+                      {isEdit ? "Update" : "Save & Submit"}
+                    </LoadingButton>
+                  </div>
                 </div>
-                <div>
-                  <LoadingButton
-                    type="submit"
-                    isLoading={buttonLoading}
-                    disabled={buttonLoading}
-                    onClick={() => {
-                      isEdit
-                        ? setFieldValue("actionType", "UPDATE")
-                        : setFieldValue("actionType", "ADD");
-                    }}
-                  >
-                    {isEdit ? "Update" : "Save & Submit"}
-                  </LoadingButton>
-                </div>
-              </div>
-            </form>
-          </>
-        )}
-      </Formik>
-    </div>
+              </form>
+            </>
+          )}
+        </Formik>
+      </div>
+      <FullScreenLoader showLoader={buttonLoading} message="Please Wait..." />
+    </>
   );
 };
 

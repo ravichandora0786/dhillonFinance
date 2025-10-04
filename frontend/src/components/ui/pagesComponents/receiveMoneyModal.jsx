@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Formik } from "formik";
 import { toast } from "react-toastify";
 
@@ -10,6 +10,7 @@ import { createTransaction } from "@/app/transaction/slice";
 import LoadingButton from "@/components/ui/loadingButton";
 import RenderFields from "@/components/ui/renderFields";
 import { getCustomerListForOptions } from "@/app/customer/slice";
+import FullScreenLoader from "@/components/ui/fullScreenLoader";
 
 const ReceiveMoneyModal = ({
   openModal,
@@ -154,65 +155,68 @@ const ReceiveMoneyModal = ({
   }, [dispatch]);
 
   return (
-    <GenericModal
-      showModal={openModal}
-      closeModal={onBack}
-      modalTitle={`Receive Money from ${customer?.firstName} ${customer?.lastName}`}
-      modalBody={
-        <Formik
-          initialValues={initialObject}
-          //   validationSchema={}
-          enableReinitialize={true}
-          onSubmit={handleSubmitData}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            handleBlur,
-            handleSubmit,
-            setFieldValue,
-            resetForm,
-          }) => (
-            <form onSubmit={handleSubmit}>
-              <RenderFields
-                fields={fields}
-                values={values}
-                errors={errors}
-                touched={touched}
-                setFieldValue={setFieldValue}
-                handleBlur={handleBlur}
-                columns={2}
-              />
-              {/* Buttons */}
-              <div className="flex justify-end gap-3 mt-6">
-                <div>
-                  <LoadingButton
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      resetForm();
-                      onBack();
-                    }}
-                  >
-                    Cancel
-                  </LoadingButton>
+    <>
+      <GenericModal
+        showModal={openModal}
+        closeModal={onBack}
+        modalTitle={`Receive Money from ${customer?.firstName} ${customer?.lastName}`}
+        modalBody={
+          <Formik
+            initialValues={initialObject}
+            //   validationSchema={}
+            enableReinitialize={true}
+            onSubmit={handleSubmitData}
+          >
+            {({
+              values,
+              errors,
+              touched,
+              handleBlur,
+              handleSubmit,
+              setFieldValue,
+              resetForm,
+            }) => (
+              <form onSubmit={handleSubmit}>
+                <RenderFields
+                  fields={fields}
+                  values={values}
+                  errors={errors}
+                  touched={touched}
+                  setFieldValue={setFieldValue}
+                  handleBlur={handleBlur}
+                  columns={2}
+                />
+                {/* Buttons */}
+                <div className="flex justify-end gap-3 mt-6">
+                  <div>
+                    <LoadingButton
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        resetForm();
+                        onBack();
+                      }}
+                    >
+                      Cancel
+                    </LoadingButton>
+                  </div>
+                  <div>
+                    <LoadingButton
+                      type="submit"
+                      isLoading={buttonLoading}
+                      disabled={buttonLoading}
+                    >
+                      Receive Money
+                    </LoadingButton>
+                  </div>
                 </div>
-                <div>
-                  <LoadingButton
-                    type="submit"
-                    isLoading={buttonLoading}
-                    disabled={buttonLoading}
-                  >
-                    Receive Money
-                  </LoadingButton>
-                </div>
-              </div>
-            </form>
-          )}
-        </Formik>
-      }
-    />
+              </form>
+            )}
+          </Formik>
+        }
+      />
+      <FullScreenLoader showLoader={buttonLoading} message="Please Wait..." />
+    </>
   );
 };
 

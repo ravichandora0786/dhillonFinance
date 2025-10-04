@@ -19,7 +19,7 @@ export default function NameAvatarColumn({
     <div className="flex items-center gap-3 px-2 py-1">
       {showImage && (
         <div className="flex-shrink-0">
-          <img
+          <iframe
             alt={name}
             src={imageUrl}
             className="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm"
