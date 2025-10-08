@@ -27,7 +27,7 @@ function* getAllCustomerLoanListSaga(action) {
     const response = yield httpRequest.get(endPoints.CustomerLoan, {
       params: data,
     });
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (err) {
     const errorMessage = err.message || "Something went wrong!";
     toast.error(errorMessage);
@@ -48,7 +48,7 @@ function* getCustomerLoanDetailByIdSaga(action) {
     );
 
     yield put(setCustomerLoanData(response?.data));
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (error) {
     const errorMessage = error?.message || "Something went wrong!";
     toast.error(errorMessage);

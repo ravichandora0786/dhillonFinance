@@ -14,6 +14,7 @@ import Status from "@/components/ui/status";
 import InputBox from "@/components/ui/inputBox";
 import LoadingButton from "@/components/ui/loadingButton";
 import TitleAndDescription from "@/components/ui/titleAndDescription";
+import LoanDetailModal from "@/components/ui/pagesComponents/loanDetailsModal";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -36,7 +37,7 @@ import { removeTimeFromDate } from "@/Services/utils";
 import ConfirmationModal from "@/components/ui/deleteConfirmation";
 import { toast } from "react-toastify";
 
-const columns = (handleDelete) => [
+const columns = (handleDelete, handleViewLoan) => [
   {
     header: () => <div className="">Customer name</div>,
     accessorKey: "customer.firstName",
@@ -107,10 +108,14 @@ const columns = (handleDelete) => [
     header: "Action",
     cell: ({ row }) => (
       <ActionColumnsComponent
-        showDeleteButton={true}
+        showViewButton={true}
+        // showDeleteButton={true}
         showEditLink={true}
         editOnLink={`/loan/edit/${row.original.id}`}
-        deleteOnClick={() => handleDelete(row?.original)}
+        viewOnClick={() => {
+          handleViewLoan(row?.original);
+        }}
+        // deleteOnClick={() => handleDelete(row?.original)}
       />
     ),
   },
@@ -121,8 +126,7 @@ const CustomerLoan = (permissions) => {
   const navigate = useRouter();
   const dispatch = useDispatch();
   const { confirm, ModalContent } = ConfirmationModal();
-  const [loading, setLoading] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
+  const [openViewDetailModal, setOpenViewDetailModal] = useState(false);
   const [rowData, setRowData] = useState({});
   const [columnVisibility, setColumnVisibility] = useState({});
   const pagination = useSelector(selectCustomerLoanPagination);
@@ -147,6 +151,10 @@ const CustomerLoan = (permissions) => {
 
   const handleAddNewCustomerLoan = () => {
     navigate.push("/loan/add");
+  };
+  const handleViewLoan = (rowData) => {
+    setRowData(rowData);
+    setOpenViewDetailModal(true);
   };
   const handleDelete = async (rowData) => {
     const isConfirmed = await confirm({
@@ -253,7 +261,7 @@ const CustomerLoan = (permissions) => {
         </div>
         <div className="w-full">
           <DataTableComponent
-            columns={columns(handleDelete)}
+            columns={columns(handleDelete, handleViewLoan)}
             data={customerLoanList?.loans || []}
             pagination={pagination}
             setPagination={(newPagination) =>
@@ -267,6 +275,16 @@ const CustomerLoan = (permissions) => {
       </div>
       {/* Delete Confirmation Modal */}
       {ModalContent}
+
+      {/* loan Detail modal */}
+      <LoanDetailModal
+        openModal={openViewDetailModal}
+        onBack={() => {
+          setRowData({});
+          setOpenViewDetailModal(false);
+        }}
+        data={rowData}
+      />
     </>
   );
 };

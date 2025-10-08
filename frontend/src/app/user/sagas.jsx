@@ -26,7 +26,7 @@ function* getAllUserListSaga(action) {
     const response = yield httpRequest.get(endPoints.User, {
       params: data,
     });
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (err) {
     const errorMessage = err.message || "Something went wrong!";
     toast.error(errorMessage);
@@ -44,7 +44,7 @@ function* getUserDetailByIdSaga(action) {
     const response = yield call(httpRequest.get, `${endPoints.User}/${id}`);
 
     yield put(setUserDetailData(response?.data));
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (error) {
     const errorMessage = error?.message || "Something went wrong!";
     toast.error(errorMessage);
@@ -61,7 +61,7 @@ function* deleteUserByIdSaga(action) {
   try {
     const response = yield call(httpRequest.delete, `${endPoints.User}/${id}`);
 
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (error) {
     const errorMessage = error?.message || "Delete failed";
     toast.error(errorMessage);
@@ -80,7 +80,7 @@ function* createNewUserSaga(action) {
       ...data,
     });
 
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (error) {
     const errorMessage = error?.message || "Create failed";
     toast.error(errorMessage);
@@ -99,7 +99,7 @@ function* updateUsersSaga(action) {
       ...data,
     });
 
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (error) {
     const errorMessage = error?.message || "Update failed";
     toast.error(errorMessage);
@@ -116,7 +116,7 @@ function* updateUserStatusSaga(action) {
   try {
     const response = yield httpRequest.put(`${endPoints.User}/${id}`);
 
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (error) {
     const errorMessage = error?.message || "Update failed";
     toast.error(errorMessage);

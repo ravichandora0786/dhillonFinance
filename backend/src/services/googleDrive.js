@@ -9,32 +9,46 @@ export const CLIENT_SECRET = process.env.DRIVE_CLIENT_SECRET;
 export const REDIRECT_URI = process.env.DRIVE_REDIRECT_URI;
 export const FOLDER_ID = process.env.DRIVE_FOLDER_ID;
 
+// Tokens from environment (instead of file)
+export const ACCESS_TOKEN = process.env.DRIVE_ACCESS_TOKEN;
+export const REFRESH_TOKEN = process.env.DRIVE_REFRESH_TOKEN;
+export const EXPIRY_DATE = process.env.DRIVE_EXPIRY_DATE
+  ? Number(process.env.DRIVE_EXPIRY_DATE)
+  : null;
+
 export const oAuth2Client = new google.auth.OAuth2(
   CLIENT_ID,
   CLIENT_SECRET,
   REDIRECT_URI
 );
 
+// ====== LEGACY FILE PATH (optional fallback, not used but kept) ======
 const TOKEN_PATH = path.join(process.cwd(), "tokens.json");
 
 /**
- * Save tokens to local file
- * @param {Object} tokens
- */
-export const saveTokens = (tokens) => {
-  fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens, null, 2));
-};
-
-/**
- * Load tokens from file (if exists)
+ * Load tokens — from ENV first, fallback to file if exists
  * @returns {Object|null}
  */
 export const loadTokens = () => {
+  // Prefer ENV tokens
+  if (ACCESS_TOKEN && REFRESH_TOKEN) {
+    const tokens = {
+      access_token: ACCESS_TOKEN,
+      refresh_token: REFRESH_TOKEN,
+      expiry_date: EXPIRY_DATE,
+    };
+    oAuth2Client.setCredentials(tokens);
+    return tokens;
+  }
+
+  // Fallback: check if tokens.json exists
   if (fs.existsSync(TOKEN_PATH)) {
     const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
     oAuth2Client.setCredentials(tokens);
     return tokens;
   }
+
+  //No tokens found
   return null;
 };
 
@@ -89,6 +103,7 @@ export const getGoogleDriveClient = async () => {
   // Refresh token if expired
   if (!tokens.expiry_date || tokens.expiry_date < Date.now()) {
     const { credentials } = await oAuth2Client.refreshAccessToken();
+    console.log(credentials, "credentials credentials");
 
     // Keep the old refresh token if Google doesn't return a new one
     const newTokens = {
@@ -99,7 +114,12 @@ export const getGoogleDriveClient = async () => {
     };
 
     oAuth2Client.setCredentials(newTokens);
-    saveTokens(newTokens);
+
+    console.log("✅ Google Drive access token refreshed!");
+
+    // ⚙️ (Optional) If you want to log it for manual .env update:
+    console.log(" New Access Token:", credentials.access_token);
+    console.log(" New Expiry Date:", credentials.expiry_date);
   }
 
   return google.drive({ version: "v3", auth: oAuth2Client });

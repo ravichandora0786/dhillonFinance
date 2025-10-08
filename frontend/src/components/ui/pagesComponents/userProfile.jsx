@@ -97,7 +97,7 @@ const UserProfileComponent = () => {
         </div>
 
         {/* Profile Completion */}
-        <div className="bg-white rounded-lg shadow p-4 mt-6">
+        {/* <div className="bg-white rounded-lg shadow p-4 mt-6">
           <h4 className="font-semibold">Complete Your Profile</h4>
           <p className="text-sm text-gray-500">
             Complete your profile to get better results
@@ -108,7 +108,7 @@ const UserProfileComponent = () => {
           <p className="text-right text-sm mt-1 font-semibold text-green-600">
             85%
           </p>
-        </div>
+        </div> */}
 
         {/* Tabs */}
         <div className="flex gap-6 mt-6 border-b">

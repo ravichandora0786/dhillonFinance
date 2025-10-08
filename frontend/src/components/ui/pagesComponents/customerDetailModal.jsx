@@ -1,10 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
 import GenericModal from "@/components/ui/genericModal";
+import ViewField from "../viewField";
 
 const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
-  const dispatch = useDispatch();
   const customer = data;
 
   return (
@@ -71,10 +70,10 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
           {/* Customer details */}
           <div className="">
             <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Aadhar Number" value={customer?.aadharNumber} />
-              <Field label="PAN Number" value={customer?.panCardNumber} />
-              <Field label="Mobile" value={customer?.mobileNumber} />
-              <Field
+              <ViewField label="Aadhar Number" value={customer?.aadharNumber} />
+              <ViewField label="PAN Number" value={customer?.panCardNumber} />
+              <ViewField label="Mobile" value={customer?.mobileNumber} />
+              <ViewField
                 label="Address"
                 value={`${customer?.address}, ${customer?.city}, ${customer?.state}, ${customer?.pinCode}`}
               />
@@ -119,35 +118,44 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
                 >
                   {/* Basic Loan Info */}
                   <div className="grid grid-cols-2 md:grid-cols-2 sm:grid-cols-2 gap-4">
-                    <Field label="Loan Amount" value={`₹ ${loan?.amount}`} />
-                    <Field
+                    <ViewField
+                      label="Loan Amount"
+                      value={`₹ ${loan?.amount}`}
+                    />
+                    <ViewField
                       label="Interest Rate"
                       value={`${loan?.interestRate}%`}
                     />
-                    <Field label="EMIs (Months)" value={loan?.tenureMonths} />
-                    <Field label="EMI Amount" value={`₹ ${loan?.emiAmount}`} />
-                    <Field
+                    <ViewField
+                      label="EMIs (Months)"
+                      value={loan?.tenureMonths}
+                    />
+                    <ViewField
+                      label="EMI Amount"
+                      value={`₹ ${loan?.emiAmount}`}
+                    />
+                    <ViewField
                       label="Total Payable"
                       value={`₹ ${loan?.totalPayableAmount}`}
                     />
-                    <Field label="Status" value={loan?.status} />
-                    <Field label="Start Date" value={loan?.startDate} />
-                    <Field label="End Date" value={loan?.endDate} />
-                    <Field
+                    <ViewField label="Status" value={loan?.status} />
+                    <ViewField label="Start Date" value={loan?.startDate} />
+                    <ViewField label="End Date" value={loan?.endDate} />
+                    <ViewField
                       label="Next Installment Date"
                       value={loan?.installmentDate}
                     />
-                    <Field
+                    <ViewField
                       label="Next EMI Amount"
                       value={`₹ ${loan?.nextEmiAmount}`}
                     />
-                    <Field label="Paid EMIs" value={loan?.paidEmis} />
-                    <Field label="Pending EMIs" value={loan?.pendingEmis} />
-                    <Field
+                    <ViewField label="Paid EMIs" value={loan?.paidEmis} />
+                    <ViewField label="Pending EMIs" value={loan?.pendingEmis} />
+                    <ViewField
                       label="Received Payments"
                       value={`₹ ${loan?.repaymentsReceived}`}
                     />
-                    <Field
+                    <ViewField
                       label="Pending Payments"
                       value={`₹ ${loan?.repaymentsPending}`}
                     />
@@ -156,14 +164,10 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
                   {/* Description */}
                   {loan?.description && (
                     <div className="mt-3">
-                      <Field
+                      <ViewField
                         label="Description"
                         value={`${loan?.description}`}
                       />
-                      {/* <div className="text-xs text-slate-400">Description</div>
-                      <div className="mt-1 text-sm text-slate-800 font-medium">
-                        {loan?.description}
-                      </div> */}
                     </div>
                   )}
 
@@ -183,9 +187,17 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
                               {`Payment`}
                             </span>
                             <span className="text-sm text-slate-600">
-                              {txn?.transactionType === "Disbursement" ? "Pay Loan" : txn?.transactionType}
+                              {txn?.transactionType === "Disbursement"
+                                ? "Pay Loan"
+                                : txn?.transactionType}
                             </span>
-                            <span className={`text-sm font-medium ${txn?.transactionType === "Disbursement" ? "text-danger" : "text-green-600"} `}>
+                            <span
+                              className={`text-sm font-medium ${
+                                txn?.transactionType === "Disbursement"
+                                  ? "text-danger"
+                                  : "text-green-600"
+                              } `}
+                            >
                               ₹ {txn.amount || 0}
                             </span>
                             <span className="text-xs text-slate-400">
@@ -208,17 +220,6 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
     />
   );
 };
-
-function Field({ label, value }) {
-  return (
-    <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-      <div className="text-xs text-slate-400">{label}</div>
-      <div className="mt-1 text-sm text-slate-800 font-medium break-words">
-        {value}
-      </div>
-    </div>
-  );
-}
 
 function ImageCard({ label, src }) {
   return (

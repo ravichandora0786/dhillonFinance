@@ -12,7 +12,6 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 // import sendMail from "../services/mail.service.js";
 import RoleModel from "../models/role.model.js";
 import { generateVerificationToken } from "../utils/verificationToken.js";
-import { trimRequestBody } from "../utils/trimRequestBody.js";
 import ActivityPermissionModel from "../models/activityPermission.model.js";
 import PermissionModel from "../models/permission.model.js";
 import ActivityMasterModel from "../models/activityMaster.model.js";
@@ -21,11 +20,7 @@ import { Op } from "sequelize";
 import FileController from "./file.controller.js";
 import { EMAIL_TEMPLATE } from "../utils/constants/index.js";
 import sendMail from "../services/mail.service.js";
-import {
-  oAuth2Client,
-  loadTokens,
-  saveTokens,
-} from "../services/googleDrive.js";
+import { oAuth2Client, loadTokens } from "../services/googleDrive.js";
 
 /**
  * Generate JWT Token
@@ -125,7 +120,6 @@ const loginUser = asyncHandler(async (req, res, next) => {
       console.log("Google token expired. Refreshing...");
       const newTokens = await oAuth2Client.refreshAccessToken(); // refresh
       oAuth2Client.setCredentials(newTokens.credentials);
-      saveTokens(newTokens.credentials);
     }
 
     // **Update lastLoginAt**

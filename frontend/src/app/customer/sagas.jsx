@@ -27,7 +27,7 @@ function* getAllCustomerListSaga(action) {
     const response = yield httpRequest.get(endPoints.Customer, {
       params: data,
     });
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (err) {
     const errorMessage = err.message || "Something went wrong!";
     toast.error(errorMessage);
@@ -45,7 +45,7 @@ function* getCustomerDetailByIdSaga(action) {
     const response = yield call(httpRequest.get, `${endPoints.Customer}/${id}`);
 
     yield put(setCustomerData(response?.data));
-    yield onSuccess({ message: response?.data?.message, data: response.data });
+    yield onSuccess({ message: response?.message, data: response.data });
   } catch (error) {
     const errorMessage = error?.message || "Something went wrong!";
     toast.error(errorMessage);
@@ -143,7 +143,7 @@ function* getCustomerListForOptionsSaga(action) {
     const response = yield httpRequest.get(`${endPoints.Customer}/options`, {
       params: data,
     });
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (err) {
     const errorMessage = err.message || "Something went wrong!";
     toast.error(errorMessage);

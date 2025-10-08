@@ -124,12 +124,22 @@ const getLoans = asyncHandler(async (req, res, next) => {
         {
           model: CustomerModel,
           as: "customer",
-          attributes: ["id", "firstName", "lastName", "mobileNumber"],
+          attributes: [
+            "id",
+            "firstName",
+            "lastName",
+            "mobileNumber",
+            "status",
+            "address",
+            "city",
+            "pinCode",
+            "state",
+          ],
         },
         {
           model: TransactionModel,
           as: "transactions",
-          attributes: ["amount", "transactionType", "createdAt"],
+          // attributes: ["amount", "transactionType", "createdAt"],
           separate: true, // optional: can remove for large datasets
           order: [["createdAt", "DESC"]],
         },
@@ -188,12 +198,22 @@ const getLoanById = asyncHandler(async (req, res, next) => {
         {
           model: CustomerModel,
           as: "customer",
-          attributes: ["id", "firstName", "lastName", "mobileNumber"],
+          attributes: [
+            "id",
+            "firstName",
+            "lastName",
+            "mobileNumber",
+            "status",
+            "address",
+            "city",
+            "pinCode",
+            "state",
+          ],
         },
         {
           model: TransactionModel,
           as: "transactions",
-          attributes: ["amount", "transactionType"], // include type
+          // attributes: ["amount", "transactionType"], // include type
           separate: true,
           order: [["createdAt", "DESC"]], // latest transaction first
         },

@@ -26,7 +26,7 @@ function* getAllStateListSaga(action) {
     const response = yield httpRequest.get(endPoints.State, {
       params: data,
     });
-    yield onSuccess({ message: response?.data?.message, data: response?.data });
+    yield onSuccess({ message: response?.message, data: response?.data });
   } catch (err) {
     const errorMessage = err.message || "Something went wrong!";
     toast.error(errorMessage);
