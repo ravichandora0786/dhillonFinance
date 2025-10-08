@@ -25,6 +25,7 @@ const CustomerCardComponent = ({
   handleDelete,
   handleView,
   handleReceivedMoneyBtn,
+  handleCloseCustomerLoan,
 }) => {
   const router = useRouter();
 
@@ -172,19 +173,34 @@ const CustomerCardComponent = ({
           <div className="flex flex-row gap-2">
             {customer?.loans?.length >= 0 &&
             customer?.loans[0]?.status === "Active" ? (
-              <div>
-                {" "}
-                <LoadingButton
-                  type="button"
-                  isLoading={false}
-                  disabled={false}
-                  onClick={() => {
-                    handleReceivedMoneyBtn(customer);
-                  }}
-                >
-                  Receive Money
-                </LoadingButton>
-              </div>
+              <>
+                <div>
+                  {" "}
+                  <LoadingButton
+                    type="button"
+                    isLoading={false}
+                    disabled={false}
+                    onClick={() => {
+                      handleCloseCustomerLoan(customer);
+                    }}
+                  >
+                    Close Loan
+                  </LoadingButton>
+                </div>
+                <div>
+                  {" "}
+                  <LoadingButton
+                    type="button"
+                    isLoading={false}
+                    disabled={false}
+                    onClick={() => {
+                      handleReceivedMoneyBtn(customer);
+                    }}
+                  >
+                    Receive Money
+                  </LoadingButton>
+                </div>
+              </>
             ) : (
               <div>
                 {" "}

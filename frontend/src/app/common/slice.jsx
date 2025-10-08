@@ -11,6 +11,7 @@ const initialState = {
   refreshToken: null,
   rolePermissionsMap: [],
   countryOptions: [],
+  allImages: [],
 };
 
 const commonSlice = createSlice({
@@ -33,6 +34,9 @@ const commonSlice = createSlice({
     setCountryOptions(state, action) {
       state.countryOptions = action.payload;
     },
+    setAllImages(state, action) {
+      state.allImages = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(logoutApp, () => {
@@ -51,6 +55,7 @@ export const {
   setRefreshToken,
   setRolePermissionsMap,
   setCountryOptions,
+  setAllImages,
 } = commonSlice.actions;
 
 // Other Actions
@@ -60,6 +65,9 @@ export const getAllDistrict = createAction("COMMON/GETALLDISTRICT");
 export const getAllState = createAction("COMMON/GETALLSTATE");
 
 export const imageUpload = createAction("COMMON/IMAGE_UPLOAD");
+export const deleteImage = createAction("COMMON/IMAGE_DELETE");
+export const cleanUpUnusedImage = createAction("COMMON/CLEAN_UP_UNUSED_IMAGE");
+export const getAllImages = createAction("COMMON/GET_ALL_IMAGES");
 export const getUploadedFile = createAction("COMMON/GET_UPLOADED_FILE");
 export const getPermissionsByRoleId = createAction(
   "COMMON/GET_PERMISSIONS_BY_ROLE_ID"

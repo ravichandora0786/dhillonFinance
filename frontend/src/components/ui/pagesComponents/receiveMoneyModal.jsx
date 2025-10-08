@@ -19,7 +19,6 @@ const ReceiveMoneyModal = ({
   callBackFunc = () => {},
 }) => {
   const dispatch = useDispatch();
-  const isEdit = Object.keys(data)?.length > 0;
   const customer = data;
   const [customerOptions, setCustomerOptions] = useState([]);
 
@@ -111,6 +110,7 @@ const ReceiveMoneyModal = ({
       const defaultValues = {
         [CommonFields.CUSTOMER_ID]: customer.id,
         [TransactionFields.TRANSACTION_TYPE]: "Repayment",
+        [TransactionFields.AMOUNT]: customer?.loans[0]?.nextEmiAmount,
         [CommonFields.IS_ACTIVE]: true,
       };
 

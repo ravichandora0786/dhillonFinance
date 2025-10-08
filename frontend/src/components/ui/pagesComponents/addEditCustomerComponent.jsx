@@ -245,7 +245,8 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
   const defaultImage = {
     [CustomerFields.AADHAR_IMAGE]: "",
     [CustomerFields.ANY_PRUF_IMAGE]: "",
-    [CustomerFields.AGREEMENT_IMAGE]: "",
+    // [CustomerFields.AGREEMENT_IMAGE]: undefined,
+    // [CustomerFields.PAN_CARD_IMAGE]: undefined,
     [CustomerFields.PROFILE_IMAGE]: "",
   };
 
@@ -343,10 +344,14 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                   data[CustomerFields.PROFILE_IMAGE],
                 [CustomerFields.ANY_PRUF_IMAGE]:
                   data[CustomerFields.ANY_PRUF_IMAGE],
+                [CustomerFields.PAN_CARD_IMAGE]:
+                  data[CustomerFields.PAN_CARD_IMAGE],
                 [CustomerFields.START_DATE]: data[CustomerFields.START_DATE],
                 [CustomerFields.END_DATE]: data[CustomerFields.END_DATE],
                 [CommonFields.DESCRIPTION]: data[CommonFields.DESCRIPTION],
                 [CommonFields.IS_ACTIVE]: data[CommonFields.IS_ACTIVE],
+                [CustomerFields.VEHICLE_NUMBER]:
+                  data[CustomerFields.VEHICLE_NUMBER],
               };
 
               setInitialObject(obj);
@@ -414,23 +419,26 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                       type: "file",
                       required: true,
                       disabled: false,
-                      onChange: (e) => {
-                        setSelectedImage(e.target.files[0]);
-                      },
                     },
-
                     {
-                      name: CustomerFields.AGREEMENT_IMAGE,
-                      label: "Agreement Image",
+                      name: CustomerFields.PAN_CARD_IMAGE,
+                      label: "PAN Card Image",
+                      type: "file",
+                      required: false,
+                      disabled: false,
+                    },
+                    {
+                      name: CustomerFields.ANY_PRUF_IMAGE,
+                      label: "Other Pruf/Vehicle Number",
                       type: "file",
                       required: true,
                       disabled: false,
                     },
                     {
-                      name: CustomerFields.ANY_PRUF_IMAGE,
-                      label: "Pruf",
+                      name: CustomerFields.AGREEMENT_IMAGE,
+                      label: "Agreement Image",
                       type: "file",
-                      required: true,
+                      required: false,
                       disabled: false,
                     },
                   ]?.map((field) => {

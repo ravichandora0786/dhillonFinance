@@ -40,6 +40,7 @@ import DeleteConfirmationModal from "@/components/ui/deleteConfirmation";
 import CustomerDetailModal from "@/components/ui/pagesComponents/customerDetailModal";
 import ReceiveMoneyModal from "@/components/ui/pagesComponents/receiveMoneyModal";
 import { toast } from "react-toastify";
+import { closeCustomerLoanWithTransaction } from "../loan/slice";
 
 const columns = (handleDelete, handleView, handleReceivedMoneyBtn) => [
   {
@@ -172,6 +173,20 @@ const Customer = (permissions) => {
     );
   };
 
+  const handleCloseCustomerLoan = async (rowData) => {
+    // const isConfirmed = await confirm();
+    // if (!isConfirmed) return;
+    dispatch(
+      closeCustomerLoanWithTransaction({
+        data: { loanId: rowData?.loans[0]?.id, customerId: rowData?.id },
+        onSuccess: (response) => {
+          toast.success(response?.message);
+        },
+        onFailure: () => {},
+      })
+    );
+  };
+
   const handleRefresh = () => {
     dispatch(setCustomerPagination({ pageIndex: 0, pageSize: 10 }));
     dispatch(setCustomerSearchData({ search: "" }));
@@ -272,6 +287,7 @@ const Customer = (permissions) => {
                 handleDelete={handleDelete}
                 handleView={handleView}
                 handleReceivedMoneyBtn={handleReceivedMoneyBtn}
+                handleCloseCustomerLoan={handleCloseCustomerLoan}
               />
             ))}
           </div>

@@ -11,3 +11,4 @@ export const selectRefreshToken = (state) => common(state).refreshToken;
 export const selectRolePermissionsMap = (state) =>
   common(state).rolePermissionsMap;
 export const selectCountryOptions = (state) => common(state).countryOptions;
+export const selectAllImages = (state) => common(state).allImages;

@@ -142,6 +142,96 @@ loanRouter.get("/:id", authenticateUser, loanController.getLoanById);
 
 /**
  * @swagger
+ * /loan/closeWithTransaction:
+ *   put:
+ *     summary: Close a loan by creating a final repayment transaction
+ *     description: Closes the loan for a given customer by creating a final repayment transaction for the remaining pending amount. This operation is performed inside a database transaction for data integrity.
+ *     tags: [Loans]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - customerId
+ *               - loanId
+ *             properties:
+ *               customerId:
+ *                 type: integer
+ *                 example: 5
+ *                 description: ID of the customer
+ *               loanId:
+ *                 type: integer
+ *                 example: 10
+ *                 description: ID of the loan to close
+ *     responses:
+ *       200:
+ *         description: Loan closed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Loan closed successfully with final repayment transaction
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     loan:
+ *                       type: object
+ *                       description: Updated loan details
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 10
+ *                         status:
+ *                           type: string
+ *                           example: Closed
+ *                         nextEmiAmount:
+ *                           type: number
+ *                           example: 0
+ *                         pendingEmis:
+ *                           type: integer
+ *                           example: 0
+ *                     finalTransaction:
+ *                       type: object
+ *                       description: Final repayment transaction created
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 45
+ *                         transactionType:
+ *                           type: string
+ *                           example: Repayment
+ *                         amount:
+ *                           type: number
+ *                           example: 10000
+ *                         paymentMode:
+ *                           type: string
+ *                           example: Cash
+ *       400:
+ *         description: Missing or invalid input
+ *       404:
+ *         description: Loan or customer not found
+ *       500:
+ *         description: Internal server error
+ */
+
+loanRouter.put(
+  "/closeWithTransaction",
+  authenticateUser,
+  loanController.closeLoanWithTransaction
+);
+
+/**
+ * @swagger
  * /loan/{id}:
  *   put:
  *     summary: Update loan

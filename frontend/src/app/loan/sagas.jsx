@@ -7,6 +7,7 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import { toast } from "react-toastify";
 import { endPoints, httpRequest } from "@/request";
 import {
+  closeCustomerLoanWithTransaction,
   createCustomerLoan,
   deleteCustomerLoan,
   getAllCustomerLoans,
@@ -114,6 +115,28 @@ function* updateCustomerLoansSaga(action) {
 }
 
 /**
+ * close Customer Loan With Transaction By customerId and loanId
+ * @param {*}
+ */
+function* closeCustomerLoanWithTransactionSaga(action) {
+  const { data, onSuccess, onFailure } = action.payload;
+  try {
+    const response = yield httpRequest.put(
+      `${endPoints.CustomerLoan}/closeWithTransaction`,
+      {
+        ...data,
+      }
+    );
+
+    yield onSuccess({ message: response?.message });
+  } catch (error) {
+    const errorMessage = error?.message || "Update failed";
+    toast.error(errorMessage);
+    yield onFailure({ message: errorMessage });
+  }
+}
+
+/**
  * Update CustomerLoan Status By Id
  * @param {*}
  */
@@ -137,4 +160,8 @@ export function* customerLoanSaga() {
   yield takeLatest(createCustomerLoan, createNewCustomerLoanSaga);
   yield takeLatest(updateCustomerLoan, updateCustomerLoansSaga);
   yield takeLatest(updateCustomerLoanStatus, updateCustomerLoanStatusSaga);
+  yield takeLatest(
+    closeCustomerLoanWithTransaction,
+    closeCustomerLoanWithTransactionSaga
+  );
 }

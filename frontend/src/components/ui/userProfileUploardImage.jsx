@@ -5,7 +5,6 @@ import { ImPencil } from "react-icons/im";
 import { getUploadedFile, imageUpload } from "@/app/common/slice";
 import GenericModal from "./genericModal";
 import { updateUser } from "@/app/user/slice";
-import { Formik } from "formik";
 import LoadingButton from "./loadingButton";
 import InputBox from "./inputBox";
 

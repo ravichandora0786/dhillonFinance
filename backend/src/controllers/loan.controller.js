@@ -264,10 +264,123 @@ const deleteLoan = asyncHandler(async (req, res, next) => {
   }
 });
 
+export const closeLoanWithTransaction = asyncHandler(async (req, res, next) => {
+  const t = await sequelize.transaction();
+  try {
+    const { customerId, loanId } = req.body;
+
+    if (!customerId || !loanId) {
+      await t.rollback();
+      return next(new ApiError(400, "Customer ID and Loan ID are required"));
+    }
+
+    // Validate Customer
+    const customer = await CustomerModel.findByPk(customerId, {
+      transaction: t,
+    });
+    if (!customer) {
+      await t.rollback();
+      return next(new ApiError(404, "Customer not found"));
+    }
+
+    // Validate Loan
+    const loan = await LoanModel.findOne({
+      where: { id: loanId, customerId },
+      transaction: t,
+    });
+
+    if (!loan) {
+      await t.rollback();
+      return next(new ApiError(404, "Loan not found for this customer"));
+    }
+
+    if (loan.status === "Closed") {
+      await t.rollback();
+      return next(new ApiError(400, "Loan is already closed"));
+    }
+
+    // Get all transactions for this loan
+    const transactions = await TransactionModel.findAll({
+      where: { loanId, customerId },
+      transaction: t,
+    });
+
+    // Calculate total paid amount (only Repayment)
+    const totalRepaymentAmount = transactions
+      .filter((tx) => tx.transactionType === "Repayment")
+      .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+    // Calculate pending amount
+    const pendingAmount =
+      Number(loan.totalPayableAmount || 0) - totalRepaymentAmount;
+
+    // If no pending amount
+    if (pendingAmount <= 0) {
+      await loan.update(
+        {
+          status: "Closed",
+          nextEmiAmount: 0,
+          installmentDate: null,
+          pendingEmis: 0,
+        },
+        { transaction: t }
+      );
+
+      await t.commit();
+      return res
+        .status(200)
+        .json(new ApiResponse(200, loan, "Loan already fully paid and closed"));
+    }
+
+    // Create final repayment transaction
+    const finalTransaction = await TransactionModel.create(
+      {
+        loanId,
+        customerId,
+        amount: pendingAmount,
+        transactionType: "Repayment",
+        paymentMode: "Cash",
+        transactionDate: new Date(),
+        description: "Final repayment (Loan Closed)",
+      },
+      { transaction: t }
+    );
+
+    // Update loan to closed
+    await loan.update(
+      {
+        status: "Closed",
+        pendingEmis: 0,
+        nextEmiAmount: 0,
+        installmentDate: null,
+        paidEmis: loan.paidEmis + 1,
+      },
+      { transaction: t }
+    );
+
+    await t.commit();
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          loan,
+          finalTransaction,
+        },
+        "Loan closed successfully with final repayment transaction"
+      )
+    );
+  } catch (err) {
+    await t.rollback();
+    next(new ApiError(500, err.message));
+  }
+});
+
 export default {
   createLoan,
   getLoans,
   getLoanById,
   updateLoan,
   deleteLoan,
+  closeLoanWithTransaction,
 };

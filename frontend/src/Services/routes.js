@@ -23,4 +23,5 @@ export const ProtectedRoutes = {
   CUSTOMER: "/customer",
   CUSTOMER_ADD: "/customer/add",
   CUSTOMER_EDIT: "/customer/edit",
+  IMAGES: "/images",
 };

@@ -63,43 +63,64 @@ const createTransaction = asyncHandler(async (req, res, next) => {
 
     if (transactionType === "Repayment") {
       const newPaidEmis = loanToUpdate.paidEmis + 1;
-      const newPendingEmis = loanToUpdate.tenureMonths - newPaidEmis;
+      const where = {};
+      if (customerId) where.customerId = customerId;
+      if (loanId) where.loanId = loanId;
+      const transactions = await TransactionModel.findAll({ where });
+      const totalRepaymentAmount = transactions
+        .filter((t) => t.transactionType === "Repayment")
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-      let calculatedNextEmiAmount = parseFloat(
-        (
-          parseFloat(loanToUpdate.nextEmiAmount || 0) -
-          parseFloat(amount) +
-          parseFloat(loanToUpdate.emiAmount || 0)
-        ).toFixed(2)
-      );
+      if (amount >= activeLoan?.totalPayableAmount - totalRepaymentAmount) {
+        await loanToUpdate.update(
+          {
+            paidEmis: newPaidEmis,
+            pendingEmis: 0,
+            nextEmiAmount: 0,
+            installmentDate: null,
+            status: "Closed",
+          },
+          { transaction: t }
+        );
+      } else {
+        const newPendingEmis = loanToUpdate.tenureMonths - newPaidEmis;
 
-      const newNextEmiAmount =
-        calculatedNextEmiAmount > 0 ? calculatedNextEmiAmount : 0;
+        let calculatedNextEmiAmount = parseFloat(
+          (
+            parseFloat(loanToUpdate.nextEmiAmount || 0) -
+            parseFloat(amount) +
+            parseFloat(loanToUpdate.emiAmount || 0)
+          ).toFixed(2)
+        );
 
-      const currentInstallmentDate = loanToUpdate.installmentDate
-        ? new Date(loanToUpdate.installmentDate)
-        : new Date();
+        const newNextEmiAmount =
+          calculatedNextEmiAmount > 0 ? calculatedNextEmiAmount : 0;
 
-      const newInstallmentDate =
-        newPendingEmis > 0
-          ? (() => {
-              currentInstallmentDate.setMonth(
-                currentInstallmentDate.getMonth() + 1
-              );
-              return currentInstallmentDate.toISOString().split("T")[0];
-            })()
-          : null;
+        const currentInstallmentDate = loanToUpdate.installmentDate
+          ? new Date(loanToUpdate.installmentDate)
+          : new Date();
 
-      await loanToUpdate.update(
-        {
-          paidEmis: newPaidEmis,
-          pendingEmis: newPendingEmis > 0 ? newPendingEmis : 0,
-          nextEmiAmount: newNextEmiAmount,
-          installmentDate: newInstallmentDate,
-          status: newPendingEmis === 0 ? "Closed" : loanToUpdate.status,
-        },
-        { transaction: t }
-      );
+        const newInstallmentDate =
+          newPendingEmis > 0
+            ? (() => {
+                currentInstallmentDate.setMonth(
+                  currentInstallmentDate.getMonth() + 1
+                );
+                return currentInstallmentDate.toISOString().split("T")[0];
+              })()
+            : null;
+
+        await loanToUpdate.update(
+          {
+            paidEmis: newPaidEmis,
+            pendingEmis: newPendingEmis > 0 ? newPendingEmis : 0,
+            nextEmiAmount: newPendingEmis > 0 ? newNextEmiAmount : 0,
+            installmentDate: newPendingEmis > 0 ? newInstallmentDate : null,
+            status: newPendingEmis === 0 ? "Closed" : loanToUpdate.status,
+          },
+          { transaction: t }
+        );
+      }
     }
 
     await t.commit();

@@ -180,16 +180,19 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
                             className="flex justify-between items-center p-2 rounded-md bg-slate-50 border border-slate-100"
                           >
                             <span className="text-sm text-slate-600">
-                              {"Payment"}
+                              {`Payment`}
                             </span>
-                            <span className="text-sm font-medium text-slate-800">
-                              ₹ {txn.amount}
+                            <span className="text-sm text-slate-600">
+                              {txn?.transactionType === "Disbursement" ? "Pay Loan" : txn?.transactionType}
+                            </span>
+                            <span className={`text-sm font-medium ${txn?.transactionType === "Disbursement" ? "text-danger" : "text-green-600"} `}>
+                              ₹ {txn.amount || 0}
                             </span>
                             <span className="text-xs text-slate-400">
-                              {txn.paymentMode}
+                              {txn.paymentMode || "-"}
                             </span>
                             <span className="text-xs text-slate-400">
-                              {txn.transactionDate}
+                              {txn.transactionDate || "-"}
                             </span>
                           </div>
                         ))}

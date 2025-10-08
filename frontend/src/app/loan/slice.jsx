@@ -59,3 +59,6 @@ export const updateCustomerLoanStatus = createAction("UPDATE_LOAN_STATUS");
 export const getAllCustomerLoans = createAction("GET_ALL_LOANS");
 export const getCustomerLoanDetailById = createAction("GET_LOAN_DETAIL_BY_ID");
 export const deleteCustomerLoan = createAction("GET_DELETE_LOAN_BY_ID");
+export const closeCustomerLoanWithTransaction = createAction(
+  "CLOSE_LOAN_WITH_TRANSACTION"
+);

@@ -10,22 +10,44 @@ import {
 
 import { CustomerFields, CommonFields } from "@/constants/fieldsName";
 
-const fileValidation = Yup.mixed()
-  .required("Please upload a file")
-  .test("fileCheck", "Please select a valid file under 100KB", (value) => {
-    // Agar ID (string) hai to valid hai (already uploaded)
-    if (typeof value === "string" && value.trim() !== "") return true;
+/**
+ * Reusable file validation schema generator
+ */
+const fileValidation = (isRequired = false, fieldName = "file") => {
+  let schema = Yup.mixed().test(
+    "fileCheck",
+    "Please select a valid file under 100KB (only JPG or PNG)",
+    (value) => {
+      // Allow empty value if field is not required
+      if (!value) return !isRequired;
 
-    // Agar abhi file object hai to uska size/type check karo
-    if (value instanceof File) {
-      const isValidSize = value.size <= 100 * 1024; // 100KB
-      const isValidType = ["image/jpeg", "image/png"].includes(value.type);
-      return isValidSize && isValidType;
+      // Allow already uploaded file IDs (string)
+      if (typeof value === "string" && value.trim() !== "") return true;
+
+      // Validate file object
+      if (value instanceof File) {
+        const isValidSize = value.size <= 100 * 1024; // 100 KB
+        const isValidType = ["image/jpeg", "image/png"].includes(value.type);
+        return isValidSize && isValidType;
+      }
+
+      return false;
     }
+  );
 
-    return false;
-  });
+  // Add required rule only if needed
+  if (isRequired) {
+    schema = schema.required(`${fieldName} is required`);
+  } else {
+    schema = schema.notRequired();
+  }
 
+  return schema;
+};
+
+/**
+ * Customer creation validation schema
+ */
 export const createCustomerSchema = Yup.object().shape({
   [CustomerFields.FIRST_NAME]: Yup.string()
     .matches(new RegExp(ALPHABETIC_REGEX), "Only alphabets are allowed")
@@ -78,11 +100,26 @@ export const createCustomerSchema = Yup.object().shape({
     .required("Vehicle Number is required"),
 
   // Image fields
-  [CustomerFields.PROFILE_IMAGE]: fileValidation,
-  [CustomerFields.AADHAR_IMAGE]: fileValidation,
-  // [CustomerFields.PAN_CARD_IMAGE]: fileValidation,
-  [CustomerFields.AGREEMENT_IMAGE]: fileValidation,
-  [CustomerFields.ANY_PRUF_IMAGE]: fileValidation,
+  [CustomerFields.PROFILE_IMAGE]: fileValidation(
+    true,
+    CustomerFields.PROFILE_IMAGE
+  ),
+  [CustomerFields.AADHAR_IMAGE]: fileValidation(
+    true,
+    CustomerFields.AADHAR_IMAGE
+  ),
+  [CustomerFields.PAN_CARD_IMAGE]: fileValidation(
+    false,
+    CustomerFields.PAN_CARD_IMAGE
+  ),
+  [CustomerFields.AGREEMENT_IMAGE]: fileValidation(
+    false,
+    CustomerFields.AGREEMENT_IMAGE
+  ),
+  [CustomerFields.ANY_PRUF_IMAGE]: fileValidation(
+    true,
+    CustomerFields.ANY_PRUF_IMAGE
+  ),
 
   [CommonFields.IS_ACTIVE]: Yup.boolean().required("Status is required"),
 });

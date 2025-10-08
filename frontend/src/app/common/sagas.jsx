@@ -7,6 +7,9 @@ import { call, put, takeEvery, takeLatest } from "redux-saga/effects";
 import { toast } from "react-toastify";
 import { persistor } from "@/redux/store";
 import {
+  cleanUpUnusedImage,
+  deleteImage,
+  getAllImages,
   getPermissionsByRoleId,
   getUploadedFile,
   imageUpload,
@@ -15,6 +18,7 @@ import {
   resetPassword,
   sendMailForgotPassword,
   setAccessToken,
+  setAllImages,
   setRefreshToken,
   setRolePermissionsMap,
   setUser,
@@ -180,6 +184,65 @@ function* resetForgotPasswordSaga(action) {
   }
 }
 
+/**
+ * Delete Image By Id
+ * @param {*}
+ */
+function* deleteImageSaga(action) {
+  const { id, onSuccess, onFailure } = action.payload;
+  try {
+    const response = yield call(
+      httpRequest.delete,
+      `${endPoints.CommonImageUpload}/${id}`
+    );
+
+    yield onSuccess({ message: response?.message, data: response?.data });
+  } catch (error) {
+    const errorMessage = error?.message || "Delete failed";
+    toast.error(errorMessage);
+    yield onFailure({ message: errorMessage });
+  }
+}
+
+/**
+ * Delete Image By Id
+ * @param {*}
+ */
+function* cleanUpUnusedImageSaga(action) {
+  const { onSuccess, onFailure } = action.payload;
+  try {
+    const response = yield call(
+      httpRequest.delete,
+      `${endPoints.CommonImageUpload}/cleanupDrive`
+    );
+
+    yield onSuccess({ message: response?.message, data: response?.data });
+  } catch (error) {
+    const errorMessage = error?.message || "Delete failed";
+    toast.error(errorMessage);
+    yield onFailure({ message: errorMessage });
+  }
+}
+
+/**
+ * Get All Images by filter with customer and user
+ * @param {*}
+ */
+function* getAllImagesSaga(action) {
+  const { data, onSuccess, onFailure } = action.payload;
+  try {
+    const response = yield httpRequest.get(endPoints.CommonImageUpload, {
+      params: data,
+    });
+    yield put(setAllImages(response?.data?.data));
+    yield onSuccess({ message: response?.data?.message, data: response?.data });
+  } catch (err) {
+    const errorMessage = err.message || "Something went wrong!";
+    toast.error(errorMessage);
+    yield onFailure({ message: errorMessage });
+  }
+}
+
 export function* commonSagas() {
   yield takeLatest(loginApp, loginAppSaga);
   yield takeLatest(imageUpload, imageUploadSaga);
@@ -188,4 +251,7 @@ export function* commonSagas() {
   yield takeLatest(sendMailForgotPassword, sendMailForgotPasswordSaga);
   yield takeLatest(resetPassword, resetPasswordSaga);
   yield takeLatest(resetForgotPassword, resetForgotPasswordSaga);
+  yield takeLatest(cleanUpUnusedImage, cleanUpUnusedImageSaga);
+  yield takeLatest(deleteImage, deleteImageSaga);
+  yield takeLatest(getAllImages, getAllImagesSaga);
 }
