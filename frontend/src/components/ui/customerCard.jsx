@@ -36,7 +36,7 @@ const CustomerCardComponent = ({
                     ? "text-green-600 border-green-600"
                     : customer.status === "Inactive"
                     ? "text-danger border-danger"
-                    : "text-gray-500 border-gray-500"
+                    : "text-black border-black"
                 }`}
               >
                 <option value="Active" className="text-green-500 bg-white">
@@ -45,7 +45,7 @@ const CustomerCardComponent = ({
                 <option value="Inactive" className="text-red-500 bg-white">
                   Inactive
                 </option>
-                <option value="Blocked" className="text-gray-500 bg-white">
+                <option value="Blocked" className="text-black bg-white">
                   Block
                 </option>
               </select>

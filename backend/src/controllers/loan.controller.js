@@ -14,11 +14,22 @@ const createLoan = asyncHandler(async (req, res, next) => {
   try {
     const { customerId, emiAmount, amount, startDate, tenureMonths } = req.body;
 
+    if (!customerId || !emiAmount || !amount || !startDate || !tenureMonths) {
+      await transaction.rollback();
+      return next(new ApiError(400, "All required fields must be provided"));
+    }
+
     // Customer check
     const customer = await CustomerModel.findByPk(customerId, { transaction });
     if (!customer) {
       await transaction.rollback();
       return next(new ApiError(404, "Customer not found"));
+    }
+    if (["Blocked", "Inactive"].includes(customer.status)) {
+      await transaction.rollback();
+      return next(
+        new ApiError(403, `Customer is ${customer.status}, cannot create loan`)
+      );
     }
 
     // Check existing active/pending/defaulted loan
@@ -140,7 +151,7 @@ const getLoans = asyncHandler(async (req, res, next) => {
           model: TransactionModel,
           as: "transactions",
           // attributes: ["amount", "transactionType", "createdAt"],
-          separate: true, // optional: can remove for large datasets
+          separate: true,
           order: [["createdAt", "DESC"]],
         },
       ],

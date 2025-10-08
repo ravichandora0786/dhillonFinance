@@ -183,9 +183,9 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
                             key={idx}
                             className="flex justify-between items-center p-2 rounded-md bg-slate-50 border border-slate-100"
                           >
-                            <span className="text-sm text-slate-600">
+                            {/* <span className="text-sm text-slate-600">
                               {`Payment`}
-                            </span>
+                            </span> */}
                             <span className="text-sm text-slate-600">
                               {txn?.transactionType === "Disbursement"
                                 ? "Pay Loan"
