@@ -21,6 +21,7 @@ import InputBox from "../inputBox";
 import BackButton from "../backButton";
 import { createCustomerSchema } from "@/validationSchema/customerSchema";
 import FullScreenLoader from "@/components/ui/fullScreenLoader";
+import { customerStatusOptions } from "@/constants/dropdown";
 
 // Field Configuration Array
 
@@ -126,7 +127,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
-      maxLength: 12,
+      maxLength: 14,
       onKeyDown: (e) => {
         const value = e.target.value;
 
@@ -152,10 +153,25 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
         }
 
         // Max length = 12
-        if (value.length >= 12) {
+        if (value.length >= 14) {
           e.preventDefault();
           return;
         }
+      },
+      onChange: (e, setFieldValue) => {
+        let value = e.target.value.replace(/\D/g, "");
+
+        // format: xxxx-xxxx-xxxx
+        if (value.length > 4 && value.length <= 8) {
+          value = `${value.slice(0, 4)}-${value.slice(4)}`;
+        } else if (value.length > 8) {
+          value = `${value.slice(0, 4)}-${value.slice(4, 8)}-${value.slice(
+            8,
+            12
+          )}`;
+        }
+
+        setFieldValue(CustomerFields.AADHAR_NUMBER, value);
       },
     },
     {
@@ -202,7 +218,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
       type: "text",
       required: true,
       disabled: false,
-      maxLength: 15,
+      maxLength: 20,
       onKeyDown: (e) => {
         const value = e.target.value;
         if (
@@ -218,7 +234,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
         ) {
           return;
         }
-        if (!/^[a-zA-Z0-9]$/.test(e.key)) {
+        if (!/^[a-zA-Z0-9 ]$/.test(e.key)) {
           e.preventDefault();
           return;
         }
@@ -226,16 +242,17 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
     },
 
     {
-      name: CommonFields.IS_ACTIVE,
-      label: "Active",
-      type: "toggle",
+      name: CommonFields.STATUS,
+      label: "Status",
+      type: "select",
+      options: customerStatusOptions,
       required: true,
       disabled: false,
     },
   ];
   let initialValues = fields.reduce((acc, f) => {
-    if (f.name === CommonFields.IS_ACTIVE) {
-      acc[f.name] = true;
+    if (f.name === CommonFields.STATUS) {
+      acc[f.name] = "Active";
     } else {
       acc[f.name] = "";
     }
@@ -349,7 +366,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                 [CustomerFields.START_DATE]: data[CustomerFields.START_DATE],
                 [CustomerFields.END_DATE]: data[CustomerFields.END_DATE],
                 [CommonFields.DESCRIPTION]: data[CommonFields.DESCRIPTION],
-                [CommonFields.IS_ACTIVE]: data[CommonFields.IS_ACTIVE],
+                [CommonFields.STATUS]: data[CommonFields.STATUS],
                 [CustomerFields.VEHICLE_NUMBER]:
                   data[CustomerFields.VEHICLE_NUMBER],
               };

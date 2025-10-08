@@ -118,7 +118,12 @@ function* updateCustomersSaga(action) {
 function* updateCustomerStatusSaga(action) {
   const { id, data, onSuccess, onFailure } = action.payload;
   try {
-    const response = yield httpRequest.put(`${endPoints.Customer}/${id}`);
+    const response = yield httpRequest.put(
+      `${endPoints.Customer}/status/${id}`,
+      {
+        ...data,
+      }
+    );
 
     yield onSuccess({ message: response?.message });
   } catch (error) {

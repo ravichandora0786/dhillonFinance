@@ -89,8 +89,17 @@ export const getGoogleDriveClient = async () => {
   // Refresh token if expired
   if (!tokens.expiry_date || tokens.expiry_date < Date.now()) {
     const { credentials } = await oAuth2Client.refreshAccessToken();
-    oAuth2Client.setCredentials(credentials);
-    saveTokens(credentials);
+
+    // Keep the old refresh token if Google doesn't return a new one
+    const newTokens = {
+      ...tokens,
+      access_token: credentials.access_token,
+      expiry_date: credentials.expiry_date,
+      refresh_token: credentials.refresh_token || tokens.refresh_token,
+    };
+
+    oAuth2Client.setCredentials(newTokens);
+    saveTokens(newTokens);
   }
 
   return google.drive({ version: "v3", auth: oAuth2Client });

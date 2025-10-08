@@ -48,6 +48,7 @@ const CustomerModel = sequelize.define(
     aadharNumber: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     panCardNumber: {
       type: DataTypes.STRING,

@@ -22,7 +22,11 @@ import { createCustomerLoanSchema } from "@/validationSchema/loanSchema";
 import FullScreenLoader from "@/components/ui/fullScreenLoader";
 import { loanStatusOptions } from "@/constants/dropdown";
 
-const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
+const AddEditCustomerLoanComponent = ({
+  customerLoanId,
+  isEdit,
+  customerId = null,
+}) => {
   const dispatch = useDispatch();
   const navigate = useRouter();
   const [customerOptions, setCustomerOptions] = useState([]);
@@ -35,7 +39,7 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       type: "select",
       options: customerOptions,
       required: true,
-      disabled: false,
+      disabled: customerId ? true : false,
     },
 
     {
@@ -160,7 +164,7 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       label: "Intrest Rate",
       type: "text",
       required: true,
-      disabled: false,
+      disabled: true,
       onKeyDown: (e) => {
         const value = e.target.value;
         // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
@@ -191,6 +195,7 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       required: true,
       disabled: false,
       dateMode: "single",
+      minDate: "",
     },
     {
       name: LoanFields.START_DATE,
@@ -199,6 +204,7 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       required: true,
       disabled: false,
       dateMode: "single",
+      minDate: "",
     },
     {
       name: LoanFields.END_DATE,
@@ -207,6 +213,7 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       required: true,
       disabled: false,
       dateMode: "single",
+      minDate: "",
     },
     {
       name: CommonFields.DESCRIPTION,
@@ -227,8 +234,8 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
   ];
 
   const initialValues = fields.reduce((acc, f) => {
-    if (f.name === CommonFields.IS_ACTIVE) {
-      acc[f.name] = true;
+    if (f.name === CommonFields.STATUS) {
+      acc[f.name] = "Active";
     } else {
       acc[f.name] = "";
     }
@@ -346,6 +353,15 @@ const AddEditCustomerLoanComponent = ({ customerLoanId, isEdit }) => {
       })
     );
   }, [dispatch]);
+
+  useEffect(() => {
+    if (customerId) {
+      setInitialObject((prev) => ({
+        ...prev,
+        [CommonFields.CUSTOMER_ID]: customerId,
+      }));
+    }
+  }, [customerId]);
 
   return (
     <>

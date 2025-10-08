@@ -36,12 +36,18 @@ const refreshFileUrl = async (fileObj, folderName) => {
 const createCustomer = asyncHandler(async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
-    const { mobileNumber } = req.body;
+    const { mobileNumber, aadharNumber } = req.body;
 
     // check duplicate mobile
     const existing = await CustomerModel.findOne({ where: { mobileNumber } });
     if (existing)
       return next(new ApiError(400, "Mobile number already exists"));
+    // check duplicate mobile
+    const aadharExistingCheck = await CustomerModel.findOne({
+      where: { aadharNumber },
+    });
+    if (aadharExistingCheck)
+      return next(new ApiError(400, "Aadhar number already exists"));
 
     const customer = await CustomerModel.create(req.body, { transaction });
     await transaction.commit();
@@ -635,6 +641,43 @@ const getCustomersNextEMI = asyncHandler(async (req, res, next) => {
   }
 });
 
+/** Update Customer Status */
+const updateCustomerStatusById = asyncHandler(async (req, res, next) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ["Active", "Inactive", "Blocked"];
+    if (!validStatuses.includes(status)) {
+      return next(new ApiError(400, "Invalid status value"));
+    }
+
+    const customer = await CustomerModel.findByPk(id);
+    if (!customer) {
+      return next(new ApiError(404, "Customer not found"));
+    }
+
+    customer.status = status;
+    await customer.save({ transaction });
+
+    await transaction.commit();
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { id: customer.id, status: customer.status },
+          "Customer status updated successfully"
+        )
+      );
+  } catch (err) {
+    await transaction.rollback();
+    next(new ApiError(500, err.message));
+  }
+});
+
 export default {
   createCustomer,
   getCustomers,
@@ -644,4 +687,5 @@ export default {
   getCustomerOptions,
   getCustomerRepaymentStats,
   getCustomersNextEMI,
+  updateCustomerStatusById,
 };

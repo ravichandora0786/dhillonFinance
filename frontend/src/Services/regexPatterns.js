@@ -1,6 +1,6 @@
-export const AADHAR_REGEX = "^[2-9][0-9]{11}$";
+export const AADHAR_REGEX = "^[2-9][0-9]{3}-[0-9]{4}-[0-9]{4}$";
 export const ALPHABETIC_REGEX = "^[a-zA-Z]+( [a-zA-Z]+)*$";
-export const ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
+export const ALPHANUMERIC_REGEX = "^[a-zA-Z0-9 ]+$";
 export const DATE_YYYY_MM_DD_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
 export const DECIMAL_NUMBER_REGEX = "^\\d+(\\.\\d{1,4})?$";
 export const EMAIL_BASIC_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";

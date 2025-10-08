@@ -308,4 +308,57 @@ customerRouter.get(
   customerController.getCustomersNextEMI
 );
 
+/**
+ * @swagger
+ * /customer/status/{id}:
+ *   put:
+ *     summary: Update customer status
+ *     tags: [Dashboard]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Customer ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Active, Inactive, Blocked]
+ *                 example: Active
+ *     responses:
+ *       200:
+ *         description: Customer status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Active
+ *                 id:
+ *                   type: integer
+ *                   example: 1
+ *       400:
+ *         description: Invalid status
+ *       404:
+ *         description: Customer not found
+ *       500:
+ *         description: Server error
+ */
+customerRouter.put(
+  "/status/:id",
+  authenticateUser,
+  customerController.updateCustomerStatusById
+);
+
 export default customerRouter;

@@ -13,3 +13,8 @@ export const loanStatusOptions = [
   { label: "Pending", value: "Pending" },
   { label: "Close", value: "Closed" },
 ];
+export const customerStatusOptions = [
+  { label: "Active", value: "Active" },
+  { label: "In-active", value: "Inactive" },
+  { label: "Block", value: "Blocked" },
+];

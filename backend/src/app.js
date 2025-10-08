@@ -27,12 +27,13 @@ const io = new Server(httpServer, {
   },
 });
 
-app.set("io", io); // using set method to mount the `io` instance on the app to avoid usage of `global`
+app.set("io", io); 
 
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 // Middleware to parse incoming JSON requests

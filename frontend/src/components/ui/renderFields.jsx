@@ -1,4 +1,3 @@
-import { parseFullDate, todayDate } from "@/Services/utils";
 import CustomDatePicker from "./customDatePicker";
 import CustomSwitch from "./customSwitch";
 import InputBox from "./inputBox";
@@ -20,7 +19,6 @@ const RenderFields = ({
   columns = 4,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const today = todayDate();
   const variantClasses = {
     4: "lg:grid-cols-4",
     3: "lg:grid-cols-3",
@@ -40,9 +38,10 @@ const RenderFields = ({
           isMulti = false,
           selectOnChange,
           dateMode = "single",
-          onChange = () => {},
+          onChange,
           onKeyDown,
           maxLength,
+          minDate,
         }) => {
           const fieldValue = getIn(values, name);
           const fieldError = getIn(errors, name);
@@ -122,11 +121,33 @@ const RenderFields = ({
                   value={fieldValue}
                   onChange={(date) => {
                     setFieldValue(name, date);
+                    // calculate end date if start date and months available
+                    const startDate =
+                      name === LoanFields.START_DATE
+                        ? new Date(date)
+                        : new Date(values[LoanFields.START_DATE]);
+
+                    const months = parseInt(values[LoanFields.MONTHS] || 0);
+
+                    if (
+                      startDate &&
+                      months > 0 &&
+                      !isNaN(startDate.getTime())
+                    ) {
+                      const endDate = new Date(startDate);
+                      endDate.setMonth(endDate.getMonth() + months);
+
+                      const formattedEndDate = endDate
+                        .toISOString()
+                        .split("T")[0];
+
+                      setFieldValue(LoanFields.END_DATE, formattedEndDate);
+                    }
                   }}
                   placeholderText="DD/MM/YYYY"
                   isClearable={true}
                   dateFormat="dd MMM yyyy"
-                  minDate={today}
+                  minDate={minDate}
                   error={fieldError}
                   touched={fieldTouched}
                 />
@@ -165,39 +186,46 @@ const RenderFields = ({
                   value={fieldValue}
                   onChange={(e) => {
                     const value = e.target.value;
-                    setFieldValue(name, value);
-
-                    const principal =
-                      name === LoanFields.PRINCIPAL_AMOUNT
-                        ? parseFloat(value)
-                        : parseFloat(values[LoanFields.PRINCIPAL_AMOUNT] || 0);
-
-                    const totalPay =
-                      name === LoanFields.TOTAL_PAY_AMOUNT
-                        ? parseFloat(value)
-                        : parseFloat(values[LoanFields.TOTAL_PAY_AMOUNT] || 0);
-
-                    const months =
-                      name === LoanFields.MONTHS
-                        ? parseInt(value)
-                        : parseInt(values[LoanFields.MONTHS] || 0);
-
-                    if (principal > 0 && totalPay > 0 && months > 0) {
-                      // EMI calculation with interest
-                      const emi = totalPay / months;
-
-                      // Interest rate calculation
-                      const interestAmount = totalPay - principal;
-                      const interestRate = (interestAmount / principal) * 100;
-
-                      setFieldValue(LoanFields.EMI_AMOUNT, emi.toFixed(2));
-                      setFieldValue(
-                        LoanFields.INTREST_RATE,
-                        interestRate.toFixed(2)
-                      );
+                    // agar field ke config me custom onChange diya gaya hai
+                    if (typeof onChange === "function") {
+                      onChange(e, setFieldValue);
+                      return;
                     } else {
-                      setFieldValue(LoanFields.EMI_AMOUNT, "");
-                      setFieldValue(LoanFields.INTREST_RATE, "");
+                      setFieldValue(name, value);
+
+                      const principal =
+                        name === LoanFields.PRINCIPAL_AMOUNT
+                          ? parseFloat(value)
+                          : parseFloat(
+                              values[LoanFields.PRINCIPAL_AMOUNT] || 0
+                            );
+
+                      const totalPay =
+                        name === LoanFields.TOTAL_PAY_AMOUNT
+                          ? parseFloat(value)
+                          : parseFloat(
+                              values[LoanFields.TOTAL_PAY_AMOUNT] || 0
+                            );
+
+                      const months =
+                        name === LoanFields.MONTHS
+                          ? parseInt(value)
+                          : parseInt(values[LoanFields.MONTHS] || 0);
+
+                      if (principal > 0 && totalPay > 0 && months > 0) {
+                        // EMI calculation with interest
+                        const emi = totalPay / months;
+
+                        // Interest rate calculation
+                        const interestAmount = totalPay - principal;
+                        const interestRate = (interestAmount / principal) * 100;
+
+                        setFieldValue(LoanFields.EMI_AMOUNT, emi.toFixed(2));
+                        setFieldValue(
+                          LoanFields.INTREST_RATE,
+                          interestRate.toFixed(2)
+                        );
+                      }
                     }
                   }}
                   placeholder={`Enter ${label}`}

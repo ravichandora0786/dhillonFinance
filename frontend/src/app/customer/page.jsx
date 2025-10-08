@@ -25,6 +25,7 @@ import {
   setCustomerId,
   setCustomerPagination,
   setCustomerSearchData,
+  updateCustomerStatus,
 } from "./slice";
 import {
   selectAllCustomerList,
@@ -36,11 +37,12 @@ import ActionColumnsComponent from "@/components/tableCollumnComponents/actionCo
 import SingleParagraphColumn from "@/components/tableCollumnComponents/singleParagraphCol";
 import NameAvatarColumn from "@/components/tableCollumnComponents/nameWithImageCol";
 import ButtonColumn from "@/components/tableCollumnComponents/buttonCol";
-import DeleteConfirmationModal from "@/components/ui/deleteConfirmation";
+import ConfirmationModal from "@/components/ui/deleteConfirmation";
 import CustomerDetailModal from "@/components/ui/pagesComponents/customerDetailModal";
 import ReceiveMoneyModal from "@/components/ui/pagesComponents/receiveMoneyModal";
 import { toast } from "react-toastify";
 import { closeCustomerLoanWithTransaction } from "../loan/slice";
+import FullScreenLoader from "@/components/ui/fullScreenLoader";
 
 const columns = (handleDelete, handleView, handleReceivedMoneyBtn) => [
   {
@@ -126,14 +128,11 @@ const columns = (handleDelete, handleView, handleReceivedMoneyBtn) => [
   },
 ];
 
-const Customer = (permissions) => {
-  const create = true;
+const Customer = () => {
   const navigate = useRouter();
   const dispatch = useDispatch();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const { confirm, ModalContent } = DeleteConfirmationModal();
-  const [loading, setLoading] = useState(false);
-  const [customerId, setCustomerId] = useState(null);
+  const { confirm, ModalContent } = ConfirmationModal();
+  const [screenLoading, setScreenLoading] = useState(false);
   const [openViewDetailModal, setOpenViewDetailModal] = useState(false);
   const [openReceivedMoneyModal, setOpenReceivedMoneyModal] = useState(false);
   const [rowData, setRowData] = useState({});
@@ -159,7 +158,14 @@ const Customer = (permissions) => {
     navigate.push("/customer/add");
   };
   const handleDelete = async (rowData) => {
-    const isConfirmed = await confirm();
+    const isConfirmed = await confirm({
+      title: "",
+      message:
+        "Are you sure you want to delete this Customer? Once deleted, it cannot be restored.",
+      icon: "delete",
+      confirmText: "Yes, Delete",
+      cancelText: "Cancel",
+    });
     if (!isConfirmed) return;
     dispatch(
       deleteCustomer({
@@ -174,15 +180,73 @@ const Customer = (permissions) => {
   };
 
   const handleCloseCustomerLoan = async (rowData) => {
-    // const isConfirmed = await confirm();
-    // if (!isConfirmed) return;
+    const loan = rowData?.loans?.[0];
+    if (!loan) {
+      toast.error("No active loan found for this customer");
+      return;
+    }
+
+    const isConfirmed = await confirm({
+      title: "",
+      message: "Are you sure you want to close this loan?",
+      icon: "info",
+      confirmText: "Yes, Close Loan",
+      cancelText: "Cancel",
+      details: [
+        {
+          label: "Customer Name",
+          value: `${rowData?.firstName} ${rowData?.lastName}`,
+        },
+        {
+          label: "Loan Amount",
+          value: `${loan?.amount}`,
+        },
+        {
+          label: "Receivable Loan Amount",
+          value: `${loan?.totalPayableAmount}`,
+        },
+        { label: "Pending Emi", value: `${loan?.pendingEmis}` },
+        { label: "Pending Amount", value: `₹${loan?.repaymentsPending}` },
+        {
+          label: "EMIs Paid",
+          value: `${loan?.paidEmis} of ${loan?.tenureMonths}`,
+        },
+      ],
+    });
+
+    if (!isConfirmed) return;
+
+    setScreenLoading(true);
+
     dispatch(
       closeCustomerLoanWithTransaction({
-        data: { loanId: rowData?.loans[0]?.id, customerId: rowData?.id },
+        data: { loanId: loan?.id, customerId: rowData?.id },
         onSuccess: (response) => {
           toast.success(response?.message);
+          getAllCustomersList(customerSearchData, pagination);
+          setScreenLoading(false);
         },
-        onFailure: () => {},
+        onFailure: () => {
+          setScreenLoading(false);
+        },
+      })
+    );
+  };
+
+  const handleCustomerStatus = async (id, status) => {
+    setScreenLoading(true);
+    dispatch(
+      updateCustomerStatus({
+        id,
+        data: { status },
+        onSuccess: (response) => {
+          toast.success(response?.message);
+          getAllCustomersList(customerSearchData, pagination);
+          setScreenLoading(false);
+        },
+        onFailure: () => {
+          setScreenLoading(false);
+        },
       })
     );
   };
@@ -288,6 +352,7 @@ const Customer = (permissions) => {
                 handleView={handleView}
                 handleReceivedMoneyBtn={handleReceivedMoneyBtn}
                 handleCloseCustomerLoan={handleCloseCustomerLoan}
+                handleCustomerStatus={handleCustomerStatus}
               />
             ))}
           </div>
@@ -340,6 +405,7 @@ const Customer = (permissions) => {
           getAllCustomersList(customerSearchData, pagination);
         }}
       />
+      <FullScreenLoader showLoader={screenLoading} message="Please Wait..." />
     </>
   );
 };

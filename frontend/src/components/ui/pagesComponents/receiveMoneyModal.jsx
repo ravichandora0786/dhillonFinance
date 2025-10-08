@@ -11,6 +11,7 @@ import LoadingButton from "@/components/ui/loadingButton";
 import RenderFields from "@/components/ui/renderFields";
 import { getCustomerListForOptions } from "@/app/customer/slice";
 import FullScreenLoader from "@/components/ui/fullScreenLoader";
+import { todayDate } from "@/Services/utils";
 
 const ReceiveMoneyModal = ({
   openModal,
@@ -21,6 +22,7 @@ const ReceiveMoneyModal = ({
   const dispatch = useDispatch();
   const customer = data;
   const [customerOptions, setCustomerOptions] = useState([]);
+  const today = todayDate().toISOString().split("T")[0];
 
   // Field Configuration Array
   const fields = [
@@ -30,7 +32,7 @@ const ReceiveMoneyModal = ({
       type: "select",
       options: customerOptions,
       required: true,
-      disabled: false,
+      disabled: customer?.id ? true : false,
     },
     {
       name: TransactionFields.AMOUNT,
@@ -58,6 +60,7 @@ const ReceiveMoneyModal = ({
       type: "date",
       required: true,
       disabled: false,
+      minDate: "",
     },
     {
       name: CommonFields.DESCRIPTION,
@@ -111,6 +114,7 @@ const ReceiveMoneyModal = ({
         [CommonFields.CUSTOMER_ID]: customer.id,
         [TransactionFields.TRANSACTION_TYPE]: "Repayment",
         [TransactionFields.AMOUNT]: customer?.loans[0]?.nextEmiAmount,
+        [TransactionFields.TRANSACTION_DATE]: today,
         [CommonFields.IS_ACTIVE]: true,
       };
 
@@ -159,7 +163,9 @@ const ReceiveMoneyModal = ({
       <GenericModal
         showModal={openModal}
         closeModal={onBack}
-        modalTitle={`Receive Money from ${customer?.firstName} ${customer?.lastName}`}
+        modalTitle={`Receive Money ${customer ? "from" : ""} ${
+          customer?.firstName || ""
+        } ${customer?.lastName || ""}`}
         modalBody={
           <Formik
             initialValues={initialObject}

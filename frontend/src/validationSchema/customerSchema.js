@@ -81,8 +81,8 @@ export const createCustomerSchema = Yup.object().shape({
 
   [CustomerFields.AADHAR_NUMBER]: Yup.string()
     .matches(new RegExp(AADHAR_REGEX), "Enter valid 12-digit Aadhar Number")
-    .min(12, "Aadhar Number must be 12 digits")
-    .max(12, "Aadhar Number must be 12 digits")
+    .min(14, "Aadhar Number must be 12 digits")
+    .max(14, "Aadhar Number must be 12 digits")
     .required("Aadhar Number is required"),
 
   [CustomerFields.PAN_CARD_NUMBER]: Yup.string()
@@ -121,5 +121,5 @@ export const createCustomerSchema = Yup.object().shape({
     CustomerFields.ANY_PRUF_IMAGE
   ),
 
-  [CommonFields.IS_ACTIVE]: Yup.boolean().required("Status is required"),
+  [CommonFields.STATUS]: Yup.string().required("Status is required"),
 });

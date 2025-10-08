@@ -1,21 +1,9 @@
 "use client";
-import React, { useState } from "react";
-import {
-  FiMoreVertical,
-  FiEdit,
-  FiEye,
-  FiArrowRight,
-  FiTrash2,
-  FiMessageCircle,
-  FiPhone,
-  FiMail,
-} from "react-icons/fi";
+import React from "react";
+import { FiPhone } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
-import { MdOutlinePhone } from "react-icons/md";
 import { TbMessage } from "react-icons/tb";
 import LoadingButton from "./loadingButton";
-import Link from "next/link";
-import NameAvatarColumn from "../tableCollumnComponents/nameWithImageCol";
 import { removeTimeFromDate } from "@/Services/utils";
 import ActionColumnsComponent from "../tableCollumnComponents/actionColumn";
 import { useRouter } from "next/navigation";
@@ -26,6 +14,7 @@ const CustomerCardComponent = ({
   handleView,
   handleReceivedMoneyBtn,
   handleCloseCustomerLoan,
+  handleCustomerStatus,
 }) => {
   const router = useRouter();
 
@@ -34,10 +23,34 @@ const CustomerCardComponent = ({
       <div className="w-full bg-white border rounded-lg shadow flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b px-4 py-2">
-          <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full flex items-center">
-            <span className="w-2 h-2 rounded-full bg-green-600 mr-1"></span>
-            Active
-          </span>
+          <div className="flex flex-row justify-between items-center">
+            <div className="">
+              <select
+                name="status"
+                value={customer.status}
+                onChange={(e) =>
+                  handleCustomerStatus(customer.id, e.target.value)
+                }
+                className={`border rounded-2xl px-1 bg-white ${
+                  customer.status === "Active"
+                    ? "text-green-600 border-green-600"
+                    : customer.status === "Inactive"
+                    ? "text-danger border-danger"
+                    : "text-gray-500 border-gray-500"
+                }`}
+              >
+                <option value="Active" className="text-green-500 bg-white">
+                  Active
+                </option>
+                <option value="Inactive" className="text-red-500 bg-white">
+                  Inactive
+                </option>
+                <option value="Blocked" className="text-gray-500 bg-white">
+                  Block
+                </option>
+              </select>
+            </div>
+          </div>
           <div className="">
             <ActionColumnsComponent
               showDeleteButton={true}
@@ -90,7 +103,7 @@ const CustomerCardComponent = ({
               </p>
             </div>
             <div>
-              <p className="text-gray-500">Loan Status</p>
+              <p className="text-gray-500">Latest Loan Status</p>
               <p className="font-medium text-gray-800">
                 {customer?.loans[0]?.status || "--"}
               </p>
@@ -209,7 +222,7 @@ const CustomerCardComponent = ({
                   isLoading={false}
                   disabled={false}
                   onClick={() => {
-                    router.push("/loan/add");
+                    router.push(`/loan/add?customerId=${customer.id}`);
                   }}
                   variant="danger"
                 >

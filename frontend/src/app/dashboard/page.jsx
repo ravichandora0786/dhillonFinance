@@ -137,7 +137,7 @@ export default function Dashboard() {
         onBack={() => {
           setOpenReceivedMoneyModal(false);
         }}
-        data={{}}
+        data={null}
         callBackFunc={() => {
           getDashboardDataList();
         }}

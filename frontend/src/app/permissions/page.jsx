@@ -28,7 +28,7 @@ import {
 import ActionColumnsComponent from "@/components/tableCollumnComponents/actionColumn";
 import SingleParagraphColumn from "@/components/tableCollumnComponents/singleParagraphCol";
 import { removeTimeFromDate } from "@/Services/utils";
-import DeleteConfirmationModal from "@/components/ui/deleteConfirmation";
+import ConfirmationModal from "@/components/ui/deleteConfirmation";
 import { toast } from "react-toastify";
 
 const columns = (handleDelete, handleEdit) => [
@@ -74,7 +74,7 @@ const Permission = (permissions) => {
   const create = true;
   const navigate = useRouter();
   const dispatch = useDispatch();
-  const { confirm, ModalContent } = DeleteConfirmationModal();
+  const { confirm, ModalContent } = ConfirmationModal();
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [rowData, setRowData] = useState({});
@@ -99,7 +99,14 @@ const Permission = (permissions) => {
     setOpenModal(true);
   };
   const handleDelete = async (rowData) => {
-    const isConfirmed = await confirm();
+    const isConfirmed = await confirm({
+      title: "",
+      message:
+        "Are you sure you want to delete this Permission? Once deleted, it cannot be restored.",
+      icon: "delete",
+      confirmText: "Yes, Delete",
+      cancelText: "Cancel",
+    });
     if (!isConfirmed) return;
     dispatch(
       deletePermission({
