@@ -14,6 +14,7 @@ import BackButton from "../backButton";
 import { genderOptions } from "@/constants/dropdown";
 import { UserProfileUploadImage } from "../userProfileUploardImage";
 import FullScreenLoader from "@/components/ui/fullScreenLoader";
+import ShortNameComponent from "@/components/ui/shortNmaeComponent";
 
 // Field Configuration Array
 
@@ -49,7 +50,14 @@ const AddEditUserComponent = ({ userId, isEdit }) => {
       label: "Mobile Number",
       type: "text",
       required: true,
-      disabled: true,
+      disabled: false,
+    },
+    {
+      name: UserFields.DATE_OF_BIRTH,
+      label: "Date of Birth",
+      type: "date",
+      required: true,
+      disabled: false,
     },
     {
       name: UserFields.ADDRESS,
@@ -197,11 +205,15 @@ const AddEditUserComponent = ({ userId, isEdit }) => {
             <>
               <form onSubmit={handleSubmit} className="">
                 <div>
-                  <UserProfileUploadImage
-                    fileId={values[UserFields.PROFILE_IMAGE]}
-                    userId={userId}
-                    fieldName={UserFields.PROFILE_IMAGE}
-                  />
+                  {values[UserFields.PROFILE_IMAGE] ? (
+                    <UserProfileUploadImage
+                      fileId={values[UserFields.PROFILE_IMAGE]}
+                      userId={userId}
+                      fieldName={UserFields.PROFILE_IMAGE}
+                    />
+                  ) : (
+                    <ShortNameComponent title={values[UserFields.NAME]} />
+                  )}
                 </div>
                 <RenderFields
                   fields={fields}

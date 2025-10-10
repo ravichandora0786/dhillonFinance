@@ -22,6 +22,7 @@ import BackButton from "../backButton";
 import { createCustomerSchema } from "@/validationSchema/customerSchema";
 import FullScreenLoader from "@/components/ui/fullScreenLoader";
 import { customerStatusOptions } from "@/constants/dropdown";
+import CustomImageComponent from "@/components/ui/customImageComponent";
 
 // Field Configuration Array
 
@@ -554,10 +555,12 @@ const UploadImage = ({ fieldName, error, touched }) => {
       <FullScreenLoader showLoader={isUploading} message="Uploading image..." />
       {uploadedImage && values[fieldName] ? (
         <div className="relative w-32 p-2 rounded border">
-          <img
-            src={uploadedImage}
+          <CustomImageComponent
+            alt={"customerImage"}
+            imageUrl={uploadedImage}
             className="w-full h-20 object-cover rounded"
-            alt="Preview"
+            width={200}
+            height={200}
           />
           <button
             type="button"

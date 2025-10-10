@@ -10,7 +10,7 @@ import LogoutConfirmation from "@/components/ui/logoutConfirmation";
 import LoadingButton from "../ui/loadingButton";
 import { ProtectedRoutes } from "@/Services/routes";
 
-export default function Header({ handleDrawerToggle, isMobile, menu }) {
+export default function Header({ handleDrawerToggle, menu }) {
   const router = useRouter();
   const dispatch = useDispatch();
 

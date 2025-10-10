@@ -19,6 +19,7 @@ import { UserProfileUploadImage } from "../userProfileUploardImage";
 import { UserFields } from "@/constants/fieldsName";
 import TitleAndDescription from "../titleAndDescription";
 import ChangePasswordComponent from "../changePasswordComponent";
+import ShortNameComponent from "@/components/ui/shortNmaeComponent";
 
 const UserProfileComponent = () => {
   const dispatch = useDispatch();
@@ -64,16 +65,22 @@ const UserProfileComponent = () => {
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-green-500 text-white rounded-lg p-6 relative">
           <div className="flex items-center">
-            <UserProfileUploadImage
-              fileId={user[UserFields.PROFILE_IMAGE]}
-              userId={id}
-              fieldName={UserFields.PROFILE_IMAGE}
-            />
-            {/* <div className="w-20 h-20 bg-white text-blue-600 rounded-full flex items-center justify-center text-2xl font-bold">
-            {user?.userName?.[0]?.toUpperCase()}
-          </div> */}
+            {user[UserFields.PROFILE_IMAGE] ? (
+              <UserProfileUploadImage
+                fileId={user[UserFields.PROFILE_IMAGE]}
+                userId={id}
+                fieldName={UserFields.PROFILE_IMAGE}
+              />
+            ) : (
+              <div className="w-20 h-20 bg-white text-blue-600 rounded-full flex items-center justify-center text-2xl font-bold">
+                <ShortNameComponent title={user?.[UserFields.NAME]} />
+              </div>
+            )}
+
             <div className="ml-4">
-              <h2 className="text-2xl font-semibold">{user?.userName}</h2>
+              <h2 className="text-2xl font-semibold">
+                {user?.[UserFields.NAME]}
+              </h2>
 
               <div className="flex gap-2 mt-2">
                 <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">

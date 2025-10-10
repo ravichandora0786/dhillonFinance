@@ -7,6 +7,7 @@ import GenericModal from "./genericModal";
 import { updateUser } from "@/app/user/slice";
 import LoadingButton from "./loadingButton";
 import InputBox from "./inputBox";
+import CustomImageComponent from "@/components/ui/customImageComponent";
 
 export const UserProfileUploadImage = ({
   fileId,
@@ -92,10 +93,12 @@ export const UserProfileUploadImage = ({
     <div>
       <div className="relative w-26 h-26">
         {/* Profile Image */}
-        <img
-          src={uploadedImage || "https://via.placeholder.com/150?text=Profile"}
-          alt="Profile"
+        <CustomImageComponent
+          alt={"customerProfileImage"}
+          imageUrl={uploadedImage}
           className="w-full h-full object-cover rounded-xl shadow"
+          width={200}
+          height={200}
         />
 
         {/* Pencil Button */}
@@ -124,10 +127,12 @@ export const UserProfileUploadImage = ({
               <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4">
                 {/* Preview */}
                 {selectedFile ? (
-                  <img
-                    src={URL.createObjectURL(selectedFile)}
-                    alt="Preview"
+                  <CustomImageComponent
+                    alt={"Preview"}
+                    imageUrl={URL.createObjectURL(selectedFile)}
                     className="w-32 h-32 object-cover rounded-xl mx-auto mb-4"
+                    width={200}
+                    height={200}
                   />
                 ) : (
                   <div className="w-32 h-32 mx-auto flex items-center justify-center bg-gray-100 rounded-xl mb-4">
