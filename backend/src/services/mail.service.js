@@ -1,8 +1,13 @@
 import nodemailer from "nodemailer";
 import hbs from "nodemailer-express-handlebars";
 import path from "path";
-const templatePath = path.resolve("src/emailTemplates");
+import { fileURLToPath } from "url";
 import logger from "../utils/logger.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const templatePath = path.join(__dirname, "../emailTemplates");
 
 const {
   SMTP_HOST,
@@ -15,6 +20,7 @@ const {
   DEV_SMTP_USER,
   DEV_SMTP_PASS,
   DEV_SMTP_FROM,
+  NODE_ENV,
 } = process.env;
 
 const hbsOptions = {
@@ -28,12 +34,9 @@ const hbsOptions = {
 };
 
 let transporter;
-let testAccount;
 
-if ("development" === process.env.NODE_ENV) {
-  // Generate test SMTP service account
-  testAccount = await nodemailer.createTestAccount();
-
+if (NODE_ENV === "development") {
+  const testAccount = await nodemailer.createTestAccount();
   transporter = nodemailer.createTransport({
     host: DEV_SMTP_HOST || testAccount.smtp.host,
     port: DEV_SMTP_PORT || testAccount.smtp.port,
@@ -67,7 +70,7 @@ transporter.use("compile", hbs(hbsOptions));
 async function sendMail({ to, subject, template, context }) {
   try {
     const info = await transporter.sendMail({
-      from: DEV_SMTP_FROM || SMTP_FROM,
+      from: NODE_ENV === "development" ? DEV_SMTP_FROM : SMTP_FROM,
       to,
       subject,
       template,
@@ -76,7 +79,7 @@ async function sendMail({ to, subject, template, context }) {
 
     logger.info("Message sent: " + JSON.stringify(info, null, 2));
 
-    if ("development" === process.env.NODE_ENV) {
+    if (NODE_ENV === "development") {
       logger.info("Preview URL: " + nodemailer.getTestMessageUrl(info));
     }
   } catch (err) {
