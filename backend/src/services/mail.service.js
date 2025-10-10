@@ -46,7 +46,8 @@ if ("development" === process.env.NODE_ENV) {
 } else {
   transporter = nodemailer.createTransport({
     host: SMTP_HOST,
-    port: SMTP_PORT,
+    port: SMTP_PORT ? parseInt(SMTP_PORT) : 587,
+    secure: SMTP_PORT == 465 ? true : false,
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS,
@@ -80,6 +81,7 @@ async function sendMail({ to, subject, template, context }) {
     }
   } catch (err) {
     logger.error("Error sending email: " + err.message);
+    throw err;
   }
 }
 
