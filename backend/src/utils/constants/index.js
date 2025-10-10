@@ -47,7 +47,7 @@ const TRANSACTION_PAYMENT_MODE_ENUM = ["Cash", "Bank", "UPI", "Cheque"];
 const EMAIL_TEMPLATE = {
   FORGOT_PASSWORD: {
     SUBJECT: "Forgot Password",
-    TEMPLATE: "forgotPassword",
+    TEMPLATE: "forgotpassword",
   },
 };
 
