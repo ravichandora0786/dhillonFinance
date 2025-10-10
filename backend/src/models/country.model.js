@@ -85,20 +85,20 @@ const CountryModel = sequelize.define(
   }
 );
 
-/**
- * Associations
- */
-CountryModel.belongsTo(UserModel, {
-  foreignKey: "createdBy",
-  as: "createdByUser",
-});
-CountryModel.belongsTo(UserModel, {
-  foreignKey: "updatedBy",
-  as: "updatedByUser",
-});
-CountryModel.belongsTo(UserModel, {
-  foreignKey: "deletedBy",
-  as: "deletedByUser",
-});
+// /**
+//  * Associations
+//  */
+// CountryModel.belongsTo(UserModel, {
+//   foreignKey: "createdBy",
+//   as: "createdByUser",
+// });
+// CountryModel.belongsTo(UserModel, {
+//   foreignKey: "updatedBy",
+//   as: "updatedByUser",
+// });
+// CountryModel.belongsTo(UserModel, {
+//   foreignKey: "deletedBy",
+//   as: "deletedByUser",
+// });
 
 export default CountryModel;

@@ -50,6 +50,7 @@ module.exports = {
         "LOAN",
         "TRANSACTION",
         "USER",
+        "IMAGES",
       ];
 
       const activities = activityNames.map((name) => ({

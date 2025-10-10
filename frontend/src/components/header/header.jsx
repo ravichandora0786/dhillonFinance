@@ -5,7 +5,7 @@ import { TfiHome } from "react-icons/tfi";
 import { RiMenu3Fill } from "react-icons/ri";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { selectUser } from "@/app/common/selectors";
+import { selectAccessToken, selectUser } from "@/app/common/selectors";
 import LogoutConfirmation from "@/components/ui/logoutConfirmation";
 import LoadingButton from "../ui/loadingButton";
 import { ProtectedRoutes } from "@/Services/routes";
@@ -16,6 +16,7 @@ export default function Header({ handleDrawerToggle, menu }) {
 
   // Redux user data
   const user = useSelector(selectUser);
+  const token = useSelector(selectAccessToken);
 
   return (
     <header className="w-full z-50 fixed bg-primary/70 shadow px-4 py-1 flex justify-between items-center">
@@ -29,24 +30,26 @@ export default function Header({ handleDrawerToggle, menu }) {
 
       {/* Right - Profile Section */}
       <div className="relative flex items-center gap-2">
-        <div className="">
-          <LoadingButton
-            type="button"
-            isLoading={false}
-            disabled={false}
-            variant={"custom"}
-            className="px-0 py-2"
-            onClick={() => {
-              handleDrawerToggle();
-            }}
-          >
-            {menu ? (
-              <FiMenu className="mr-2" />
-            ) : (
-              <RiMenu3Fill className="mr-2" />
-            )}
-          </LoadingButton>
-        </div>
+        {token && (
+          <div className="">
+            <LoadingButton
+              type="button"
+              isLoading={false}
+              disabled={false}
+              variant={"custom"}
+              className="px-0 py-2"
+              onClick={() => {
+                handleDrawerToggle();
+              }}
+            >
+              {menu ? (
+                <FiMenu className="mr-2" />
+              ) : (
+                <RiMenu3Fill className="mr-2" />
+              )}
+            </LoadingButton>
+          </div>
+        )}
 
         <div className="">
           <LoadingButton
@@ -62,20 +65,27 @@ export default function Header({ handleDrawerToggle, menu }) {
             <TfiHome className="" />
           </LoadingButton>
         </div>
-        <div className="">
-          <LoadingButton
-            type="button"
-            isLoading={false}
-            disabled={false}
-            variant={"custom"}
-            className="px-0 py-2"
-            onClick={() => {
-              router.push(`/user/profile/${user?.id}`);
-            }}
-          >
-            <FiUser className="" />
-          </LoadingButton>
-        </div>
+        {token && (
+          <>
+            <div className="">
+              <LoadingButton
+                type="button"
+                isLoading={false}
+                disabled={false}
+                variant={"custom"}
+                className="px-0 py-2"
+                onClick={() => {
+                  router.push(`/user/profile/${user?.id}`);
+                }}
+              >
+                <FiUser className="" />
+              </LoadingButton>
+            </div>
+            <div className="">
+              <LogoutConfirmation />
+            </div>
+          </>
+        )}
         {/* <div className="">
           <LoadingButton
             type="button"
@@ -90,9 +100,6 @@ export default function Header({ handleDrawerToggle, menu }) {
             <FiSettings className="" />
           </LoadingButton>
         </div> */}
-        <div className="">
-          <LogoutConfirmation />
-        </div>
       </div>
     </header>
   );

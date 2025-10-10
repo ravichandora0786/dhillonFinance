@@ -14,9 +14,6 @@ import { userReducer } from "@/app/user/slice";
 import { roleReducer } from "@/app/role/slice";
 import { activityMasterReducer } from "@/app/activityMaster/slice";
 import { permissionReducer } from "@/app/permissions/slice";
-import { countryReducer } from "@/app/country/slice";
-import { stateReducer } from "@/app/state/slice";
-import { districtReducer } from "@/app/district/slice";
 import { customerReducer } from "@/app/customer/slice";
 import { customerLoanReducer } from "@/app/loan/slice";
 import { transactionReducer } from "@/app/transaction/slice";
@@ -52,9 +49,6 @@ const appReducer = combineReducers({
   roleReducer,
   activityMasterReducer,
   permissionReducer,
-  countryReducer,
-  stateReducer,
-  districtReducer,
   customerReducer,
   customerLoanReducer,
   transactionReducer,

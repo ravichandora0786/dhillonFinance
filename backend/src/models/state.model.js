@@ -63,21 +63,21 @@ const StateModel = sequelize.define(
   }
 );
 
-/**
- * Associations
- */
-StateModel.belongsTo(CountryModel, { foreignKey: "countryId", as: "country" });
-StateModel.belongsTo(UserModel, {
-  foreignKey: "createdBy",
-  as: "createdByUser",
-});
-StateModel.belongsTo(UserModel, {
-  foreignKey: "updatedBy",
-  as: "updatedByUser",
-});
-StateModel.belongsTo(UserModel, {
-  foreignKey: "deletedBy",
-  as: "deletedByUser",
-});
+// /**
+//  * Associations
+//  */
+// StateModel.belongsTo(CountryModel, { foreignKey: "countryId", as: "country" });
+// StateModel.belongsTo(UserModel, {
+//   foreignKey: "createdBy",
+//   as: "createdByUser",
+// });
+// StateModel.belongsTo(UserModel, {
+//   foreignKey: "updatedBy",
+//   as: "updatedByUser",
+// });
+// StateModel.belongsTo(UserModel, {
+//   foreignKey: "deletedBy",
+//   as: "deletedByUser",
+// });
 
 export default StateModel;

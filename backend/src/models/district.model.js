@@ -65,25 +65,25 @@ const DistrictModel = sequelize.define(
   }
 );
 
-/**
- * Associations
- */
-DistrictModel.belongsTo(CountryModel, {
-  foreignKey: "countryId",
-  as: "country",
-});
-DistrictModel.belongsTo(StateModel, { foreignKey: "stateId", as: "state" });
-DistrictModel.belongsTo(UserModel, {
-  foreignKey: "createdBy",
-  as: "createdByUser",
-});
-DistrictModel.belongsTo(UserModel, {
-  foreignKey: "updatedBy",
-  as: "updatedByUser",
-});
-DistrictModel.belongsTo(UserModel, {
-  foreignKey: "deletedBy",
-  as: "deletedByUser",
-});
+// /**
+//  * Associations
+//  */
+// DistrictModel.belongsTo(CountryModel, {
+//   foreignKey: "countryId",
+//   as: "country",
+// });
+// DistrictModel.belongsTo(StateModel, { foreignKey: "stateId", as: "state" });
+// DistrictModel.belongsTo(UserModel, {
+//   foreignKey: "createdBy",
+//   as: "createdByUser",
+// });
+// DistrictModel.belongsTo(UserModel, {
+//   foreignKey: "updatedBy",
+//   as: "updatedByUser",
+// });
+// DistrictModel.belongsTo(UserModel, {
+//   foreignKey: "deletedBy",
+//   as: "deletedByUser",
+// });
 
 export default DistrictModel;

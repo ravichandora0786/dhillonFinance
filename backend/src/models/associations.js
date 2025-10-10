@@ -7,9 +7,6 @@ import RoleModel from "./role.model.js";
 import ActivityMasterModel from "./activityMaster.model.js";
 import PermissionModel from "./permission.model.js";
 import ActivityPermissionModel from "./activityPermission.model.js";
-import CountryModel from "./country.model.js";
-import DistrictModel from "./district.model.js";
-import StateModel from "./state.model.js";
 import CustomerModel from "./customer.model.js";
 import UploadFileModel from "./uploadFile.model.js";
 import LoanModel from "./loan.model.js";
@@ -133,9 +130,6 @@ export {
   ActivityMasterModel,
   PermissionModel,
   ActivityPermissionModel,
-  CountryModel,
-  DistrictModel,
-  StateModel,
   CustomerModel,
   UploadFileModel,
   LoanModel,

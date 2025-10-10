@@ -202,30 +202,35 @@ const loginUser = asyncHandler(async (req, res, next) => {
  * Forgot Password
  */
 const forgotPassword = asyncHandler(async (req, res, next) => {
-  const { email } = req.body;
+  try {
+    const { email } = req.body;
 
-  const user = await UserModel.findOne({
-    where: { email, isActive: true },
-  });
+    const user = await UserModel.findOne({
+      where: { email, isActive: true },
+    });
 
-  if (!user) {
-    throw new ApiError(400, "Invalid Email");
+    if (!user) {
+      return res.status(400).json({ message: "Invalid Email" });
+    }
+
+    const verificationToken = generateVerificationToken(user);
+
+    await sendMail({
+      to: email,
+      subject: EMAIL_TEMPLATE.FORGOT_PASSWORD.SUBJECT,
+      template: EMAIL_TEMPLATE.FORGOT_PASSWORD.TEMPLATE,
+      context: {
+        link: `${process.env.CLIENT_URL}/forgotPassword?token=${verificationToken}`,
+      },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Reset Password email sent successfully" });
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    return res.status(500).json({ message: "Internal Server Error", error });
   }
-
-  const verificationToken = generateVerificationToken(user);
-
-  await sendMail({
-    to: email,
-    subject: EMAIL_TEMPLATE.FORGOT_PASSWORD.SUBJECT,
-    template: EMAIL_TEMPLATE.FORGOT_PASSWORD.TEMPLATE,
-    context: {
-      link: `${process.env.CLIENT_URL}/forgotPassword?token=${verificationToken}`,
-    },
-  });
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, null, "Reset Password email sent successfully"));
 });
 
 /**
