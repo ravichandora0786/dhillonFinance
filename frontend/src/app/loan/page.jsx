@@ -136,7 +136,7 @@ const CustomerLoan = (permissions) => {
   const searchFields = [
     {
       name: "search",
-      placeholder: "Search By Customer",
+      placeholder: "Customer",
       onChange: (e) => {
         const value = e.target.value;
         dispatch(
@@ -190,7 +190,7 @@ const CustomerLoan = (permissions) => {
         data: {
           page: pagination?.pageIndex + 1,
           limit: pagination?.pageSize,
-          name: customerLoanSearchData?.search,
+          search: customerLoanSearchData?.search,
         },
         onSuccess: ({ message, data }) => {
           console.log(message);
@@ -236,7 +236,7 @@ const CustomerLoan = (permissions) => {
                 <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <InputBox
                   type="text"
-                  placeholder={`Search by ${field?.name}`}
+                  placeholder={`Search by ${field?.placeholder}`}
                   className="pl-10"
                   onChange={field?.onChange}
                   value={customerLoanSearchData?.[field.name] ?? ""}

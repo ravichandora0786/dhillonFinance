@@ -9,7 +9,7 @@ const initialState = {
   allCustomerLoanList: {},
   customerLoanData: {},
   pagination: { pageIndex: 0, pageSize: 10 },
-  customerLoanSearchData: { name: "" },
+  customerLoanSearchData: { search: "" },
   customerLoanOptions: [],
   customerLoanId: "",
 };

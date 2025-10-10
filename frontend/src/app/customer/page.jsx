@@ -252,7 +252,7 @@ const Customer = () => {
   };
 
   const handleRefresh = () => {
-    dispatch(setCustomerPagination({ pageIndex: 0, pageSize: 10 }));
+    dispatch(setCustomerPagination({ pageIndex: 0, pageSize: 12 }));
     dispatch(setCustomerSearchData({ search: "" }));
   };
 
@@ -344,17 +344,23 @@ const Customer = () => {
         </div>
         <div className="w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {customerList?.customers?.map((item, index) => (
-              <CustomerCardComponent
-                key={index}
-                customer={item}
-                handleDelete={handleDelete}
-                handleView={handleView}
-                handleReceivedMoneyBtn={handleReceivedMoneyBtn}
-                handleCloseCustomerLoan={handleCloseCustomerLoan}
-                handleCustomerStatus={handleCustomerStatus}
-              />
-            ))}
+            {customerList?.customers?.length > 0 ? (
+              customerList.customers.map((item, index) => (
+                <CustomerCardComponent
+                  key={index}
+                  customer={item}
+                  handleDelete={handleDelete}
+                  handleView={handleView}
+                  handleReceivedMoneyBtn={handleReceivedMoneyBtn}
+                  handleCloseCustomerLoan={handleCloseCustomerLoan}
+                  handleCustomerStatus={handleCustomerStatus}
+                />
+              ))
+            ) : (
+              <div className="col-span-full flex flex-col items-center justify-center py-10 text-gray-500">
+                <p className="text-lg font-medium">No customer records found</p>
+              </div>
+            )}
           </div>
           {/* Common Pagination */}
           <CustomPagination

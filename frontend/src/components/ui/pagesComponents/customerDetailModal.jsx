@@ -2,6 +2,7 @@
 import React from "react";
 import GenericModal from "@/components/ui/genericModal";
 import ViewField from "../viewField";
+import CustomImageComponent from "@/components/ui/customImageComponent";
 
 const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
   const customer = data;
@@ -18,10 +19,12 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
               {/* Avatar */}
               <div className="flex-shrink-0">
                 {customer?.profileFile ? (
-                  <iframe
-                    src={customer?.profileFile?.image}
-                    alt="Profile"
+                  <CustomImageComponent
+                    alt={"customerProfileImage"}
+                    imageUrl={customer?.profileFile?.image}
                     className="w-24 h-24 rounded-full object-cover shadow-md border"
+                    width={200}
+                    height={200}
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-primary/7 flex items-center justify-center text-primary font-semibold text-3xl border">
@@ -225,10 +228,12 @@ function ImageCard({ label, src }) {
   return (
     <div className="rounded-lg border border-gray-200 p-4 bg-slate-50 shadow-sm">
       <div className="text-xs text-slate-500 mb-2">{label}</div>
-      <iframe
-        src={src}
+      <CustomImageComponent
         alt={label}
+        imageUrl={src}
         className="w-full h-48 object-contain rounded-md bg-white"
+        width={600}
+        height={600}
       />
     </div>
   );

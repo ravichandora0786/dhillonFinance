@@ -5,6 +5,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 import { MdOutlinePhone } from "react-icons/md";
+import CustomImageComponent from "@/components/ui/customImageComponent";
 
 export default function NameAvatarColumn({
   name,
@@ -13,16 +14,18 @@ export default function NameAvatarColumn({
   showDescription = false,
   showMobile = false,
   mobileNumber,
-  imageUrl = "https://img.freepik.com/free-vector/smiling-young-…tion_1308-173524.jpg?semt=ais_incoming&w=740&q=80",
+  imageUrl,
 }) {
   return (
     <div className="flex items-center gap-3 px-2 py-1">
       {showImage && (
         <div className="flex-shrink-0">
-          <iframe
+          <CustomImageComponent
             alt={name}
-            src={imageUrl}
+            imageUrl={imageUrl}
             className="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm"
+            width={24}
+            height={24}
           />
         </div>
       )}

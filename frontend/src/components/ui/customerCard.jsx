@@ -6,6 +6,7 @@ import { TbMessage } from "react-icons/tb";
 import LoadingButton from "./loadingButton";
 import { removeTimeFromDate } from "@/Services/utils";
 import ActionColumnsComponent from "../tableCollumnComponents/actionColumn";
+import CustomImageComponent from "@/components/ui/customImageComponent";
 import { useRouter } from "next/navigation";
 
 const CustomerCardComponent = ({
@@ -71,13 +72,12 @@ const CustomerCardComponent = ({
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-3 px-1 py-0">
                 <div className="flex-shrink-0">
-                  <iframe
-                    alt={"PI"}
-                    src={
-                      customer?.profileFile?.image ||
-                      "https://img.freepik.com/free-vector/smiling-young-…tion_1308-173524.jpg?semt=ais_incoming&w=740&q=80"
-                    }
+                  <CustomImageComponent
+                    alt={"customerProfile"}
+                    imageUrl={customer?.profileFile?.image}
                     className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm"
+                    width={40}
+                    height={40}
                   />
                 </div>
                 <div className="flex flex-col justify-between items-start">
