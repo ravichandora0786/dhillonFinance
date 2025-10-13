@@ -32,13 +32,9 @@ const customerRouter = express.Router();
  *           type: string
  *         mobileNumber:
  *           type: string
- *         pinCode:
- *           type: string
  *         address:
  *           type: string
  *         city:
- *           type: string
- *         state:
  *           type: string
  *         aadharNumber:
  *           type: string

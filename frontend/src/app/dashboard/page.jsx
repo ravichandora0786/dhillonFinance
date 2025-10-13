@@ -51,7 +51,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card
             icon={<FiUsers className="text-3xl text-blue-500" />}
-            title="Total Borrowers"
+            title="Active Borrowers"
             value={data?.customerStats?.totalCustomers || 0}
             subtitle="Loan Customers"
           />
@@ -59,19 +59,19 @@ export default function Dashboard() {
             icon={<FiDollarSign className="text-3xl text-green-500" />}
             title="Disbursed Amount"
             value={`₹${data?.repaymentStats?.totalDisbursedAmount || 0}`}
-            subtitle="Principal Amount"
+            subtitle="Active Loan Principal Amount"
           />
           <Card
             icon={<FiTrendingUp className="text-3xl text-orange-500" />}
             title="Collection Amount"
             value={`₹${data?.repaymentStats?.totalRepaymentsReceived || 0}`}
-            subtitle="Collection Amount With Intrest"
+            subtitle="Active Loan Collection With Int & charges"
           />
           <Card
             icon={<FiAlertCircle className="text-3xl text-red-500" />}
             title="Receivables Amount"
             value={`₹${data?.repaymentStats?.totalRepaymentsPending || 0}`}
-            subtitle="Pending Amount With Intrest"
+            subtitle="Active Loan Pending Amount With Int"
           />
         </div>
 

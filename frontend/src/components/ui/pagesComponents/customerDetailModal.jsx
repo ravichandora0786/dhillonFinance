@@ -3,6 +3,7 @@ import React from "react";
 import GenericModal from "@/components/ui/genericModal";
 import ViewField from "../viewField";
 import CustomImageComponent from "@/components/ui/customImageComponent";
+import LoanTransactionTable from "../loanTransactionTable";
 
 const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
   const customer = data;
@@ -35,11 +36,11 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
               </div>
 
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-semibold text-slate-900">
-                  {customer?.firstName} {customer?.lastName}
-                </h2>
-                <p className="text-sm text-slate-500 truncate">
-                  {customer?.city}, {customer?.state}
+                <span className="text-2xl font-semibold text-slate-900">
+                  {`${customer?.firstName} ${customer?.lastName}`}
+                </span>
+                <p className="text-lg text-slate-500 truncate">
+                  {customer?.city}
                 </p>
               </div>
             </div>
@@ -73,12 +74,13 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
           {/* Customer details */}
           <div className="">
             <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ViewField label="Father Name" value={customer?.fatherName} />
               <ViewField label="Aadhar Number" value={customer?.aadharNumber} />
               <ViewField label="PAN Number" value={customer?.panCardNumber} />
               <ViewField label="Mobile" value={customer?.mobileNumber} />
               <ViewField
                 label="Address"
-                value={`${customer?.address}, ${customer?.city}, ${customer?.state}, ${customer?.pinCode}`}
+                value={`${customer?.address}, ${customer?.city}`}
               />
             </div>
 
@@ -155,12 +157,22 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
                     <ViewField label="Paid EMIs" value={loan?.paidEmis} />
                     <ViewField label="Pending EMIs" value={loan?.pendingEmis} />
                     <ViewField
-                      label="Received Payments"
-                      value={`₹ ${loan?.repaymentsReceived}`}
+                      label="Total Received Payments"
+                      value={`₹ ${
+                        loan?.repaymentsReceived + loan?.totalLateCharges
+                      }`}
                     />
                     <ViewField
                       label="Pending Payments"
                       value={`₹ ${loan?.repaymentsPending}`}
+                    />
+                    <ViewField
+                      label="Total charges"
+                      value={`₹ ${loan?.totalLateCharges}`}
+                    />
+                    <ViewField
+                      label="Profit"
+                      value={`₹ ${loan?.profitAmount}`}
                     />
                   </div>
 
@@ -176,43 +188,7 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
 
                   {/* Transactions */}
                   {loan?.transactions?.length > 0 && (
-                    <div className="mt-4">
-                      <div className="text-sm font-semibold text-slate-700 mb-2">
-                        Transactions
-                      </div>
-                      <div className="space-y-2">
-                        {loan?.transactions.map((txn, idx) => (
-                          <div
-                            key={idx}
-                            className="flex justify-between items-center p-2 rounded-md bg-slate-50 border border-slate-100"
-                          >
-                            {/* <span className="text-sm text-slate-600">
-                              {`Payment`}
-                            </span> */}
-                            <span className="text-sm text-slate-600">
-                              {txn?.transactionType === "Disbursement"
-                                ? "Pay Loan"
-                                : txn?.transactionType}
-                            </span>
-                            <span
-                              className={`text-sm font-medium ${
-                                txn?.transactionType === "Disbursement"
-                                  ? "text-danger"
-                                  : "text-green-600"
-                              } `}
-                            >
-                              ₹ {txn.amount || 0}
-                            </span>
-                            <span className="text-xs text-slate-400">
-                              {txn.paymentMode || "-"}
-                            </span>
-                            <span className="text-xs text-slate-400">
-                              {txn.transactionDate || "-"}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    <LoanTransactionTable transactions={loan.transactions} />
                   )}
                 </div>
               ))}

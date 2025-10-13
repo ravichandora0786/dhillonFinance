@@ -120,28 +120,33 @@ const RenderFields = ({
                   name={name}
                   value={fieldValue}
                   onChange={(date) => {
-                    setFieldValue(name, date);
-                    // calculate end date if start date and months available
-                    const startDate =
-                      name === LoanFields.START_DATE
-                        ? new Date(date)
-                        : new Date(values[LoanFields.START_DATE]);
+                    if (typeof onChange === "function") {
+                      onChange(date, setFieldValue);
+                      return;
+                    } else {
+                      setFieldValue(name, date);
+                      // calculate end date if start date and months available
+                      const startDate =
+                        name === LoanFields.START_DATE
+                          ? new Date(date)
+                          : new Date(values[LoanFields.START_DATE]);
 
-                    const months = parseInt(values[LoanFields.MONTHS] || 0);
+                      const months = parseInt(values[LoanFields.MONTHS] || 0);
 
-                    if (
-                      startDate &&
-                      months > 0 &&
-                      !isNaN(startDate.getTime())
-                    ) {
-                      const endDate = new Date(startDate);
-                      endDate.setMonth(endDate.getMonth() + months);
+                      if (
+                        startDate &&
+                        months > 0 &&
+                        !isNaN(startDate.getTime())
+                      ) {
+                        const endDate = new Date(startDate);
+                        endDate.setMonth(endDate.getMonth() + months);
 
-                      const formattedEndDate = endDate
-                        .toISOString()
-                        .split("T")[0];
+                        const formattedEndDate = endDate
+                          .toISOString()
+                          .split("T")[0];
 
-                      setFieldValue(LoanFields.END_DATE, formattedEndDate);
+                        setFieldValue(LoanFields.END_DATE, formattedEndDate);
+                      }
                     }
                   }}
                   placeholderText="DD/MM/YYYY"
@@ -212,11 +217,38 @@ const RenderFields = ({
                           ? parseInt(value)
                           : parseInt(values[LoanFields.MONTHS] || 0);
 
-                      if (principal > 0 && totalPay > 0 && months > 0) {
-                        // EMI calculation with interest
-                        const emi = totalPay / months;
+                      const interestRate =
+                        name === LoanFields.INTREST_RATE
+                          ? parseFloat(value)
+                          : parseFloat(values[LoanFields.INTREST_RATE] || 0);
 
-                        // Interest rate calculation
+                      // Case 1: Interest rate changed → calculate totalPayAmount + EMI
+                      if (
+                        name === LoanFields.INTREST_RATE &&
+                        principal > 0 &&
+                        interestRate >= 0 &&
+                        months > 0
+                      ) {
+                        const interestAmount = (principal * interestRate) / 100;
+                        const totalPayAmount = principal + interestAmount;
+                        const emi = totalPayAmount / months;
+
+                        setFieldValue(
+                          LoanFields.TOTAL_PAY_AMOUNT,
+                          totalPayAmount.toFixed(2)
+                        );
+                        setFieldValue(LoanFields.EMI_AMOUNT, emi.toFixed(2));
+                      }
+
+                      // Case 2: Total pay or principal changed → calculate EMI and interest rate
+                      else if (
+                        (name === LoanFields.PRINCIPAL_AMOUNT ||
+                          name === LoanFields.TOTAL_PAY_AMOUNT) &&
+                        principal > 0 &&
+                        totalPay > 0 &&
+                        months > 0
+                      ) {
+                        const emi = totalPay / months;
                         const interestAmount = totalPay - principal;
                         const interestRate = (interestAmount / principal) * 100;
 
@@ -225,6 +257,17 @@ const RenderFields = ({
                           LoanFields.INTREST_RATE,
                           interestRate.toFixed(2)
                         );
+                      }
+
+                      // Case 3: Months changed → recalculate EMI only
+                      else if (name === LoanFields.MONTHS && months > 0) {
+                        const currentTotalPay = parseFloat(
+                          values[LoanFields.TOTAL_PAY_AMOUNT] || 0
+                        );
+                        if (currentTotalPay > 0) {
+                          const emi = currentTotalPay / months;
+                          setFieldValue(LoanFields.EMI_AMOUNT, emi.toFixed(2));
+                        }
                       }
                     }
                   }}

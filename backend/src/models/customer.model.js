@@ -24,24 +24,20 @@ const CustomerModel = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    fatherName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     mobileNumber: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-    },
-    pinCode: {
-      type: DataTypes.STRING,
-      allowNull: false,
     },
     address: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     city: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    state: {
       type: DataTypes.STRING,
       allowNull: false,
     },

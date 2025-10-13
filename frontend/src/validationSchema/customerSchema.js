@@ -5,7 +5,6 @@ import {
   ALPHANUMERIC_REGEX,
   PAN_CARD_REGEX,
   PHONE_NUMBER_REGEX,
-  INDIAN_PINCODE_REGEX,
 } from "@/Services/regexPatterns";
 
 import { CustomerFields, CommonFields } from "@/constants/fieldsName";
@@ -56,6 +55,9 @@ export const createCustomerSchema = Yup.object().shape({
   [CustomerFields.LAST_NAME]: Yup.string()
     .matches(new RegExp(ALPHABETIC_REGEX), "Only alphabets are allowed")
     .nullable(),
+  [CustomerFields.FATHER_NAME]: Yup.string()
+    .matches(new RegExp(ALPHABETIC_REGEX), "Only alphabets are allowed")
+    .required("Father Name is required"),
 
   [CustomerFields.MOBILE_NUMBER]: Yup.string()
     .matches(new RegExp(PHONE_NUMBER_REGEX), "Enter a valid mobile number")
@@ -65,19 +67,9 @@ export const createCustomerSchema = Yup.object().shape({
 
   [CustomerFields.ADDRESS]: Yup.string().required("Address is required"),
 
-  [CustomerFields.STATE]: Yup.string()
-    .matches(new RegExp(ALPHABETIC_REGEX), "Only alphabets are allowed")
-    .required("State is required"),
-
   [CustomerFields.CITY]: Yup.string()
     .matches(new RegExp(ALPHABETIC_REGEX), "Only alphabets are allowed")
     .required("City is required"),
-
-  [CustomerFields.PIN_CODE]: Yup.string()
-    .matches(new RegExp(INDIAN_PINCODE_REGEX), "Enter valid 6-digit PIN Code")
-    .min(6, "PIN Code must be 6 digits")
-    .max(6, "PIN Code must be 6 digits")
-    .required("Pin Code is required"),
 
   [CustomerFields.AADHAR_NUMBER]: Yup.string()
     .matches(new RegExp(AADHAR_REGEX), "Enter valid 12-digit Aadhar Number")

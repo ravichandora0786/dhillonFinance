@@ -164,7 +164,7 @@ const AddEditCustomerLoanComponent = ({
       label: "Intrest Rate",
       type: "text",
       required: true,
-      disabled: true,
+      disabled: false,
       onKeyDown: (e) => {
         const value = e.target.value;
         // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
@@ -190,7 +190,7 @@ const AddEditCustomerLoanComponent = ({
     },
     {
       name: LoanFields.PAY_INSTALLMENT_DATE,
-      label: "Pay Installment Date",
+      label: "Recovery EMI Date",
       type: "date",
       required: true,
       disabled: false,

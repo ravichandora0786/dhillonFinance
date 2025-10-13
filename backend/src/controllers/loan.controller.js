@@ -143,14 +143,12 @@ const getLoans = asyncHandler(async (req, res, next) => {
             "status",
             "address",
             "city",
-            "pinCode",
-            "state",
+            "fatherName",
           ],
         },
         {
           model: TransactionModel,
           as: "transactions",
-          // attributes: ["amount", "transactionType", "createdAt"],
           separate: true,
           order: [["createdAt", "DESC"]],
         },
@@ -164,21 +162,38 @@ const getLoans = asyncHandler(async (req, res, next) => {
     const loanData = loans.rows.map((loan) => {
       const paymentsReceived = loan.transactions.reduce((sum, tx) => {
         return tx.transactionType === "Repayment"
-          ? sum + parseFloat(tx.amount)
+          ? sum + parseFloat(tx.amount || 0)
           : sum;
       }, 0);
 
+      const receivedCharges = loan.transactions
+        .filter((tx) => tx.transactionType === "Repayment")
+        .reduce((sum, tx) => sum + parseFloat(tx.lateEMICharges || 0), 0);
+
       const pendingAmount =
-        parseFloat(loan.totalPayableAmount) - paymentsReceived;
+        parseFloat(loan.totalPayableAmount || 0) - paymentsReceived;
+
+      // Sum of all late EMI charges
+      const totalLateCharges = loan.transactions.reduce(
+        (sum, tx) => sum + parseFloat(tx.lateEMICharges || 0),
+        0
+      );
+
+      // Profit = totalPayableAmount - principalAmount + totalLateCharges
+      const profit =
+        parseFloat(loan.totalPayableAmount || 0) -
+        parseFloat(loan.amount || 0) +
+        totalLateCharges;
 
       return {
         ...loan.toJSON(),
-        paymentsReceived,
-        pendingAmount: pendingAmount >= 0 ? pendingAmount : 0,
+        paymentsReceived: (paymentsReceived + receivedCharges).toFixed(2),
+        pendingAmount: pendingAmount >= 0 ? pendingAmount.toFixed(2) : "0.00",
+        totalLateCharges: totalLateCharges.toFixed(2),
+        profit: profit.toFixed(2),
       };
     });
 
-    // Calculate pagination info
     const totalPages = Math.ceil(loans.count / limit);
 
     return res.status(200).json(
@@ -217,8 +232,7 @@ const getLoanById = asyncHandler(async (req, res, next) => {
             "status",
             "address",
             "city",
-            "pinCode",
-            "state",
+            "fatherName",
           ],
         },
         {
@@ -241,10 +255,24 @@ const getLoanById = asyncHandler(async (req, res, next) => {
     const pendingAmount =
       parseFloat(loan.totalPayableAmount) - paymentsReceived;
 
+    // Sum of all late EMI charges
+    const totalLateCharges = loan.transactions.reduce(
+      (sum, tx) => sum + parseFloat(tx.lateEMICharges || 0),
+      0
+    );
+
+    // Profit = totalPayableAmount - principalAmount + totalLateCharges
+    const profit =
+      parseFloat(loan.totalPayableAmount || 0) -
+      parseFloat(loan.amount || 0) +
+      totalLateCharges;
+
     const loanWithPayments = {
       ...loan.toJSON(),
-      paymentsReceived,
+      paymentsReceived: (paymentsReceived + receivedCharges).toFixed(2),
       pendingAmount: pendingAmount >= 0 ? pendingAmount : 0,
+      totalLateCharges: totalLateCharges.toFixed(2),
+      profit: profit.toFixed(2),
     };
 
     return res

@@ -20,7 +20,10 @@ const createTransaction = asyncHandler(async (req, res, next) => {
       paymentMode,
       transactionDate,
       description,
+      perDayLateCharge,
     } = req.body;
+
+    transactionDate = new Date(transactionDate);
 
     // Validate Customer
     const customer = await CustomerModel.findByPk(customerId, {
@@ -44,6 +47,25 @@ const createTransaction = asyncHandler(async (req, res, next) => {
 
     const loanId = activeLoan.id;
 
+    // ===== Late EMI Calculation Logic =====
+    let lateEMIDays = 0;
+    let lateEMICharges = 0;
+
+    if (transactionType === "Repayment" && activeLoan.installmentDate) {
+      const installmentDate = new Date(activeLoan.installmentDate);
+      if (transactionDate > installmentDate) {
+        // Calculate difference in days
+        const diffTime = transactionDate.getTime() - installmentDate.getTime();
+        lateEMIDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // convert ms → days
+        lateEMICharges = (
+          lateEMIDays * parseFloat(perDayLateCharge || 0)
+        ).toFixed(2);
+      } else {
+        lateEMIDays = 0;
+        lateEMICharges = 0;
+      }
+    }
+
     // Create Transaction
     const transactionRecord = await TransactionModel.create(
       {
@@ -54,6 +76,8 @@ const createTransaction = asyncHandler(async (req, res, next) => {
         paymentMode,
         transactionDate,
         description,
+        lateEMIDays,
+        lateEMICharges,
       },
       { transaction: t }
     );

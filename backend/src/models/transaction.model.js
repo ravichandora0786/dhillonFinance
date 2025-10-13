@@ -40,8 +40,20 @@ const TransactionModel = sequelize.define(
     },
 
     amount: {
-      type: DataTypes.DECIMAL(12, 2),
+      type: DataTypes.DECIMAL(25, 2),
       allowNull: false,
+    },
+
+    lateEMIDays: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+    },
+
+    lateEMICharges: {
+      type: DataTypes.DECIMAL(20, 2),
+      allowNull: true,
+      defaultValue: 0,
     },
 
     transactionType: {

@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import GenericModal from "@/components/ui/genericModal";
+import LoanTransactionTable from "@/components/ui/loanTransactionTable";
 import ViewField from "../viewField";
 
 const LoanDetailModal = ({ openModal, onBack = () => {}, data }) => {
@@ -24,7 +25,7 @@ const LoanDetailModal = ({ openModal, onBack = () => {}, data }) => {
               <div className="grid grid-cols-2 md:grid-cols-2 sm:grid-cols-2 gap-4">
                 <ViewField
                   label="Customer Name"
-                  value={`${loan?.customer?.firstName} ${loan?.customer?.lastName}`}
+                  value={`${loan?.customer?.firstName} ${loan?.customer?.lastName} s/o ${loan?.customer?.fatherName}`}
                 />
                 <ViewField
                   label="Mobile Number"
@@ -32,7 +33,7 @@ const LoanDetailModal = ({ openModal, onBack = () => {}, data }) => {
                 />
                 <ViewField
                   label="Address"
-                  value={`${loan?.customer?.address}, ${loan?.customer?.city}, ${loan?.customer?.state}, ${loan?.customer?.pinCode}`}
+                  value={`${loan?.customer?.address}, ${loan?.customer?.city}`}
                 />
                 <ViewField label="Status" value={loan?.customer?.status} />
               </div>
@@ -77,13 +78,18 @@ const LoanDetailModal = ({ openModal, onBack = () => {}, data }) => {
                   <ViewField label="Paid EMIs" value={loan?.paidEmis} />
                   <ViewField label="Pending EMIs" value={loan?.pendingEmis} />
                   <ViewField
-                    label="Received Payments"
+                    label="Total Received Payments"
                     value={`₹ ${loan?.paymentsReceived}`}
                   />
                   <ViewField
                     label="Pending Payments"
                     value={`₹ ${loan?.pendingAmount}`}
                   />
+                  <ViewField
+                    label="Total charges"
+                    value={`₹ ${loan?.totalLateCharges}`}
+                  />
+                  <ViewField label="Profit" value={`₹ ${loan?.profit}`} />
                 </div>
 
                 {/* Description */}
@@ -95,40 +101,7 @@ const LoanDetailModal = ({ openModal, onBack = () => {}, data }) => {
 
                 {/* Transactions */}
                 {loan?.transactions?.length > 0 && (
-                  <div className="mt-4">
-                    <div className="text-sm font-semibold text-slate-700 mb-2">
-                      Transactions
-                    </div>
-                    <div className="space-y-2">
-                      {loan.transactions.map((txn, idx) => (
-                        <div
-                          key={idx}
-                          className="flex justify-between items-center p-2 rounded-md bg-slate-50 border border-slate-100"
-                        >
-                          <span className="text-sm text-slate-600">
-                            {txn.transactionType === "Disbursement"
-                              ? "Pay Loan"
-                              : txn.transactionType}
-                          </span>
-                          <span
-                            className={`text-sm font-medium ${
-                              txn.transactionType === "Disbursement"
-                                ? "text-red-500"
-                                : "text-green-600"
-                            }`}
-                          >
-                            ₹ {txn.amount || 0}
-                          </span>
-                          <span className="text-xs text-slate-400">
-                            {txn.paymentMode || "-"}
-                          </span>
-                          <span className="text-xs text-slate-400">
-                            {txn.transactionDate || "-"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <LoanTransactionTable transactions={loan.transactions} />
                 )}
               </div>
             </div>

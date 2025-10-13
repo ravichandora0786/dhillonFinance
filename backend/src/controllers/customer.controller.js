@@ -158,13 +158,25 @@ const getCustomers = asyncHandler(async (req, res, next) => {
           .filter((tx) => tx.transactionType === "Repayment")
           .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
 
+        const totalLateCharges = loan.transactions.reduce(
+          (sum, tx) => sum + (parseFloat(tx.lateEMICharges) || 0),
+          0
+        );
+
         const repaymentsPending =
           parseFloat(loan.totalPayableAmount) - repaymentsReceived;
+
+        const profitAmount =
+          parseFloat(loan.totalPayableAmount) -
+          parseFloat(loan.amount) +
+          totalLateCharges;
 
         return {
           ...loan.toJSON(),
           repaymentsReceived,
           repaymentsPending: repaymentsPending >= 0 ? repaymentsPending : 0,
+          totalLateCharges,
+          profitAmount: profitAmount >= 0 ? profitAmount : 0,
         };
       });
 
@@ -264,13 +276,26 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
         .filter((tx) => tx.transactionType === "Repayment")
         .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
 
+      const totalLateCharges = loan.transactions.reduce(
+        (sum, tx) => sum + (parseFloat(tx.lateEMICharges) || 0),
+        0
+      );
+
       const repaymentsPending =
         parseFloat(loan.totalPayableAmount) - repaymentsReceived;
+
+      // Profit = (Total Received + Late Charges) - Principal Amount
+      const profitAmount =
+        parseFloat(loan.totalPayableAmount) -
+        parseFloat(loan.amount) +
+        totalLateCharges;
 
       return {
         ...loan.toJSON(),
         repaymentsReceived,
         repaymentsPending: repaymentsPending >= 0 ? repaymentsPending : 0,
+        totalLateCharges,
+        profitAmount: profitAmount >= 0 ? profitAmount : 0,
       };
     });
 
@@ -462,7 +487,7 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
             {
               model: TransactionModel,
               as: "transactions",
-              attributes: ["amount", "transactionType"],
+              // attributes: ["amount", "transactionType", "lateEMICharges"],
             },
           ],
         },
@@ -494,6 +519,7 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
     };
 
     let totalRepaymentsReceived = 0;
+    let totalReceivedCharges = 0;
     let totalRepaymentsPending = 0;
     let totalActiveLoans = 0;
     let totalDisbursedAmount = 0;
@@ -525,7 +551,13 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
 
           const repaymentsReceived = loan.transactions
             .filter((tx) => tx.transactionType === "Repayment")
-            .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+            .reduce((sum, tx) => sum + parseFloat(tx.amount || 0), 0);
+
+          const receivedCharges = loan.transactions
+            .filter((tx) => tx.transactionType === "Repayment")
+            .reduce((sum, tx) => sum + parseFloat(tx.lateEMICharges || 0), 0);
+
+          totalReceivedCharges += receivedCharges;
 
           const repaymentsPending =
             parseFloat(loan.totalPayableAmount || 0) - repaymentsReceived;
@@ -537,8 +569,11 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
       });
     });
 
-    // Format to 2 decimal places
-    totalRepaymentsReceived = Number(totalRepaymentsReceived.toFixed(2));
+    // Add charges to totalRepaymentsReceived
+    totalRepaymentsReceived = Number(
+      (totalRepaymentsReceived + totalReceivedCharges).toFixed(2)
+    );
+
     totalRepaymentsPending = Number(totalRepaymentsPending.toFixed(2));
     totalDisbursedAmount = Number(totalDisbursedAmount.toFixed(2));
 
@@ -555,6 +590,7 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
             totalDisbursedAmount,
             totalRepaymentsReceived,
             totalRepaymentsPending,
+            totalReceivedCharges,
           },
         },
         "Customer and loan stats calculated successfully"

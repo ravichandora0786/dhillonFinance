@@ -41,12 +41,11 @@ export const PermissionFields = {
 export const CustomerFields = {
   FIRST_NAME: "firstName",
   LAST_NAME: "lastName",
+  FATHER_NAME: "fatherName",
   MOBILE_NUMBER: "mobileNumber",
-  PIN_CODE: "pinCode",
   ADDRESS: "address",
   CITY: "city",
   DISTRICT: "district",
-  STATE: "state",
   AADHAR_NUMBER: "aadharNumber",
   PAN_CARD_NUMBER: "panCardNumber",
   AADHAR_IMAGE: "aadharImage",
@@ -73,6 +72,7 @@ export const TransactionFields = {
   AMOUNT: "amount",
   PAYMENT_MODE: "paymentMode",
   TRANSACTION_DATE: "transactionDate",
+  PER_DAY_CHARGES: "perDayLateCharge",
 };
 
 export const CommonFields = {

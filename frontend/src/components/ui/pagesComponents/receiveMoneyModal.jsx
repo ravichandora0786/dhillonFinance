@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Formik } from "formik";
 import { toast } from "react-toastify";
@@ -22,124 +22,107 @@ const ReceiveMoneyModal = ({
   const dispatch = useDispatch();
   const customer = data;
   const [customerOptions, setCustomerOptions] = useState([]);
+  const [installmentDate, setInstallmentDate] = useState(null);
+  const [showLateField, setShowLateField] = useState(false);
+
   const today = todayDate().toISOString().split("T")[0];
-
-  // Field Configuration Array
-  const fields = [
-    {
-      name: CommonFields.CUSTOMER_ID,
-      label: "Customer Name",
-      type: "select",
-      options: customerOptions,
-      required: true,
-      disabled: customer?.id ? true : false,
-    },
-    {
-      name: TransactionFields.AMOUNT,
-      label: "Amount",
-      type: "text",
-      required: true,
-      disabled: false,
-    },
-    {
-      name: TransactionFields.PAYMENT_MODE,
-      label: "Payment Type",
-      type: "select",
-      options: [
-        { label: "Cash", value: "Cash" },
-        { label: "Bank", value: "Bank" },
-        { label: "UPI", value: "UPI" },
-        { label: "Cheque", value: "Cheque" },
-      ],
-      required: true,
-      disabled: false,
-    },
-    {
-      name: TransactionFields.TRANSACTION_DATE,
-      label: "Date",
-      type: "date",
-      required: true,
-      disabled: false,
-      minDate: "",
-    },
-    {
-      name: CommonFields.DESCRIPTION,
-      label: "Description",
-      type: "text",
-      required: false,
-      disabled: false,
-    },
-  ];
-
-  // Step 1: sabhi fields se initial values banao
-  let initialValues = fields.reduce((acc, f) => {
-    if (f.name === CommonFields.IS_ACTIVE) {
-      acc[f.name] = false;
-    } else {
-      acc[f.name] = "";
-    }
-    return acc;
-  }, {});
-
   const [buttonLoading, setButtonLoading] = useState(false);
-  const [initialObject, setInitialObject] = useState(initialValues);
 
-  const handleSubmitData = async (values) => {
-    setButtonLoading(true);
-    const { ...restValues } = values;
-    let filteredValues = structuredClone(restValues);
-    await new Promise((resolve, reject) => {
-      dispatch(
-        createTransaction({
-          data: filteredValues,
-          onSuccess: (response) => {
-            toast.success(response?.message);
-            resolve();
-            setButtonLoading(false);
-            callBackFunc();
-            onBack();
-          },
-          onFailure: (error) => {
-            reject(new Error(error));
-            setButtonLoading(false);
-          },
-        })
-      );
-    });
-  };
+  // Generate fields dynamically
+  const fields = useMemo(() => {
+    const baseFields = [
+      {
+        name: CommonFields.CUSTOMER_ID,
+        label: "Customer Name",
+        type: "select",
+        options: customerOptions,
+        required: true,
+        disabled: !!customer?.id,
+      },
+      {
+        name: TransactionFields.AMOUNT,
+        label: "Amount",
+        type: "text",
+        required: true,
+        disabled: false,
+      },
+      {
+        name: TransactionFields.PAYMENT_MODE,
+        label: "Payment Type",
+        type: "select",
+        options: [
+          { label: "Cash", value: "Cash" },
+          { label: "Bank", value: "Bank" },
+          { label: "UPI", value: "UPI" },
+          { label: "Cheque", value: "Cheque" },
+        ],
+        required: true,
+        disabled: false,
+      },
+      {
+        name: TransactionFields.TRANSACTION_DATE,
+        label: "Transaction Date",
+        type: "date",
+        required: true,
+        disabled: false,
+        onChange: (date, setFieldValue) => {
+          if (installmentDate) {
+            const payDate = new Date(date);
+            const instDate = new Date(installmentDate);
+            if (payDate > instDate) {
+              setShowLateField(true);
+            } else {
+              setShowLateField(false);
+              setFieldValue(TransactionFields.PER_DAY_CHARGES, 0);
+            }
+          }
+          setFieldValue(TransactionFields.TRANSACTION_DATE, date);
+        },
+      },
+      {
+        name: CommonFields.DESCRIPTION,
+        label: "Description",
+        type: "text",
+        required: false,
+        disabled: false,
+      },
+    ];
+
+    // Late charge field conditionally add karo
+    if (showLateField) {
+      baseFields.push({
+        name: TransactionFields.PER_DAY_CHARGES,
+        label: "Per Day Late Charge (₹)",
+        type: "text",
+        required: false,
+        disabled: false,
+      });
+    }
+
+    return baseFields;
+  }, [customerOptions, customer?.id, showLateField, installmentDate]);
+
+  // Initial Values
+  const [initialObject, setInitialObject] = useState({});
 
   useEffect(() => {
     if (customer?.id) {
-      const defaultValues = {
+      const loan = customer?.loans?.[0];
+      setInstallmentDate(loan?.installmentDate || null);
+      setInitialObject({
         [CommonFields.CUSTOMER_ID]: customer.id,
         [TransactionFields.TRANSACTION_TYPE]: "Repayment",
-        [TransactionFields.AMOUNT]: customer?.loans[0]?.nextEmiAmount,
+        [TransactionFields.AMOUNT]: loan?.nextEmiAmount || "",
         [TransactionFields.TRANSACTION_DATE]: today,
+        [TransactionFields.PER_DAY_CHARGES]: 0,
         [CommonFields.IS_ACTIVE]: true,
-      };
-
-      // fields se initial values banao
-      let initialValues = fields.reduce((acc, f) => {
-        acc[f.name] = "";
-        return acc;
-      }, {});
-
-      // merge defaults
-      setInitialObject({ ...initialValues, ...defaultValues });
+      });
     } else {
-      const defaultValues = {
+      setInitialObject({
         [TransactionFields.TRANSACTION_TYPE]: "Repayment",
+        [TransactionFields.PER_DAY_CHARGES]: 0,
         [CommonFields.IS_ACTIVE]: true,
-      };
-
-      // fields se initial values banao
-      let initialValues = fields.reduce((acc, f) => {
-        acc[f.name] = "";
-        return acc;
-      }, {});
-
-      // merge defaults
-      setInitialObject({ ...initialValues, ...defaultValues });
+      });
     }
   }, [customer]);
 
@@ -148,15 +131,59 @@ const ReceiveMoneyModal = ({
       getCustomerListForOptions({
         data: { search: "" },
         onSuccess: ({ data }) => {
-          const options = data?.customers?.map((item) => {
-            return { label: item.name, value: item.id };
-          });
+          const options = data?.customers?.map((item) => ({
+            label: item.name,
+            value: item.id,
+          }));
           setCustomerOptions(options || []);
         },
-        onFailure: () => {},
       })
     );
   }, [dispatch]);
+
+  const handleSubmitData = async (values) => {
+    setButtonLoading(true);
+    const filteredValues = { ...values };
+    if (!showLateField) filteredValues[TransactionFields.PER_DAY_CHARGES] = 0;
+
+    await new Promise((resolve, reject) => {
+      dispatch(
+        createTransaction({
+          data: filteredValues,
+          onSuccess: (response) => {
+            toast.success(response?.message);
+            setButtonLoading(false);
+            callBackFunc();
+            onBack();
+            resolve();
+          },
+          onFailure: (error) => {
+            toast.error(error);
+            setButtonLoading(false);
+            reject(error);
+          },
+        })
+      );
+    });
+  };
+
+  // Automatically show/hide Per Day Charge based on default date
+  useEffect(() => {
+    if (
+      installmentDate &&
+      initialObject?.[TransactionFields.TRANSACTION_DATE]
+    ) {
+      const payDate = new Date(
+        initialObject[TransactionFields.TRANSACTION_DATE]
+      );
+      const instDate = new Date(installmentDate);
+      if (payDate > instDate) {
+        setShowLateField(true);
+      } else {
+        setShowLateField(false);
+      }
+    }
+  }, [installmentDate, initialObject?.[TransactionFields.TRANSACTION_DATE]]);
 
   return (
     <>

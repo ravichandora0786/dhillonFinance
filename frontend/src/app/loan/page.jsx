@@ -79,7 +79,7 @@ const columns = (handleDelete, handleViewLoan) => [
     cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
   },
   {
-    header: "Installment Date",
+    header: "Recovery Date",
     accessorKey: "installmentDate",
     cell: ({ getValue }) => (
       <SingleParagraphColumn value={removeTimeFromDate(getValue())} />
@@ -98,6 +98,16 @@ const columns = (handleDelete, handleViewLoan) => [
     cell: ({ getValue }) => (
       <SingleParagraphColumn value={removeTimeFromDate(getValue())} />
     ),
+  },
+  {
+    header: "Charges",
+    accessorKey: "totalLateCharges",
+    cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
+  },
+  {
+    header: "Total Profit",
+    accessorKey: "profit",
+    cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
   },
   {
     header: "Status ",

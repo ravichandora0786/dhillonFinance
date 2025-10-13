@@ -46,7 +46,8 @@ const RecentTransactions = () => {
                     : "text-red-500"
                 } font-semibold`}
               >
-                {t?.transactionType === "Repayment" ? "+" : "-"}₹{t?.amount}
+                {t?.transactionType === "Repayment" ? "+" : "-"}₹
+                {parseFloat(t?.amount) + parseFloat(t?.lateEMICharges)}
               </div>
               <div className="text-sm text-gray-500">
                 {t?.transactionType === "Repayment"

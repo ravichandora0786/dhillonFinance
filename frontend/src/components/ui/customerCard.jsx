@@ -82,7 +82,7 @@ const CustomerCardComponent = ({
                 </div>
                 <div className="flex flex-col justify-between items-start">
                   <span className="text-lg font-medium text-gray-800">
-                    {`${customer.firstName} ${customer.lastName}`}
+                    {`${customer.firstName} ${customer.lastName} s/o ${customer.fatherName}`}
                   </span>
 
                   <span className="flex items-center gap-1 text-sm text-gray-500">

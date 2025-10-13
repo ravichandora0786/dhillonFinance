@@ -27,7 +27,7 @@ const LoanModel = sequelize.define(
     },
 
     amount: {
-      type: DataTypes.DECIMAL(12, 2), // loan amount
+      type: DataTypes.DECIMAL(25, 2), // loan amount
       allowNull: false,
     },
 
@@ -42,12 +42,12 @@ const LoanModel = sequelize.define(
     },
 
     emiAmount: {
-      type: DataTypes.DECIMAL(12, 2), // EMI per month
+      type: DataTypes.DECIMAL(25, 2), // EMI per month
       allowNull: true,
     },
 
     totalPayableAmount: {
-      type: DataTypes.DECIMAL(12, 2), // principal + interest (total repayment)
+      type: DataTypes.DECIMAL(25, 2), // principal + interest (total repayment)
       allowNull: false,
     },
 
@@ -77,7 +77,7 @@ const LoanModel = sequelize.define(
     },
 
     nextEmiAmount: {
-      type: DataTypes.DECIMAL(12, 2),
+      type: DataTypes.DECIMAL(25, 2),
       allowNull: true,
     },
 
