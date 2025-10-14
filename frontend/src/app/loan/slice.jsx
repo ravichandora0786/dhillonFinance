@@ -11,6 +11,7 @@ const initialState = {
   pagination: { pageIndex: 0, pageSize: 10 },
   customerLoanSearchData: { search: "" },
   customerLoanOptions: [],
+  upcommingEmiList: [],
   customerLoanId: "",
 };
 
@@ -36,6 +37,9 @@ const customerLoanSlice = createSlice({
     setCustomerLoanId(customerLoan, action) {
       customerLoan.customerLoanId = action.payload;
     },
+    setUpcommingEmiList(customerLoan, action) {
+      customerLoan.upcommingEmiList = action.payload;
+    },
   },
 });
 
@@ -50,6 +54,7 @@ export const {
   setCustomerLoanSearchData,
   setCustomerLoanId,
   setCustomerLoanOptions,
+  setUpcommingEmiList,
 } = customerLoanSlice.actions;
 
 // Api Actions
@@ -62,3 +67,4 @@ export const deleteCustomerLoan = createAction("GET_DELETE_LOAN_BY_ID");
 export const closeCustomerLoanWithTransaction = createAction(
   "CLOSE_LOAN_WITH_TRANSACTION"
 );
+export const upCommingEmiLoanList = createAction("UP_COMMING_EMI_LOAN_LIST");

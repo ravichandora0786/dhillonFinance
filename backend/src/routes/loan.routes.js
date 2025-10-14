@@ -81,6 +81,72 @@ loanRouter.post(
 
 /**
  * @swagger
+ * /loan/upcoming-emi:
+ *   get:
+ *     summary: Get loans whose EMI installment is due within the next N days
+ *     tags: [Loans]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: days
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of days ahead to check (default 5)
+ *       - in: query
+ *         name: includeToday
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *         description: Include loans with installmentDate today
+ *     responses:
+ *       200:
+ *         description: List of upcoming EMIs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       amount:
+ *                         type: string
+ *                       installmentDate:
+ *                         type: string
+ *                       customer:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           firstName:
+ *                             type: string
+ *                           lastName:
+ *                             type: string
+ *                           mobileNumber:
+ *                             type: string
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid query parameters
+ *       500:
+ *         description: Internal server error
+ */
+loanRouter.get(
+  "/upcoming-emi",
+  authenticateUser,
+  loanController.getUpcomingEmis
+);
+
+/**
+ * @swagger
  * /loan:
  *   get:
  *     summary: Get list of loans with pagination, search, and filters

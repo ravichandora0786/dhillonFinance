@@ -13,6 +13,8 @@ import {
   getAllCustomerLoans,
   getCustomerLoanDetailById,
   setCustomerLoanData,
+  setUpcommingEmiList,
+  upCommingEmiLoanList,
   updateCustomerLoan,
   updateCustomerLoanStatus,
 } from "./slice";
@@ -27,6 +29,28 @@ function* getAllCustomerLoanListSaga(action) {
     const response = yield httpRequest.get(endPoints.CustomerLoan, {
       params: data,
     });
+    yield onSuccess({ message: response?.message, data: response?.data });
+  } catch (err) {
+    const errorMessage = err.message || "Something went wrong!";
+    toast.error(errorMessage);
+    yield onFailure({ message: errorMessage });
+  }
+}
+
+/**
+ * Get All upcoming emi of customer loan
+ * @param {*}
+ */
+function* upCommingEmiLoanListSaga(action) {
+  const { data, onSuccess, onFailure } = action.payload;
+  try {
+    const response = yield httpRequest.get(
+      `${endPoints.CustomerLoan}/upcoming-emi`,
+      {
+        params: data,
+      }
+    );
+    yield put(setUpcommingEmiList(response?.data));
     yield onSuccess({ message: response?.message, data: response?.data });
   } catch (err) {
     const errorMessage = err.message || "Something went wrong!";
@@ -164,4 +188,5 @@ export function* customerLoanSaga() {
     closeCustomerLoanWithTransaction,
     closeCustomerLoanWithTransactionSaga
   );
+  yield takeLatest(upCommingEmiLoanList, upCommingEmiLoanListSaga);
 }

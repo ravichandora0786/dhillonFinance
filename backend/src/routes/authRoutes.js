@@ -4,12 +4,21 @@
 
 import express from "express";
 import validateSchema from "../middlewares/validationMiddleware.js";
-import { loginUser, resetPassword } from "../schemas/auth.schema.js";
+import { loginUser } from "../schemas/auth.schema.js";
 import authController from "../controllers/auth.controller.js";
 import { decryptRequestBody } from "../utils/encryptDecrypt.js";
 import { authenticateUser } from "../middlewares/authMiddleware.js";
+import { createRateLimiter } from "../services/rateLimitAPI.js";
 
 const authRouter = express.Router();
+
+// Login limiter — 5 attempts per 15 min
+const loginLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: "Too many login attempts. Try again after 15 minutes.",
+  keyGenerator: (req) => req.body.email || req.ip,
+});
 
 /**
  * @swagger
@@ -45,6 +54,7 @@ authRouter
   .route("/login")
   .post(
     decryptRequestBody,
+    loginLimiter,
     validateSchema(loginUser),
     authController.loginUser
   );

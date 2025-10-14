@@ -229,8 +229,11 @@ const RenderFields = ({
                         interestRate >= 0 &&
                         months > 0
                       ) {
-                        const interestAmount = (principal * interestRate) / 100;
-                        const totalPayAmount = principal + interestAmount;
+                        // Monthly Interest Calculation
+                        const interestAmountPerMonth =
+                          (principal * interestRate) / 100;
+                        const totalInterest = interestAmountPerMonth * months;
+                        const totalPayAmount = principal + totalInterest;
                         const emi = totalPayAmount / months;
 
                         setFieldValue(
@@ -249,23 +252,38 @@ const RenderFields = ({
                         months > 0
                       ) {
                         const emi = totalPay / months;
-                        const interestAmount = totalPay - principal;
-                        const interestRate = (interestAmount / principal) * 100;
+                        const totalInterest = totalPay - principal;
+                        const monthlyInterestRate =
+                          (totalInterest / principal / months) * 100;
 
                         setFieldValue(LoanFields.EMI_AMOUNT, emi.toFixed(2));
                         setFieldValue(
                           LoanFields.INTREST_RATE,
-                          interestRate.toFixed(2)
+                          monthlyInterestRate.toFixed(2)
                         );
                       }
 
-                      // Case 3: Months changed → recalculate EMI only
+                      // Case 3: Months changed → recalculate EMI and total with monthly rate
                       else if (name === LoanFields.MONTHS && months > 0) {
-                        const currentTotalPay = parseFloat(
-                          values[LoanFields.TOTAL_PAY_AMOUNT] || 0
+                        const currentPrincipal = parseFloat(
+                          values[LoanFields.PRINCIPAL_AMOUNT] || 0
                         );
-                        if (currentTotalPay > 0) {
-                          const emi = currentTotalPay / months;
+                        const currentRate = parseFloat(
+                          values[LoanFields.INTREST_RATE] || 0
+                        );
+
+                        if (currentPrincipal > 0 && currentRate >= 0) {
+                          const interestAmountPerMonth =
+                            (currentPrincipal * currentRate) / 100;
+                          const totalInterest = interestAmountPerMonth * months;
+                          const totalPayAmount =
+                            currentPrincipal + totalInterest;
+                          const emi = totalPayAmount / months;
+
+                          setFieldValue(
+                            LoanFields.TOTAL_PAY_AMOUNT,
+                            totalPayAmount.toFixed(2)
+                          );
                           setFieldValue(LoanFields.EMI_AMOUNT, emi.toFixed(2));
                         }
                       }

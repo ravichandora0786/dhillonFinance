@@ -52,7 +52,6 @@ const createLoan = asyncHandler(async (req, res, next) => {
       paidEmis: 0,
       pendingEmis: tenureMonths,
       nextEmiAmount: emiAmount,
-      installmentDate: startDate,
     };
 
     // Create loan
@@ -252,6 +251,10 @@ const getLoanById = asyncHandler(async (req, res, next) => {
       .filter((tx) => tx.transactionType === "Repayment")
       .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
 
+    const receivedCharges = loan.transactions
+      .filter((tx) => tx.transactionType === "Repayment")
+      .reduce((sum, tx) => sum + parseFloat(tx.lateEMICharges || 0), 0);
+
     const pendingAmount =
       parseFloat(loan.totalPayableAmount) - paymentsReceived;
 
@@ -311,6 +314,18 @@ const deleteLoan = asyncHandler(async (req, res, next) => {
     const loan = await LoanModel.findByPk(req.params.id, { transaction });
     if (!loan) return next(new ApiError(404, responseMessage.notFound("Loan")));
 
+    // Prevent deleting Active loans
+    if (loan.status === "Active") {
+      await transaction.rollback();
+      return next(
+        new ApiError(
+          400,
+          "Active loans cannot be deleted. Please close the loan first."
+        )
+      );
+    }
+
+    // Delete non-active loans
     await loan.destroy({ force: true, transaction });
     await transaction.commit();
 
@@ -435,6 +450,61 @@ export const closeLoanWithTransaction = asyncHandler(async (req, res, next) => {
   }
 });
 
+/**
+ * GET /api/loans/upcoming-emi?days=5&includeToday=false
+ * - days: number of days ahead to check (default 5)
+ * - includeToday: "true" or "false" (default false). If true, includes today's date.
+ */
+export const getUpcomingEmis = asyncHandler(async (req, res, next) => {
+  try {
+    const days = parseInt(req.query.days, 10) || 5;
+    const includeToday = req.query.includeToday === "true";
+
+    if (isNaN(days) || days < 0) {
+      return next(new ApiError(400, "Invalid 'days' query parameter"));
+    }
+
+    // Helper: get YYYY-MM-DD for a date in server local timezone
+    const toYMD = (d) => d.toLocaleDateString("en-CA");
+
+    const today = new Date();
+
+    // start: either today (if includeToday) OR tomorrow
+    const startDateObj = new Date(today);
+    if (!includeToday) startDateObj.setDate(startDateObj.getDate() + 1);
+
+    // end: startDate + (days - (includeToday ? 0 : 1)) days => simpler: end = today + days
+    const endDateObj = new Date(today);
+    endDateObj.setDate(endDateObj.getDate() + days);
+
+    const startDate = toYMD(startDateObj);
+    const endDate = toYMD(endDateObj);
+
+    // Fetch loans whose installmentDate is between startDate and endDate (inclusive)
+    const loans = await LoanModel.findAll({
+      where: {
+        installmentDate: {
+          [Op.between]: [startDate, endDate],
+        },
+        status: "Active",
+      },
+      include: [
+        {
+          model: CustomerModel,
+          as: "customer",
+        },
+      ],
+      order: [["installmentDate", "ASC"]],
+    });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, loans, "Upcoming EMIs fetched successfully"));
+  } catch (err) {
+    next(new ApiError(500, err.message));
+  }
+});
+
 export default {
   createLoan,
   getLoans,
@@ -442,4 +512,5 @@ export default {
   updateLoan,
   deleteLoan,
   closeLoanWithTransaction,
+  getUpcomingEmis,
 };

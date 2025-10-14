@@ -76,7 +76,7 @@ const AddEditCustomerLoanComponent = ({
       label: "Loan Amount",
       type: "text",
       required: true,
-      disabled: false,
+      disabled: true,
       onKeyDown: (e) => {
         const value = e.target.value;
         // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
@@ -132,7 +132,7 @@ const AddEditCustomerLoanComponent = ({
     },
     {
       name: LoanFields.EMI_AMOUNT,
-      label: "EMI",
+      label: "EMI per month",
       type: "text",
       required: true,
       disabled: true,

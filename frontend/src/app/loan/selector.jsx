@@ -17,3 +17,5 @@ export const selectCustomerLoanOptions = (state) =>
   customerLoanSelector(state).customerLoanOptions;
 export const selectCustomerLoanId = (state) =>
   customerLoanSelector(state).customerLoanId;
+export const selectUpcommingEmiList = (state) =>
+  customerLoanSelector(state).upcommingEmiList;

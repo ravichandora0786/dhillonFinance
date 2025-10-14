@@ -13,6 +13,7 @@ import {
   s3getUploadedFile,
 } from "../services/aws/s3.config.js";
 import FileController from "./file.controller.js";
+import { getGoogleDriveClient } from "../services/googleDrive.js";
 
 /**
  * Refresh signed URL of a file if expired
@@ -412,18 +413,89 @@ const updateCustomer = asyncHandler(async (req, res, next) => {
 });
 
 /** Delete Customer */
-const deleteCustomer = asyncHandler(async (req, res, next) => {
+export const deleteCustomer = asyncHandler(async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
-    const customer = await CustomerModel.findByPk(req.params.id);
+    const { id } = req.params;
+
+    // Find customer
+    const customer = await CustomerModel.findByPk(id, { transaction });
     if (!customer)
       return next(new ApiError(404, responseMessage.notFound("Customer")));
 
+    // Find all loans of this customer
+    const loans = await LoanModel.findAll({
+      where: { customerId: id },
+      transaction,
+    });
+
+    // Check if any loan is Active
+    const activeLoan = loans.find((loan) => loan.status === "Active");
+    if (activeLoan) {
+      await transaction.rollback();
+      return next(
+        new ApiError(
+          400,
+          "Cannot delete customer: one or more loans are still Active"
+        )
+      );
+    }
+
+    // Find all transactions of this customer
+    const transactions = await TransactionModel.findAll({
+      where: { customerId: id },
+      transaction,
+    });
+
+    // Delete all transactions
+    for (const txn of transactions) {
+      await txn.destroy({ force: true, transaction });
+    }
+
+    // Delete all loans (non-active)
+    for (const loan of loans) {
+      await loan.destroy({ force: true, transaction });
+    }
+
+    // Delete uploaded files from Google Drive and DB
+    const drive = await getGoogleDriveClient();
+    const fileIds = [
+      customer.aadharImage,
+      customer.panCardImage,
+      customer.agreementImage,
+      customer.profileImage,
+      customer.otherImage,
+    ].filter(Boolean);
+
+    for (const fileId of fileIds) {
+      try {
+        const fileRecord = await UploadFileModel.findByPk(fileId, {
+          transaction,
+        });
+        if (fileRecord) {
+          await drive.files.delete({ fileId: fileRecord.imageKey });
+          await fileRecord.destroy({ force: true, transaction });
+        }
+      } catch (err) {
+        console.error(`Failed to delete file ${fileId}:`, err.message);
+      }
+    }
+
+    // Finally delete the customer
     await customer.destroy({ force: true, transaction });
+
+    // Commit all
     await transaction.commit();
+
     return res
       .status(200)
-      .json(new ApiResponse(200, null, responseMessage.deleted("Customer")));
+      .json(
+        new ApiResponse(
+          200,
+          null,
+          responseMessage.deleted("Customer and related data")
+        )
+      );
   } catch (err) {
     await transaction.rollback();
     next(new ApiError(500, err.message));
@@ -448,7 +520,10 @@ const getCustomerOptions = asyncHandler(async (req, res, next) => {
     // Fetch customers, only required fields
     const customers = await CustomerModel.findAll({
       attributes: ["id", "firstName", "lastName", "mobileNumber"],
-      where: searchCondition,
+      where: {
+        ...searchCondition,
+        status: "Active",
+      },
       order: [["firstName", "ASC"]],
     });
 

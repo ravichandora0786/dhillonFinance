@@ -3,6 +3,7 @@ import NameAvatarColumn from "../tableCollumnComponents/nameWithImageCol";
 import { useDispatch, useSelector } from "react-redux";
 import { selectAllTransactionList } from "@/app/transaction/selector";
 import { getAllTransactions } from "@/app/transaction/slice";
+import TitleAndDescription from "./titleAndDescription";
 
 const RecentTransactions = () => {
   const dispatch = useDispatch();
@@ -21,45 +22,51 @@ const RecentTransactions = () => {
   }, [dispatch]);
   return (
     <div className="bg-white rounded-lg shadow p-4 max-h-[400px] overflow-auto scrollbar-hide">
-      <h3 className="text-lg font-semibold text-gray-800">
-        Recent Transactions
-      </h3>
-      <p className="text-sm text-gray-500 mb-4">Latest borrower activities</p>
+      <TitleAndDescription
+        title="Recent Transactions"
+        description="Track your borrowers’ latest loan activities"
+      />
 
       <div className="flex flex-col divide-y">
-        {transactionData?.transactions?.map((t, idx) => (
-          <div key={idx} className="flex justify-between py-3">
-            <div>
-              <NameAvatarColumn
-                name={`${t?.customer?.firstName} ${t?.customer?.lastName}`}
-                mobileNumber={`${t.customer.mobileNumber}`}
-                showImage={true}
-                showMobile={true}
-                imageUrl={t.customer?.profileFile?.image}
-              />
+        {transactionData?.transactions?.length > 0 ? (
+          transactionData?.transactions?.map((t, idx) => (
+            <div key={idx} className="flex justify-between py-3">
+              <div>
+                <NameAvatarColumn
+                  name={`${t?.customer?.firstName} ${t?.customer?.lastName} s/o ${t?.customer?.fatherName}`}
+                  mobileNumber={`${t.customer.mobileNumber}`}
+                  showImage={true}
+                  showMobile={true}
+                  imageUrl={t.customer?.profileFile?.image}
+                />
+              </div>
+              <div className="text-right">
+                <div
+                  className={`${
+                    t?.transactionType === "Repayment"
+                      ? "text-green-600"
+                      : "text-red-500"
+                  } font-semibold`}
+                >
+                  {t?.transactionType === "Repayment" ? "+" : "-"}₹
+                  {parseFloat(t?.amount) + parseFloat(t?.lateEMICharges)}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {t?.transactionType === "Repayment"
+                    ? "Received"
+                    : "Disbursed Loan"}
+                </div>
+                <div className="pl-8 text-sm text-gray-500">
+                  {formatRelativeDate(t?.transactionDate)}
+                </div>
+              </div>
             </div>
-            <div className="text-right">
-              <div
-                className={`${
-                  t?.transactionType === "Repayment"
-                    ? "text-green-600"
-                    : "text-red-500"
-                } font-semibold`}
-              >
-                {t?.transactionType === "Repayment" ? "+" : "-"}₹
-                {parseFloat(t?.amount) + parseFloat(t?.lateEMICharges)}
-              </div>
-              <div className="text-sm text-gray-500">
-                {t?.transactionType === "Repayment"
-                  ? "Received"
-                  : "Disbursed Loan"}
-              </div>
-              <div className="pl-8 text-sm text-gray-500">
-                {formatRelativeDate(t?.transactionDate)}
-              </div>
-            </div>
+          ))
+        ) : (
+          <div className="text-sm text-gray-500 text-center py-4">
+            No Transactions found
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

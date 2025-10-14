@@ -343,7 +343,7 @@ const Customer = () => {
           </div>
         </div>
         <div className="w-full">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {customerList?.customers?.length > 0 ? (
               customerList.customers.map((item, index) => (
                 <CustomerCardComponent

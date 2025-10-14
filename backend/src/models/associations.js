@@ -28,6 +28,7 @@ UserModel.belongsTo(RoleModel, { foreignKey: "roleId", as: "role" });
 UserModel.belongsTo(UploadFileModel, {
   foreignKey: "profileImage",
   as: "profileFile",
+  onDelete: "SET NULL",
 });
 
 /*
@@ -61,26 +62,31 @@ ActivityPermissionModel.belongsTo(ActivityMasterModel, {
 CustomerModel.belongsTo(UploadFileModel, {
   foreignKey: "aadharImage",
   as: "aadharFile",
+  onDelete: "CASCADE",
 });
 
 CustomerModel.belongsTo(UploadFileModel, {
   foreignKey: "panCardImage",
   as: "panCardFile",
+  onDelete: "CASCADE",
 });
 
 CustomerModel.belongsTo(UploadFileModel, {
   foreignKey: "agreementImage",
   as: "agreementFile",
+  onDelete: "CASCADE",
 });
 
 CustomerModel.belongsTo(UploadFileModel, {
   foreignKey: "profileImage",
   as: "profileFile",
+  onDelete: "CASCADE",
 });
 
 CustomerModel.belongsTo(UploadFileModel, {
   foreignKey: "otherImage",
   as: "otherFile",
+  onDelete: "CASCADE",
 });
 
 /*
@@ -88,7 +94,12 @@ CustomerModel.belongsTo(UploadFileModel, {
  * Customer & Loan Relations
  * =======================
  */
-CustomerModel.hasMany(LoanModel, { foreignKey: "customerId", as: "loans" });
+CustomerModel.hasMany(LoanModel, {
+  foreignKey: "customerId",
+  as: "loans",
+  onDelete: "CASCADE",
+  hooks: true,
+});
 LoanModel.belongsTo(CustomerModel, {
   foreignKey: "customerId",
   as: "customer",
@@ -102,6 +113,8 @@ LoanModel.belongsTo(CustomerModel, {
 CustomerModel.hasMany(TransactionModel, {
   foreignKey: "customerId",
   as: "transactions",
+  onDelete: "CASCADE",
+  hooks: true,
 });
 TransactionModel.belongsTo(CustomerModel, {
   foreignKey: "customerId",
@@ -116,12 +129,17 @@ TransactionModel.belongsTo(CustomerModel, {
 LoanModel.hasMany(TransactionModel, {
   foreignKey: "loanId",
   as: "transactions",
+  onDelete: "CASCADE",
+  hooks: true,
 });
-TransactionModel.belongsTo(LoanModel, { foreignKey: "loanId", as: "loan" });
+TransactionModel.belongsTo(LoanModel, {
+  foreignKey: "loanId",
+  as: "loan",
+});
 
 /*
  * =======================
- * Export
+ * Export All Models
  * =======================
  */
 export {

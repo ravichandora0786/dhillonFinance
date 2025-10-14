@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getDashboardData } from "./slice";
 import { selectDashboardData } from "./selectors";
 import RecentTransactions from "@/components/ui/recentTransactions";
+import UpCommingEMILoan from "@/components/ui/upCommingEMILoan";
 import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
@@ -129,6 +130,7 @@ export default function Dashboard() {
             </div>
           </div>
           <RecentTransactions />
+          <UpCommingEMILoan />
         </div>
       </div>
 

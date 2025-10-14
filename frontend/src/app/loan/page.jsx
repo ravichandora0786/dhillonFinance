@@ -36,14 +36,15 @@ import SingleParagraphColumn from "@/components/tableCollumnComponents/singlePar
 import { removeTimeFromDate } from "@/Services/utils";
 import ConfirmationModal from "@/components/ui/deleteConfirmation";
 import { toast } from "react-toastify";
+import ReceiveMoneyModal from "@/components/ui/pagesComponents/receiveMoneyModal";
 
-const columns = (handleDelete, handleViewLoan) => [
+const columns = (handleDelete, handleViewLoan, handlePayEmi) => [
   {
     header: () => <div className="">Customer name</div>,
     accessorKey: "customer.firstName",
     cell: ({ row, getValue }) => (
       <SingleParagraphColumn
-        value={`${getValue()} ${row.original.customer.lastName}`}
+        value={`${getValue()} ${row.original.customer.lastName} s/o ${row.original.customer.fatherName}`}
         className={"font-bold"}
       />
     ),
@@ -115,17 +116,30 @@ const columns = (handleDelete, handleViewLoan) => [
     cell: ({ getValue }) => <Status text={getValue()} />,
   },
   {
+    header: "Pay",
+    accessorKey: "emi",
+    cell: ({ row }) => (
+      <LoadingButton
+        isLoading={false}
+        disabled={row.original.status !== "Active"}
+        onClick={() => handlePayEmi(row?.original)}
+      >
+        Pay EMI
+      </LoadingButton>
+    ),
+  },
+  {
     header: "Action",
     cell: ({ row }) => (
       <ActionColumnsComponent
         showViewButton={true}
-        // showDeleteButton={true}
+        showDeleteButton={true}
         showEditLink={true}
         editOnLink={`/loan/edit/${row.original.id}`}
         viewOnClick={() => {
           handleViewLoan(row?.original);
         }}
-        // deleteOnClick={() => handleDelete(row?.original)}
+        deleteOnClick={() => handleDelete(row?.original)}
       />
     ),
   },
@@ -137,6 +151,7 @@ const CustomerLoan = (permissions) => {
   const dispatch = useDispatch();
   const { confirm, ModalContent } = ConfirmationModal();
   const [openViewDetailModal, setOpenViewDetailModal] = useState(false);
+  const [openReceivedMoneyModal, setOpenReceivedMoneyModal] = useState(false);
   const [rowData, setRowData] = useState({});
   const [columnVisibility, setColumnVisibility] = useState({});
   const pagination = useSelector(selectCustomerLoanPagination);
@@ -165,6 +180,20 @@ const CustomerLoan = (permissions) => {
   const handleViewLoan = (rowData) => {
     setRowData(rowData);
     setOpenViewDetailModal(true);
+  };
+  const handlePayEmi = (rowData) => {
+    setRowData({
+      id: rowData?.customer?.id,
+      firstName: rowData?.customer?.firstName,
+      lastName: rowData?.customer?.lastName,
+      loans: [
+        {
+          installmentDate: rowData?.installmentDate,
+          nextEmiAmount: rowData?.nextEmiAmount,
+        },
+      ],
+    });
+    setOpenReceivedMoneyModal(true);
   };
   const handleDelete = async (rowData) => {
     const isConfirmed = await confirm({
@@ -271,7 +300,7 @@ const CustomerLoan = (permissions) => {
         </div>
         <div className="w-full">
           <DataTableComponent
-            columns={columns(handleDelete, handleViewLoan)}
+            columns={columns(handleDelete, handleViewLoan, handlePayEmi)}
             data={customerLoanList?.loans || []}
             pagination={pagination}
             setPagination={(newPagination) =>
@@ -294,6 +323,17 @@ const CustomerLoan = (permissions) => {
           setOpenViewDetailModal(false);
         }}
         data={rowData}
+      />
+      <ReceiveMoneyModal
+        openModal={openReceivedMoneyModal}
+        onBack={() => {
+          setRowData({});
+          setOpenReceivedMoneyModal(false);
+        }}
+        data={rowData}
+        callBackFunc={() => {
+          getAllCustomerLoansList(customerLoanSearchData, pagination);
+        }}
       />
     </>
   );
