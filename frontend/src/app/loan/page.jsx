@@ -44,7 +44,9 @@ const columns = (handleDelete, handleViewLoan, handlePayEmi) => [
     accessorKey: "customer.firstName",
     cell: ({ row, getValue }) => (
       <SingleParagraphColumn
-        value={`${getValue()} ${row.original.customer.lastName} s/o ${row.original.customer.fatherName}`}
+        value={`${getValue()} ${row.original.customer.lastName} s/o ${
+          row.original.customer.fatherName
+        }`}
         className={"font-bold"}
       />
     ),
@@ -60,12 +62,14 @@ const columns = (handleDelete, handleViewLoan, handlePayEmi) => [
     cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
   },
   {
-    header: "No.of Installment",
+    header: "Paid/Total Installment",
     accessorKey: "tenureMonths",
-    cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
+    cell: ({ row, getValue }) => (
+      <SingleParagraphColumn value={`${getValue()}/${row.original.paidEmis}`} />
+    ),
   },
   {
-    header: "EMI",
+    header: "EMI Amount",
     accessorKey: "emiAmount",
     cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
   },

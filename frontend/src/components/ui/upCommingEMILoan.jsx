@@ -24,7 +24,7 @@ const UpcomingEMILoan = () => {
   }, [dispatch]);
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 min-h-[200px] max-h-[400px] overflow-auto scrollbar-hide">
+    <div className="bg-white w-full rounded-lg shadow p-4 min-h-[200px] max-h-[400px] overflow-auto scrollbar-hide">
       {/* Updated title and description */}
       <TitleAndDescription
         title="Upcoming EMI"

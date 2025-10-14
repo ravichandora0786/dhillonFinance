@@ -21,7 +21,7 @@ const RecentTransactions = () => {
     getRecentTransactionsList();
   }, [dispatch]);
   return (
-    <div className="bg-white rounded-lg shadow p-4 max-h-[400px] overflow-auto scrollbar-hide">
+    <div className="bg-white w-full rounded-lg shadow p-4 max-h-[400px] overflow-auto scrollbar-hide">
       <TitleAndDescription
         title="Recent Transactions"
         description="Track your borrowers’ latest loan activities"
@@ -51,12 +51,18 @@ const RecentTransactions = () => {
                   {t?.transactionType === "Repayment" ? "+" : "-"}₹
                   {parseFloat(t?.amount) + parseFloat(t?.lateEMICharges)}
                 </div>
-                <div className="text-sm text-gray-500">
+                <div
+                  className={`${
+                    t?.transactionType === "Repayment"
+                      ? "text-green-600"
+                      : "text-red-500"
+                  } text-sm`}
+                >
                   {t?.transactionType === "Repayment"
                     ? "Received"
                     : "Disbursed Loan"}
                 </div>
-                <div className="pl-8 text-sm text-gray-500">
+                <div className="pl-8 text-[12px] text-gray-500">
                   {formatRelativeDate(t?.transactionDate)}
                 </div>
               </div>
