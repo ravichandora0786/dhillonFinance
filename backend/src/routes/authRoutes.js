@@ -54,7 +54,7 @@ authRouter
   .route("/login")
   .post(
     decryptRequestBody,
-    loginLimiter,
+    // loginLimiter,
     validateSchema(loginUser),
     authController.loginUser
   );
