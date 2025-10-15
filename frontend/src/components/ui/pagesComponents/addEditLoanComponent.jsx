@@ -41,7 +41,6 @@ const AddEditCustomerLoanComponent = ({
       required: true,
       disabled: customerId ? true : false,
     },
-
     {
       name: LoanFields.PRINCIPAL_AMOUNT,
       label: "Pay Amount",
@@ -70,13 +69,86 @@ const AddEditCustomerLoanComponent = ({
           return;
         }
       },
+      onChange: (e, setFieldValue, values) => {
+        const value = e.target.value;
+        setFieldValue(LoanFields.PRINCIPAL_AMOUNT, value);
+
+        const principal = parseFloat(value || 0);
+        const months = parseInt(values[LoanFields.MONTHS] || 0);
+        const interestRate = parseFloat(values[LoanFields.INTREST_RATE] || 0);
+
+        if (principal > 0 && months > 0 && interestRate >= 0) {
+          const totalInterest = ((principal * interestRate) / 100) * months;
+          const totalPay = principal + totalInterest;
+          const emi = totalPay / months;
+
+          setFieldValue(LoanFields.TOTAL_PAY_AMOUNT, totalPay.toFixed(2));
+          setFieldValue(LoanFields.EMI_AMOUNT, emi.toFixed(2));
+        }
+      },
     },
     {
-      name: LoanFields.TOTAL_PAY_AMOUNT,
-      label: "Loan Amount",
+      name: LoanFields.INTREST_RATE,
+      label: "Interest Rate",
       type: "text",
       required: true,
-      disabled: true,
+      disabled: false,
+      onKeyDown: (e) => {
+        const value = e.target.value;
+
+        // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
+        if (
+          [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+          ].includes(e.key)
+        ) {
+          return;
+        }
+
+        // Allow dot or numpad decimal (.)
+        if (e.key === "." || e.key === "Decimal") {
+          if (value.includes(".")) {
+            e.preventDefault(); // Prevent multiple dots
+          }
+          return;
+        }
+
+        // Allow only digits (0-9)
+        if (!/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+        }
+      },
+      onChange: (e, setFieldValue, values) => {
+        const value = e.target.value;
+        setFieldValue(LoanFields.INTREST_RATE, value);
+
+        const principal = parseFloat(values[LoanFields.PRINCIPAL_AMOUNT] || 0);
+        const months = parseInt(values[LoanFields.MONTHS] || 0);
+        const interestRate = parseFloat(value || 0);
+
+        if (principal > 0 && months > 0 && interestRate >= 0) {
+          const totalInterest = ((principal * interestRate) / 100) * months;
+          const totalPay = principal + totalInterest;
+          const emi = totalPay / months;
+
+          setFieldValue(LoanFields.TOTAL_PAY_AMOUNT, totalPay.toFixed(2));
+          setFieldValue(LoanFields.EMI_AMOUNT, emi.toFixed(2));
+        }
+      },
+    },
+    {
+      name: LoanFields.MONTHS,
+      label: "No. of Installments",
+      type: "text",
+      required: true,
+      disabled: false,
+      maxLength: 3,
       onKeyDown: (e) => {
         const value = e.target.value;
         // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
@@ -99,14 +171,51 @@ const AddEditCustomerLoanComponent = ({
           return;
         }
       },
+      onChange: (e, setFieldValue, values) => {
+        const value = e.target.value;
+        setFieldValue(LoanFields.MONTHS, value);
+
+        const months = parseInt(value || 0);
+        const principal = parseFloat(values[LoanFields.PRINCIPAL_AMOUNT] || 0);
+        const interestRate = parseFloat(values[LoanFields.INTREST_RATE] || 0);
+        const startDate = values[LoanFields.START_DATE]
+          ? new Date(values[LoanFields.START_DATE])
+          : null;
+
+        // Recalculate totalPayAmount & EMI
+        if (principal > 0 && months > 0 && interestRate >= 0) {
+          const totalInterest = ((principal * interestRate) / 100) * months;
+          const totalPay = principal + totalInterest;
+          const emi = totalPay / months;
+
+          setFieldValue(LoanFields.TOTAL_PAY_AMOUNT, totalPay.toFixed(2));
+          setFieldValue(LoanFields.EMI_AMOUNT, emi.toFixed(2));
+        }
+
+        // Recalculate End Date & next Installment Date if Start Date exists
+        if (startDate && !isNaN(startDate.getTime()) && months > 0) {
+          const endDate = new Date(startDate);
+          endDate.setMonth(endDate.getMonth() + months);
+          setFieldValue(
+            LoanFields.END_DATE,
+            endDate.toISOString().split("T")[0]
+          );
+
+          const nextInstallDate = new Date(startDate);
+          nextInstallDate.setMonth(nextInstallDate.getMonth() + 1);
+          setFieldValue(
+            LoanFields.PAY_INSTALLMENT_DATE,
+            nextInstallDate.toISOString().split("T")[0]
+          );
+        }
+      },
     },
     {
-      name: LoanFields.MONTHS,
-      label: "No. of Installments",
+      name: LoanFields.TOTAL_PAY_AMOUNT,
+      label: "Loan Amount",
       type: "text",
       required: true,
-      disabled: false,
-      maxLength: 3,
+      disabled: true,
       onKeyDown: (e) => {
         const value = e.target.value;
         // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
@@ -160,44 +269,6 @@ const AddEditCustomerLoanComponent = ({
       },
     },
     {
-      name: LoanFields.INTREST_RATE,
-      label: "Intrest Rate",
-      type: "text",
-      required: true,
-      disabled: false,
-      onKeyDown: (e) => {
-        const value = e.target.value;
-        // Allow: Backspace, Delete, Tab, Escape, Enter, Arrow keys
-        if (
-          [
-            "Backspace",
-            "Delete",
-            "Tab",
-            "Escape",
-            "Enter",
-            "ArrowLeft",
-            "ArrowRight",
-          ].includes(e.key)
-        ) {
-          return;
-        }
-        // Sirf digits allow
-        if (!/^[0-9]$/.test(e.key)) {
-          e.preventDefault();
-          return;
-        }
-      },
-    },
-    {
-      name: LoanFields.PAY_INSTALLMENT_DATE,
-      label: "Recovery EMI Date",
-      type: "date",
-      required: true,
-      disabled: false,
-      dateMode: "single",
-      minDate: "",
-    },
-    {
       name: LoanFields.START_DATE,
       label: "Start Date",
       type: "date",
@@ -205,13 +276,54 @@ const AddEditCustomerLoanComponent = ({
       disabled: false,
       dateMode: "single",
       minDate: "",
+      onChange: (date, setFieldValue, values) => {
+        const startDate = new Date(date);
+        const months = parseInt(values?.[LoanFields.MONTHS], 10);
+
+        // Check if months is a valid positive number
+        if (!months || isNaN(months) || months <= 0) {
+          // Show warning toast
+          toast.error(
+            "Please fill in No. of Installments before selecting Start Date"
+          );
+          return;
+        }
+
+        setFieldValue(LoanFields.START_DATE, date);
+
+        if (startDate && !isNaN(startDate.getTime())) {
+          // calculate end date
+          const endDate = new Date(startDate);
+          endDate.setMonth(endDate.getMonth() + months);
+          const formattedEndDate = endDate.toISOString().split("T")[0];
+
+          // calculate next installment date (1 month after start)
+          const nextInstallDate = new Date(startDate);
+          nextInstallDate.setMonth(nextInstallDate.getMonth() + 1);
+          const formattedInstallDate = nextInstallDate
+            .toISOString()
+            .split("T")[0];
+
+          setFieldValue(LoanFields.PAY_INSTALLMENT_DATE, formattedInstallDate);
+          setFieldValue(LoanFields.END_DATE, formattedEndDate);
+        }
+      },
     },
     {
       name: LoanFields.END_DATE,
       label: "End Date",
       type: "date",
       required: true,
-      disabled: false,
+      disabled: true,
+      dateMode: "single",
+      minDate: "",
+    },
+    {
+      name: LoanFields.PAY_INSTALLMENT_DATE,
+      label: "Recovery EMI Date",
+      type: "date",
+      required: true,
+      disabled: true,
       dateMode: "single",
       minDate: "",
     },

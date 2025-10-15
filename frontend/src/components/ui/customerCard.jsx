@@ -19,6 +19,12 @@ const CustomerCardComponent = ({
 }) => {
   const router = useRouter();
 
+  const totalProfit =
+    customer?.loans?.reduce(
+      (acc, loan) => acc + (parseFloat(loan.profitAmount) || 0),
+      0
+    ) || 0;
+
   return (
     <div className="col-span-1 flex">
       <div className="w-full bg-white border rounded-lg shadow flex flex-col">
@@ -104,8 +110,20 @@ const CustomerCardComponent = ({
             </div>
             <div>
               <p className="text-gray-500">Latest Loan Status</p>
-              <p className="font-medium text-gray-800">
-                {customer?.loans[0]?.status || "--"}
+              <p
+                className={`font-medium ${
+                  customer?.loans[0]?.status === "Active"
+                    ? "text-green-700"
+                    : "text-danger"
+                }`}
+              >
+                {customer?.loans[0]?.status || "No Loan"}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Total Profit</p>
+              <p className="font-medium text-green-700">
+                ₹{totalProfit.toLocaleString("en-IN")}
               </p>
             </div>
             <div>

@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import { removeTimeFromDate } from "@/Services/utils";
 import SingleParagraphColumn from "@/components/tableCollumnComponents/singleParagraphCol";
 import DataTableComponent from "@/components/dataTableComponent";
+import ActionColumnsComponent from "@/components/tableCollumnComponents/actionColumn";
 
 const LoanTransactionTable = ({ transactions = [] }) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
+  const [editTransationModal, setEditTransationModal] = useState(false);
+  const [rowData, setRowData] = useState({});
   const columns = [
     {
       header: "Date",
@@ -88,23 +91,41 @@ const LoanTransactionTable = ({ transactions = [] }) => {
         <SingleParagraphColumn value={getValue() || "-"} />
       ),
     },
+    {
+      header: "Action",
+      cell: ({ row }) => (
+        <ActionColumnsComponent
+          showEditButton={true}
+          editOnClick={() => handleEdit(row?.original, customerData)}
+        />
+      ),
+    },
   ];
 
+  const handleEdit = (rowData) => {
+    if (rowData.id) {
+      setRowData({});
+      setEditTransationModal(true);
+    }
+  };
+
   return (
-    <div className="mt-4">
-      <div className="text-sm font-semibold text-slate-700 mb-2">
-        Transactions
+    <>
+      <div className="mt-4">
+        <div className="text-sm font-semibold text-slate-700 mb-2">
+          Transactions
+        </div>
+        <DataTableComponent
+          columns={columns}
+          data={transactions}
+          pagination={pagination}
+          setPagination={(newPagination) =>
+            dispatch(setPagination(newPagination))
+          }
+          totalRows={pagination?.pageSize}
+        />
       </div>
-      <DataTableComponent
-        columns={columns}
-        data={transactions}
-        pagination={pagination}
-        setPagination={(newPagination) =>
-          dispatch(setPagination(newPagination))
-        }
-        totalRows={pagination?.pageSize}
-      />
-    </div>
+    </>
   );
 };
 
