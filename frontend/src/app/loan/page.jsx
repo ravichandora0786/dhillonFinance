@@ -326,6 +326,9 @@ const CustomerLoan = (permissions) => {
           setRowData({});
           setOpenViewDetailModal(false);
         }}
+        callBackFunc={() => {
+          getAllCustomerLoansList(customerLoanSearchData, pagination);
+        }}
         data={rowData}
       />
       <ReceiveMoneyModal

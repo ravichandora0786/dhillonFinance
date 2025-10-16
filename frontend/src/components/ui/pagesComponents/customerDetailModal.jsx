@@ -5,7 +5,12 @@ import ViewField from "../viewField";
 import CustomImageComponent from "@/components/ui/customImageComponent";
 import LoanTransactionTable from "../loanTransactionTable";
 
-const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
+const CustomerDetailModal = ({
+  openModal,
+  onBack = () => {},
+  data,
+  callBackFunc,
+}) => {
   const customer = data;
 
   return (
@@ -188,7 +193,14 @@ const CustomerDetailModal = ({ openModal, onBack = () => {}, data }) => {
 
                   {/* Transactions */}
                   {loan?.transactions?.length > 0 && (
-                    <LoanTransactionTable transactions={loan.transactions} />
+                    <LoanTransactionTable
+                      transactions={loan.transactions}
+                      callBackFunc={() => {
+                        onBack();
+                        callBackFunc();
+                      }}
+                      loanData={loan}
+                    />
                   )}
                 </div>
               ))}

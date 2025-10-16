@@ -289,19 +289,107 @@ const getTransactionById = asyncHandler(async (req, res, next) => {
     );
 });
 
-/** Update Transaction */
+/** Update Transaction (adjust next EMI dynamically when amount changes) */
 const updateTransaction = asyncHandler(async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
+    let {
+      customerId,
+      amount,
+      transactionType,
+      paymentMode,
+      transactionDate,
+      description,
+      perDayLateCharge,
+    } = req.body;
+
+    transactionDate = new Date(transactionDate);
+
+    // 🔹 Find existing transaction
     const transactionRecord = await TransactionModel.findByPk(req.params.id, {
       transaction: t,
     });
+
     if (!transactionRecord) {
       await t.rollback();
-      return next(new ApiError(404, responseMessage.notFound("Transaction")));
+      return next(new ApiError(404, "Transaction not found"));
     }
 
-    await transactionRecord.update(req.body, { transaction: t });
+    //  Validate customer
+    const customer = await CustomerModel.findByPk(customerId, {
+      transaction: t,
+    });
+    if (!customer) {
+      await t.rollback();
+      return next(new ApiError(404, "Customer not found"));
+    }
+
+    //  Find active loan
+    const activeLoan = await LoanModel.findOne({
+      where: { customerId, status: "Active", isActive: true },
+      transaction: t,
+    });
+
+    if (!activeLoan) {
+      await t.rollback();
+      return next(new ApiError(404, "No active loan found for this customer"));
+    }
+
+    const loanId = activeLoan.id;
+
+    // ===== Late EMI Calculation =====
+    let lateEMIDays = 0;
+    let lateEMICharges = 0;
+
+    if (transactionType === "Repayment" && activeLoan.installmentDate) {
+      const installmentDate = new Date(activeLoan.installmentDate);
+      if (transactionDate > installmentDate) {
+        const diffTime = transactionDate - installmentDate;
+        lateEMIDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        lateEMICharges = (
+          lateEMIDays * parseFloat(perDayLateCharge || 0)
+        ).toFixed(2);
+      }
+    }
+
+    //  Store old amount before update
+    const oldAmount = parseFloat(transactionRecord.amount || 0);
+    const newAmount = parseFloat(amount || 0);
+
+    //  Update the transaction itself
+    await transactionRecord.update(
+      {
+        customerId,
+        amount: newAmount,
+        transactionType,
+        paymentMode,
+        transactionDate,
+        description,
+        lateEMIDays,
+        lateEMICharges,
+      },
+      { transaction: t }
+    );
+
+    //  If it's repayment, adjust next EMI dynamically
+    if (transactionType === "Repayment") {
+      const loanToUpdate = await LoanModel.findByPk(loanId, { transaction: t });
+
+      // Core Logic:
+      // nextEmiAmount = (old nextEmiAmount + oldAmount) - newAmount
+      let nextEmiAmount =
+        parseFloat(loanToUpdate.nextEmiAmount || 0) + oldAmount - newAmount;
+
+      if (nextEmiAmount < 0) nextEmiAmount = 0;
+
+      await loanToUpdate.update(
+        {
+          nextEmiAmount: nextEmiAmount.toFixed(2),
+        },
+        { transaction: t }
+      );
+    }
+
     await t.commit();
 
     return res
@@ -310,7 +398,7 @@ const updateTransaction = asyncHandler(async (req, res, next) => {
         new ApiResponse(
           200,
           transactionRecord,
-          responseMessage.updated("Transaction")
+          "Transaction updated successfully"
         )
       );
   } catch (err) {

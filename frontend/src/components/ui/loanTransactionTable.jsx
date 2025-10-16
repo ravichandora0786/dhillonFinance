@@ -3,8 +3,14 @@ import { removeTimeFromDate } from "@/Services/utils";
 import SingleParagraphColumn from "@/components/tableCollumnComponents/singleParagraphCol";
 import DataTableComponent from "@/components/dataTableComponent";
 import ActionColumnsComponent from "@/components/tableCollumnComponents/actionColumn";
+import EditTransactionModal from "@/components/ui/pagesComponents/editTransationComponent";
+import { LoanFields } from "@/constants/fieldsName";
 
-const LoanTransactionTable = ({ transactions = [] }) => {
+const LoanTransactionTable = ({
+  transactions = [],
+  callBackFunc,
+  loanData,
+}) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
   const [editTransationModal, setEditTransationModal] = useState(false);
   const [rowData, setRowData] = useState({});
@@ -96,7 +102,7 @@ const LoanTransactionTable = ({ transactions = [] }) => {
       cell: ({ row }) => (
         <ActionColumnsComponent
           showEditButton={true}
-          editOnClick={() => handleEdit(row?.original, customerData)}
+          editOnClick={() => handleEdit(row?.original)}
         />
       ),
     },
@@ -104,7 +110,7 @@ const LoanTransactionTable = ({ transactions = [] }) => {
 
   const handleEdit = (rowData) => {
     if (rowData.id) {
-      setRowData({});
+      setRowData(rowData);
       setEditTransationModal(true);
     }
   };
@@ -125,6 +131,19 @@ const LoanTransactionTable = ({ transactions = [] }) => {
           totalRows={pagination?.pageSize}
         />
       </div>
+      <EditTransactionModal
+        openModal={editTransationModal}
+        onBack={() => {
+          setRowData({});
+          setEditTransationModal(false);
+        }}
+        data={rowData}
+        callBackFunc={() => {
+          callBackFunc();
+        }}
+        isEdit={true}
+        installmentDate={loanData?.[LoanFields.PAY_INSTALLMENT_DATE]}
+      />
     </>
   );
 };

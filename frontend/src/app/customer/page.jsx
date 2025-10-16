@@ -399,6 +399,9 @@ const Customer = () => {
           setOpenViewDetailModal(false);
         }}
         data={rowData}
+        callBackFunc={() => {
+          getAllCustomersList(customerSearchData, pagination);
+        }}
       />
       <ReceiveMoneyModal
         openModal={openReceivedMoneyModal}

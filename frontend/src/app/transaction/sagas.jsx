@@ -49,7 +49,7 @@ function* getTransactionDetailByIdSaga(action) {
     );
 
     yield put(setTransactionData(response?.data));
-    yield onSuccess({ resp: response });
+    yield onSuccess({ data: response?.data });
   } catch (error) {
     const errorMessage = error?.message || "Something went wrong!";
     toast.error(errorMessage);

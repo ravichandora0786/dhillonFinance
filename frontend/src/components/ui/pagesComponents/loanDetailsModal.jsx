@@ -4,7 +4,12 @@ import GenericModal from "@/components/ui/genericModal";
 import LoanTransactionTable from "@/components/ui/loanTransactionTable";
 import ViewField from "../viewField";
 
-const LoanDetailModal = ({ openModal, onBack = () => {}, data }) => {
+const LoanDetailModal = ({
+  openModal,
+  onBack = () => {},
+  data,
+  callBackFunc,
+}) => {
   const loan = data;
 
   return (
@@ -101,7 +106,14 @@ const LoanDetailModal = ({ openModal, onBack = () => {}, data }) => {
 
                 {/* Transactions */}
                 {loan?.transactions?.length > 0 && (
-                  <LoanTransactionTable transactions={loan.transactions} />
+                  <LoanTransactionTable
+                    transactions={loan.transactions}
+                    callBackFunc={() => {
+                      onBack();
+                      callBackFunc();
+                    }}
+                    loanData={loan}
+                  />
                 )}
               </div>
             </div>
