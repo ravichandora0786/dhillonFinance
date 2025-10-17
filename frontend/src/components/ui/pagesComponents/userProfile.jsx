@@ -46,8 +46,6 @@ const UserProfileComponent = () => {
     }
   }, [id]);
 
-  console.log(user, "user");
-
   const settings = [
     {
       title: "Change Password",

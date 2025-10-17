@@ -91,7 +91,6 @@ const Sidebar = ({ isMobile = false, mobileViewToggle = () => {} }) => {
   const userDetail = useSelector(selectUser) || {};
 
   const filteredMenu = getFilteredMenuData(menuData, permissionsState);
-  console.log(permissionsState, "filteredMenu");
 
   const handleOpenSubMenu = (key) => {
     setOpen(open === key ? "" : key);

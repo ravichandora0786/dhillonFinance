@@ -67,8 +67,6 @@ const createLoan = asyncHandler(async (req, res, next) => {
       transaction,
     });
 
-    console.log(lastLoan);
-
     let nextSequence = 1;
 
     if (lastLoan && lastLoan.loanNumber) {
@@ -322,6 +320,10 @@ const updateLoan = asyncHandler(async (req, res, next) => {
       await t.rollback();
       return next(new ApiError(404, responseMessage.notFound("Loan")));
     }
+    if (loan?.status == "Closed") {
+      await t.rollback();
+      return next(new ApiError(400, "Cannot update loan after close the loan"));
+    }
 
     // Check if any repayment transaction exists
     const existingRepayment = await TransactionModel.findOne({
@@ -339,8 +341,24 @@ const updateLoan = asyncHandler(async (req, res, next) => {
       );
     }
 
-    // Safe to update
+    // Check if loan amount is changing
+    const oldAmount = loan.amount;
+    const newAmount = req.body.amount;
+
+    // Safe to update loan
     await loan.update(req.body, { transaction: t });
+
+    // If amount changed, update Disbursement transaction
+    if (newAmount && newAmount !== oldAmount) {
+      const disbursementTx = await TransactionModel.findOne({
+        where: { loanId, transactionType: "Disbursement" },
+        transaction: t,
+      });
+
+      if (disbursementTx) {
+        await disbursementTx.update({ amount: newAmount }, { transaction: t });
+      }
+    }
     await t.commit();
 
     return res

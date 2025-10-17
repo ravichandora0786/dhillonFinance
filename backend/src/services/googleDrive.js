@@ -103,7 +103,6 @@ export const getGoogleDriveClient = async () => {
   // Refresh token if expired
   if (!tokens.expiry_date || tokens.expiry_date < Date.now()) {
     const { credentials } = await oAuth2Client.refreshAccessToken();
-    console.log(credentials, "credentials credentials");
 
     // Keep the old refresh token if Google doesn't return a new one
     const newTokens = {
@@ -115,7 +114,7 @@ export const getGoogleDriveClient = async () => {
 
     oAuth2Client.setCredentials(newTokens);
 
-    console.log("✅ Google Drive access token refreshed!");
+    console.log("Google Drive access token refreshed!");
 
     // ⚙️ (Optional) If you want to log it for manual .env update:
     console.log(" New Access Token:", credentials.access_token);

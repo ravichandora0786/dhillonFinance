@@ -116,7 +116,7 @@ const columns = (handleDelete, handleViewLoan, handlePayEmi) => [
   },
   {
     header: "Total Profit",
-    accessorKey: "profit",
+    accessorKey: "profitAmount",
     cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
   },
   {

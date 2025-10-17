@@ -62,7 +62,6 @@ export const UserProfileUploadImage = ({
                   data: { [fieldName]: data.id },
                   onSuccess: ({ message, data: userData }) => {
                     console.log(message);
-                    console.log(userData, "userData");
                     // setUploadedImage(data.url);
                     updateFileField(userData[fieldName]);
                     setOpenModal(false);

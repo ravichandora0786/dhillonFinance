@@ -267,6 +267,7 @@ const CustomerDetailModal = ({
             }}
             customerId={pdfParms.customerId}
             loanId={pdfParms.loanId}
+            customerData={customer}
           />
         </>
       }

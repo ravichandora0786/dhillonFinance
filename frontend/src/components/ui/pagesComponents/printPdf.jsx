@@ -7,8 +7,15 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import html2pdf from "html2pdf.js";
 import GenericModal from "../genericModal";
+import FullScreenLoader from "@/components/ui/fullScreenLoader"; // import your loader
 
-const PrintPdf = ({ openModal, onBack = () => {}, customerId, loanId }) => {
+const PrintPdf = ({
+  openModal,
+  onBack = () => {},
+  customerId,
+  loanId,
+  customerData,
+}) => {
   const dispatch = useDispatch();
   const [buttonLoading, setButtonLoading] = useState(false);
   const [htmlContent, setHtmlContent] = useState("");
@@ -21,7 +28,6 @@ const PrintPdf = ({ openModal, onBack = () => {}, customerId, loanId }) => {
           customerId,
           loanId,
           onSuccess: ({ data }) => {
-            console.log(data);
             setHtmlContent(data);
             resolve();
             setButtonLoading(false);
@@ -52,7 +58,9 @@ const PrintPdf = ({ openModal, onBack = () => {}, customerId, loanId }) => {
       printWindow.document.close();
       printWindow.focus();
       printWindow.print();
-      printWindow.onafterprint = () => printWindow.close();
+      printWindow.onafterprint = () => {
+        printWindow.close();
+      };
     } else {
       console.error("Failed to open print window. Please allow popups.");
     }
@@ -63,7 +71,7 @@ const PrintPdf = ({ openModal, onBack = () => {}, customerId, loanId }) => {
 
     const options = {
       margin: [0, 5, 5, 5],
-      filename: "AssessmentForm.pdf",
+      filename: `${customerData.firstName}_${customerData.lastName}.pdf`,
       html2canvas: {
         scale: 2,
         scrollX: 0,
@@ -76,7 +84,12 @@ const PrintPdf = ({ openModal, onBack = () => {}, customerId, loanId }) => {
       },
     };
 
-    html2pdf().set(options).from(element).save();
+    setButtonLoading(true);
+    html2pdf()
+      .set(options)
+      .from(element)
+      .save()
+      .finally(() => setButtonLoading(false));
   };
 
   return (
@@ -85,30 +98,37 @@ const PrintPdf = ({ openModal, onBack = () => {}, customerId, loanId }) => {
       closeModal={onBack}
       modalTitle={"Download / Print PDF"}
       modalBody={
-        <div className="max-w-4xl mx-auto p-4 space-y-4">
-          {/* Action buttons */}
-          <div className="flex gap-4 mb-4">
-            <button
-              onClick={downloadPDF}
-              disabled={buttonLoading || !htmlContent}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              {buttonLoading ? "Loading..." : "Download PDF"}
-            </button>
-            <button
-              onClick={openPrintScreen}
-              disabled={buttonLoading || !htmlContent}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              Print
-            </button>
-          </div>
+        <>
+          <div className="max-w-4xl mx-auto p-4 space-y-4">
+            {/* Action buttons */}
+            <div className="flex gap-4 mb-4">
+              <button
+                onClick={downloadPDF}
+                disabled={buttonLoading || !htmlContent}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                {buttonLoading ? "Loading..." : "Download PDF"}
+              </button>
+              <button
+                onClick={openPrintScreen}
+                disabled={buttonLoading || !htmlContent}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Print
+              </button>
+            </div>
 
-          {/* Hidden printable content */}
-          <div id="hidden-html-container" className="py-4">
-            <div dangerouslySetInnerHTML={{ __html: htmlContent }}></div>
+            {/* Hidden printable content */}
+            <div id="hidden-html-container" className="py-4">
+              <div dangerouslySetInnerHTML={{ __html: htmlContent }}></div>
+            </div>
           </div>
-        </div>
+          {/* Full screen loader */}
+          <FullScreenLoader
+            showLoader={buttonLoading}
+            message="Please Wait..."
+          />
+        </>
       }
     />
   );
