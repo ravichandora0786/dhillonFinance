@@ -56,7 +56,7 @@ const createTransaction = asyncHandler(async (req, res, next) => {
       if (transactionDate > installmentDate) {
         // Calculate difference in days
         const diffTime = transactionDate.getTime() - installmentDate.getTime();
-        lateEMIDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // convert ms → days
+        lateEMIDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         lateEMICharges = (
           lateEMIDays * parseFloat(perDayLateCharge || 0)
         ).toFixed(2);
@@ -87,15 +87,40 @@ const createTransaction = asyncHandler(async (req, res, next) => {
 
     if (transactionType === "Repayment") {
       const newPaidEmis = loanToUpdate.paidEmis + 1;
-      const where = {};
-      if (customerId) where.customerId = customerId;
-      if (loanId) where.loanId = loanId;
-      const transactions = await TransactionModel.findAll({ where });
-      const totalRepaymentAmount = transactions
-        .filter((t) => t.transactionType === "Repayment")
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-      if (amount >= activeLoan?.totalPayableAmount - totalRepaymentAmount) {
+      // All transactions for this loan
+      const transactions = await TransactionModel.findAll({
+        where: { loanId, customerId, transactionType: "Repayment" },
+        transaction: t,
+      });
+
+      const totalRepaymentAmount = transactions.reduce(
+        (sum, t) => sum + Number(t.amount || 0),
+        0
+      );
+
+      const totalLateCharges = transactions.reduce(
+        (sum, t) => sum + Number(t.lateEMICharges || 0),
+        0
+      );
+
+      // ===== Profit / Loss Calculation =====
+      const principal = parseFloat(loanToUpdate.amount || 0);
+      let profitAmount = 0;
+      let lossAmount = 0;
+      const totalReceived = totalRepaymentAmount + totalLateCharges;
+
+      if (totalReceived > principal) {
+        profitAmount = totalReceived - principal;
+        lossAmount = 0;
+      } else if (totalReceived < principal) {
+        lossAmount = principal - totalReceived;
+        profitAmount = 0;
+      }
+
+      // ===== Update EMI and loan status =====
+      if (totalRepaymentAmount >= activeLoan.totalPayableAmount) {
+        // Loan fully paid
         await loanToUpdate.update(
           {
             paidEmis: newPaidEmis,
@@ -103,13 +128,15 @@ const createTransaction = asyncHandler(async (req, res, next) => {
             nextEmiAmount: 0,
             installmentDate: null,
             status: "Closed",
+            profitAmount,
+            lossAmount,
           },
           { transaction: t }
         );
       } else {
         const newPendingEmis = loanToUpdate.tenureMonths - newPaidEmis;
 
-        let calculatedNextEmiAmount = parseFloat(
+        const calculatedNextEmiAmount = parseFloat(
           (
             parseFloat(loanToUpdate.nextEmiAmount || 0) -
             parseFloat(amount) +
@@ -141,6 +168,8 @@ const createTransaction = asyncHandler(async (req, res, next) => {
             nextEmiAmount: newPendingEmis > 0 ? newNextEmiAmount : 0,
             installmentDate: newPendingEmis > 0 ? newInstallmentDate : null,
             status: newPendingEmis === 0 ? "Closed" : loanToUpdate.status,
+            profitAmount,
+            lossAmount,
           },
           { transaction: t }
         );
@@ -305,7 +334,7 @@ const updateTransaction = asyncHandler(async (req, res, next) => {
 
     transactionDate = new Date(transactionDate);
 
-    // 🔹 Find existing transaction
+    // Find existing transaction
     const transactionRecord = await TransactionModel.findByPk(req.params.id, {
       transaction: t,
     });
@@ -382,9 +411,41 @@ const updateTransaction = asyncHandler(async (req, res, next) => {
 
       if (nextEmiAmount < 0) nextEmiAmount = 0;
 
+      // All transactions for this loan
+      const transactions = await TransactionModel.findAll({
+        where: { loanId, customerId, transactionType: "Repayment" },
+        transaction: t,
+      });
+
+      const totalRepaymentAmount = transactions.reduce(
+        (sum, t) => sum + Number(t.amount || 0),
+        0
+      );
+
+      const totalLateCharges = transactions.reduce(
+        (sum, t) => sum + Number(t.lateEMICharges || 0),
+        0
+      );
+
+      // ===== Profit / Loss Calculation =====
+      const principal = parseFloat(loanToUpdate.amount || 0);
+      let profitAmount = 0;
+      let lossAmount = 0;
+      const totalReceived = totalRepaymentAmount + totalLateCharges;
+
+      if (totalReceived > principal) {
+        profitAmount = totalReceived - principal;
+        lossAmount = 0;
+      } else if (totalReceived < principal) {
+        lossAmount = principal - totalReceived;
+        profitAmount = 0;
+      }
+
       await loanToUpdate.update(
         {
           nextEmiAmount: nextEmiAmount.toFixed(2),
+          profitAmount,
+          lossAmount,
         },
         { transaction: t }
       );

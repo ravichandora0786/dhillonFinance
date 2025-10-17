@@ -84,6 +84,7 @@ const RenderFields = ({
                         }
                   }
                   placeholder={`Select ${label}`}
+                  onBlur={handleBlur}
                   isSearchable={true}
                   isClearable={true}
                   touched={fieldTouched}

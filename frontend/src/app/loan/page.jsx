@@ -65,7 +65,7 @@ const columns = (handleDelete, handleViewLoan, handlePayEmi) => [
     header: "Paid/Total Installment",
     accessorKey: "tenureMonths",
     cell: ({ row, getValue }) => (
-      <SingleParagraphColumn value={`${getValue()}/${row.original.paidEmis}`} />
+      <SingleParagraphColumn value={`${row.original.paidEmis}/${getValue()}`} />
     ),
   },
   {

@@ -11,7 +11,9 @@ import LoadingButton from "@/components/ui/loadingButton";
 import RenderFields from "@/components/ui/renderFields";
 import { getCustomerListForOptions } from "@/app/customer/slice";
 import FullScreenLoader from "@/components/ui/fullScreenLoader";
+import { receiveMoneyValidationSchema } from "@/validationSchema/loanSchema";
 import { todayDate } from "@/Services/utils";
+import { paymentModeOptions } from "@/constants/dropdown";
 
 const ReceiveMoneyModal = ({
   openModal,
@@ -50,12 +52,7 @@ const ReceiveMoneyModal = ({
         name: TransactionFields.PAYMENT_MODE,
         label: "Payment Type",
         type: "select",
-        options: [
-          { label: "Cash", value: "Cash" },
-          { label: "Bank", value: "Bank" },
-          { label: "UPI", value: "UPI" },
-          { label: "Cheque", value: "Cheque" },
-        ],
+        options: paymentModeOptions,
         required: true,
         disabled: false,
       },
@@ -115,13 +112,20 @@ const ReceiveMoneyModal = ({
         [TransactionFields.AMOUNT]: loan?.nextEmiAmount || "",
         [TransactionFields.TRANSACTION_DATE]: today,
         [TransactionFields.PER_DAY_CHARGES]: 0,
+        [TransactionFields.PAYMENT_MODE]: "",
         [CommonFields.IS_ACTIVE]: true,
+        [CommonFields.DESCRIPTION]: true,
       });
     } else {
       setInitialObject({
+        [CommonFields.CUSTOMER_ID]: "",
         [TransactionFields.TRANSACTION_TYPE]: "Repayment",
+        [TransactionFields.AMOUNT]: 0,
+        [TransactionFields.TRANSACTION_DATE]: "",
         [TransactionFields.PER_DAY_CHARGES]: 0,
+        [TransactionFields.PAYMENT_MODE]: "",
         [CommonFields.IS_ACTIVE]: true,
+        [CommonFields.DESCRIPTION]: true,
       });
     }
   }, [customer]);
@@ -196,7 +200,7 @@ const ReceiveMoneyModal = ({
         modalBody={
           <Formik
             initialValues={initialObject}
-            //   validationSchema={}
+            validationSchema={receiveMoneyValidationSchema}
             enableReinitialize={true}
             onSubmit={handleSubmitData}
           >

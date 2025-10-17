@@ -18,18 +18,20 @@ export default function SelectDropDown({
   disabled,
   touched,
   isMulti,
+  onBlur,
 }) {
   const hasError = touched && !!error;
   return (
     <>
       <Select
         options={options}
-        blurInputOnSelect
+        // blurInputOnSelect
         placeholder={placeholder || "Select"}
         isClearable={isClearable}
         isSearchable={isSearchable || false}
         menuPortalTarget={document.body}
         name={name}
+        onBlur={onBlur}
         isDisabled={disabled || false}
         value={value}
         controlShouldRenderValue

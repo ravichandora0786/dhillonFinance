@@ -94,7 +94,14 @@ const LoanDetailModal = ({
                     label="Total charges"
                     value={`₹ ${loan?.totalLateCharges}`}
                   />
-                  <ViewField label="Profit" value={`₹ ${loan?.profit}`} />
+                  <ViewField
+                    label="Profit Amount"
+                    value={`₹ ${loan?.profitAmount}`}
+                  />
+                  <ViewField
+                    label="Loss Amount"
+                    value={`₹ ${loan?.lossAmount}`}
+                  />
                 </div>
 
                 {/* Description */}

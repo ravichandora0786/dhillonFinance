@@ -167,17 +167,11 @@ const getCustomers = asyncHandler(async (req, res, next) => {
         const repaymentsPending =
           parseFloat(loan.totalPayableAmount) - repaymentsReceived;
 
-        const profitAmount =
-          parseFloat(loan.totalPayableAmount) -
-          parseFloat(loan.amount) +
-          totalLateCharges;
-
         return {
           ...loan.toJSON(),
           repaymentsReceived,
           repaymentsPending: repaymentsPending >= 0 ? repaymentsPending : 0,
           totalLateCharges,
-          profitAmount: profitAmount >= 0 ? profitAmount : 0,
         };
       });
 
@@ -285,18 +279,11 @@ const getCustomerById = asyncHandler(async (req, res, next) => {
       const repaymentsPending =
         parseFloat(loan.totalPayableAmount) - repaymentsReceived;
 
-      // Profit = (Total Received + Late Charges) - Principal Amount
-      const profitAmount =
-        parseFloat(loan.totalPayableAmount) -
-        parseFloat(loan.amount) +
-        totalLateCharges;
-
       return {
         ...loan.toJSON(),
         repaymentsReceived,
         repaymentsPending: repaymentsPending >= 0 ? repaymentsPending : 0,
         totalLateCharges,
-        profitAmount: profitAmount >= 0 ? profitAmount : 0,
       };
     });
 
@@ -519,7 +506,7 @@ const getCustomerOptions = asyncHandler(async (req, res, next) => {
 
     // Fetch customers, only required fields
     const customers = await CustomerModel.findAll({
-      attributes: ["id", "firstName", "lastName", "mobileNumber"],
+      attributes: ["id", "firstName", "lastName", "mobileNumber", "fatherName"],
       where: {
         ...searchCondition,
         status: "Active",
@@ -530,7 +517,7 @@ const getCustomerOptions = asyncHandler(async (req, res, next) => {
     // Map to option format (optional)
     const options = customers.map((c) => ({
       id: c.id,
-      name: `${c.firstName} ${c.lastName}`,
+      name: `${c.firstName} ${c.lastName} s/o ${c.fatherName}`,
       mobileNumber: c.mobileNumber,
     }));
 
@@ -550,9 +537,10 @@ const getCustomerOptions = asyncHandler(async (req, res, next) => {
   }
 });
 
-/** Get overall totals (customers, repaymentsReceived, repaymentsPending, disbursedAmount) for Active loans */
+/** Get overall totals (customers, repaymentsReceived, repaymentsPending, disbursedAmount, totalProfit) for Active loans */
 const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
   try {
+    // ---- Fetch customers, loans, and transactions ----
     const customers = await CustomerModel.findAll({
       include: [
         {
@@ -562,7 +550,6 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
             {
               model: TransactionModel,
               as: "transactions",
-              // attributes: ["amount", "transactionType", "lateEMICharges"],
             },
           ],
         },
@@ -593,14 +580,18 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
       totalLoans: 0,
     };
 
+    // ---- Aggregates ----
     let totalRepaymentsReceived = 0;
     let totalReceivedCharges = 0;
     let totalRepaymentsPending = 0;
     let totalActiveLoans = 0;
     let totalDisbursedAmount = 0;
-    const activeLoanCustomersSet = new Set(); // unique active loan customers
+    let totalProfit = 0;
+    let totalLoss = 0;
 
-    // ---- Loan Customers grouping (only count) ----
+    const activeLoanCustomersSet = new Set();
+
+    // ---- Loan Customers grouping (for count by status) ----
     const loanCustomers = {
       Active: 0,
       Closed: 0,
@@ -610,30 +601,33 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
 
     customers.forEach((customer) => {
       customer.loans.forEach((loan) => {
-        // loan status count
+        // Count loan statuses
         if (loanStats[loan.status] !== undefined) {
           loanStats[loan.status]++;
           loanCustomers[loan.status]++;
         }
         loanStats.totalLoans++;
 
-        // repayments (only for Active loans)
-        if (loan.status === "Active") {
+        // For Active or Closed loans
+        if (loan.status === "Active" || loan.status === "Closed") {
           totalActiveLoans++;
           activeLoanCustomersSet.add(customer.id);
 
           totalDisbursedAmount += parseFloat(loan.amount || 0);
 
+          // Repayments received
           const repaymentsReceived = loan.transactions
             .filter((tx) => tx.transactionType === "Repayment")
             .reduce((sum, tx) => sum + parseFloat(tx.amount || 0), 0);
 
+          // Late charges received
           const receivedCharges = loan.transactions
             .filter((tx) => tx.transactionType === "Repayment")
             .reduce((sum, tx) => sum + parseFloat(tx.lateEMICharges || 0), 0);
 
           totalReceivedCharges += receivedCharges;
 
+          // Pending repayments
           const repaymentsPending =
             parseFloat(loan.totalPayableAmount || 0) - repaymentsReceived;
 
@@ -644,31 +638,44 @@ const getCustomerRepaymentStats = asyncHandler(async (req, res, next) => {
       });
     });
 
-    // Add charges to totalRepaymentsReceived
+    // ---- Add charges to total received ----
     totalRepaymentsReceived = Number(
       (totalRepaymentsReceived + totalReceivedCharges).toFixed(2)
     );
-
     totalRepaymentsPending = Number(totalRepaymentsPending.toFixed(2));
     totalDisbursedAmount = Number(totalDisbursedAmount.toFixed(2));
 
+    // ---- Calculate total profit and loss ----
+    const allLoans = customers.flatMap((c) => c.loans || []);
+    totalProfit = allLoans.reduce(
+      (sum, l) => sum + (parseFloat(l.profitAmount) || 0),
+      0
+    );
+    totalLoss = allLoans.reduce(
+      (sum, l) => sum + (parseFloat(l.lossAmount) || 0),
+      0
+    );
+
+    // ---- Final response ----
     return res.status(200).json(
       new ApiResponse(
         200,
         {
           customerStats,
           loanStats,
-          loanCustomers, // loan customers count by status
+          loanCustomers,
           repaymentStats: {
-            totalActiveLoans, // total active loans
-            totalActiveLoanCustomers: activeLoanCustomersSet.size, // unique active loan customers
+            totalActiveLoans,
+            totalActiveLoanCustomers: activeLoanCustomersSet.size,
             totalDisbursedAmount,
             totalRepaymentsReceived,
             totalRepaymentsPending,
             totalReceivedCharges,
+            totalProfit,
+            totalLoss,
           },
         },
-        "Customer and loan stats calculated successfully"
+        "Customer, loan, and profit stats calculated successfully"
       )
     );
   } catch (err) {

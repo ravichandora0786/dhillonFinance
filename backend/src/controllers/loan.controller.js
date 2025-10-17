@@ -52,6 +52,7 @@ const createLoan = asyncHandler(async (req, res, next) => {
       paidEmis: 0,
       pendingEmis: tenureMonths,
       nextEmiAmount: emiAmount,
+      lossAmount: amount,
     };
 
     // Create loan
@@ -178,18 +179,11 @@ const getLoans = asyncHandler(async (req, res, next) => {
         0
       );
 
-      // Profit = totalPayableAmount - principalAmount + totalLateCharges
-      const profit =
-        parseFloat(loan.totalPayableAmount || 0) -
-        parseFloat(loan.amount || 0) +
-        totalLateCharges;
-
       return {
         ...loan.toJSON(),
         paymentsReceived: (paymentsReceived + receivedCharges).toFixed(2),
         pendingAmount: pendingAmount >= 0 ? pendingAmount.toFixed(2) : "0.00",
         totalLateCharges: totalLateCharges.toFixed(2),
-        profit: profit.toFixed(2),
       };
     });
 
@@ -264,18 +258,11 @@ const getLoanById = asyncHandler(async (req, res, next) => {
       0
     );
 
-    // Profit = totalPayableAmount - principalAmount + totalLateCharges
-    const profit =
-      parseFloat(loan.totalPayableAmount || 0) -
-      parseFloat(loan.amount || 0) +
-      totalLateCharges;
-
     const loanWithPayments = {
       ...loan.toJSON(),
       paymentsReceived: (paymentsReceived + receivedCharges).toFixed(2),
       pendingAmount: pendingAmount >= 0 ? pendingAmount : 0,
       totalLateCharges: totalLateCharges.toFixed(2),
-      profit: profit.toFixed(2),
     };
 
     return res
@@ -290,19 +277,42 @@ const getLoanById = asyncHandler(async (req, res, next) => {
 
 /** Update Loan */
 const updateLoan = asyncHandler(async (req, res, next) => {
-  const transaction = await sequelize.transaction();
+  const t = await sequelize.transaction();
   try {
-    const loan = await LoanModel.findByPk(req.params.id, { transaction });
-    if (!loan) return next(new ApiError(404, responseMessage.notFound("Loan")));
+    const loanId = req.params.id;
 
-    await loan.update(req.body, { transaction });
-    await transaction.commit();
+    // Check if loan exists
+    const loan = await LoanModel.findByPk(loanId, { transaction: t });
+    if (!loan) {
+      await t.rollback();
+      return next(new ApiError(404, responseMessage.notFound("Loan")));
+    }
+
+    // Check if any repayment transaction exists
+    const existingRepayment = await TransactionModel.findOne({
+      where: { loanId, transactionType: "Repayment" },
+      transaction: t,
+    });
+
+    if (existingRepayment) {
+      await t.rollback();
+      return next(
+        new ApiError(
+          400,
+          "Cannot update loan after a repayment transaction has been made"
+        )
+      );
+    }
+
+    // Safe to update
+    await loan.update(req.body, { transaction: t });
+    await t.commit();
 
     return res
       .status(200)
       .json(new ApiResponse(200, loan, responseMessage.updated("Loan")));
   } catch (err) {
-    await transaction.rollback();
+    await t.rollback();
     next(new ApiError(500, err.message));
   }
 });

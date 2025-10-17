@@ -15,6 +15,7 @@ import LoadingButton from "@/components/ui/loadingButton";
 import RenderFields from "@/components/ui/renderFields";
 import FullScreenLoader from "@/components/ui/fullScreenLoader";
 import { todayDate } from "@/Services/utils";
+import { paymentModeOptions } from "@/constants/dropdown";
 
 const EditTransactionModal = ({
   openModal,
@@ -43,12 +44,7 @@ const EditTransactionModal = ({
         name: TransactionFields.PAYMENT_MODE,
         label: "Payment Type",
         type: "select",
-        options: [
-          { label: "Cash", value: "Cash" },
-          { label: "Bank", value: "Bank" },
-          { label: "UPI", value: "UPI" },
-          { label: "Cheque", value: "Cheque" },
-        ],
+        options: paymentModeOptions,
         required: true,
       },
       {

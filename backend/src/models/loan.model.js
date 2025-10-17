@@ -86,6 +86,18 @@ const LoanModel = sequelize.define(
       allowNull: true,
     },
 
+    profitAmount: {
+      type: DataTypes.DECIMAL(25, 2),
+      allowNull: true,
+      defaultValue: 0,
+    },
+
+    lossAmount: {
+      type: DataTypes.DECIMAL(25, 2),
+      allowNull: true,
+      defaultValue: 0,
+    },
+
     paidEmis: {
       type: DataTypes.INTEGER,
       defaultValue: 0,

@@ -7,6 +7,8 @@ import {
   FiDollarSign,
   FiTrendingUp,
   FiAlertCircle,
+  FiArrowUpCircle,
+  FiArrowDownCircle,
 } from "react-icons/fi";
 import ReceiveMoneyModal from "@/components/ui/pagesComponents/receiveMoneyModal";
 import { useDispatch, useSelector } from "react-redux";
@@ -52,7 +54,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card
             icon={<FiUsers className="text-3xl text-blue-500" />}
-            title="Active Borrowers"
+            title="Total Borrowers"
             value={data?.customerStats?.totalCustomers || 0}
             subtitle="Loan Customers"
           />
@@ -60,19 +62,31 @@ export default function Dashboard() {
             icon={<FiDollarSign className="text-3xl text-green-500" />}
             title="Disbursed Amount"
             value={`₹${data?.repaymentStats?.totalDisbursedAmount || 0}`}
-            subtitle="Active Loan Principal Amount"
+            subtitle="Loan Principal Amount"
           />
           <Card
             icon={<FiTrendingUp className="text-3xl text-orange-500" />}
             title="Collection Amount"
             value={`₹${data?.repaymentStats?.totalRepaymentsReceived || 0}`}
-            subtitle="Active Loan Collection With Int & charges"
+            subtitle="Loan Collection With Int & charges"
           />
           <Card
             icon={<FiAlertCircle className="text-3xl text-red-500" />}
             title="Receivables Amount"
             value={`₹${data?.repaymentStats?.totalRepaymentsPending || 0}`}
-            subtitle="Active Loan Pending Amount With Int"
+            subtitle="Loan Pending Amount With Int"
+          />
+          <Card
+            icon={<FiArrowUpCircle className="text-3xl text-green-500" />}
+            title="Profit Amount"
+            value={`₹${data?.repaymentStats?.totalProfit || 0}`}
+            subtitle=""
+          />
+          <Card
+            icon={<FiArrowDownCircle className="text-3xl text-red-500" />}
+            title="Loss Amount"
+            value={`₹${data?.repaymentStats?.totalLoss || 0}`}
+            subtitle=""
           />
         </div>
 

@@ -1,5 +1,9 @@
 import * as Yup from "yup";
-import { CommonFields, LoanFields } from "@/constants/fieldsName";
+import {
+  CommonFields,
+  LoanFields,
+  TransactionFields,
+} from "@/constants/fieldsName";
 
 export const createCustomerLoanSchema = Yup.object().shape({
   [CommonFields.CUSTOMER_ID]: Yup.string().required("Customer is required"),
@@ -49,4 +53,36 @@ export const createCustomerLoanSchema = Yup.object().shape({
   ),
 
   [CommonFields.STATUS]: Yup.string().required("Status is required"),
+});
+
+export const receiveMoneyValidationSchema = Yup.object().shape({
+  [CommonFields.CUSTOMER_ID]: Yup.string()
+    .required("Customer Name is required")
+    .nullable(),
+
+  [TransactionFields.AMOUNT]: Yup.number()
+    .typeError("Amount must be a valid number")
+    .positive("Amount must be greater than 0")
+    .required("Amount is required"),
+
+  [TransactionFields.PAYMENT_MODE]: Yup.string()
+    .oneOf(["Cash", "Bank", "UPI", "Cheque"], "Invalid Payment Type")
+    .required("Payment mode is required"),
+
+  [TransactionFields.TRANSACTION_DATE]: Yup.date()
+    .required("Transaction date is required")
+    .max(new Date(), "Transaction date cannot be in the future"),
+
+  [TransactionFields.PER_DAY_CHARGES]: Yup.number()
+    .typeError("Late charge must be a valid number")
+    .min(0, "Late charge cannot be negative")
+    .when("showLateField", {
+      is: true,
+      then: (schema) => schema.required("Per day late charge is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+  [CommonFields.DESCRIPTION]: Yup.string()
+    .max(200, "Description can be max 200 characters")
+    .nullable(),
 });

@@ -342,6 +342,7 @@ const AddEditCustomerComponent = ({ customerId, isEdit }) => {
                 [CommonFields.ID]: data[CommonFields.ID],
                 [CustomerFields.FIRST_NAME]: data[CustomerFields.FIRST_NAME],
                 [CustomerFields.LAST_NAME]: data[CustomerFields.LAST_NAME],
+                [CustomerFields.FATHER_NAME]: data[CustomerFields.FATHER_NAME],
                 [CustomerFields.MOBILE_NUMBER]:
                   data[CustomerFields.MOBILE_NUMBER],
                 [CustomerFields.PIN_CODE]: data[CustomerFields.PIN_CODE],

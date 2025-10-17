@@ -18,3 +18,9 @@ export const customerStatusOptions = [
   { label: "In-active", value: "Inactive" },
   { label: "Block", value: "Blocked" },
 ];
+export const paymentModeOptions = [
+  { label: "Cash", value: "Cash" },
+  { label: "Bank", value: "Bank" },
+  { label: "UPI", value: "UPI" },
+  { label: "Cheque", value: "Cheque" },
+];
