@@ -796,6 +796,222 @@ const updateCustomerStatusById = asyncHandler(async (req, res, next) => {
   }
 });
 
+// Get detailed printable customer loan statement (with optional loanId filter) including transactions, profile, and Dhillon Finance invoice info.
+const getCustomerLoanDetailsById = asyncHandler(async (req, res, next) => {
+  try {
+    const { id: customerId } = req.params;
+    const { loanId } = req.query;
+
+    const customer = await CustomerModel.findByPk(customerId, {
+      include: [
+        { model: UploadFileModel, as: "aadharFile" },
+        { model: UploadFileModel, as: "panCardFile" },
+        { model: UploadFileModel, as: "agreementFile" },
+        { model: UploadFileModel, as: "profileFile" },
+        { model: UploadFileModel, as: "otherFile" },
+        {
+          model: LoanModel,
+          as: "loans",
+          where: loanId ? { id: loanId } : undefined,
+          required: false,
+          separate: true,
+          order: [["createdAt", "DESC"]],
+          include: [
+            {
+              model: TransactionModel,
+              as: "transactions",
+              attributes: [
+                "id",
+                "amount",
+                "transactionType",
+                "lateEMICharges",
+                "createdAt",
+              ],
+              separate: true,
+              order: [["createdAt", "DESC"]],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!customer)
+      return next(new ApiError(404, responseMessage.notFound("Customer")));
+
+    const loans = customer.loans || [];
+
+    // --- Calculate Loan Stats ---
+    const totalLoans = loans.length;
+    const activeLoans = loans.filter((l) => l.status === "Active").length;
+    const closedLoans = loans.filter((l) => l.status === "Closed").length;
+
+    // --- Generate Transaction Table ---
+    const generateTransactionTable = (transactions) => {
+      if (!transactions || transactions.length === 0)
+        return `<tr><td colspan="6">No transactions found</td></tr>`;
+
+      return transactions
+        .map(
+          (tx, idx) => `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>${new Date(tx.createdAt).toLocaleDateString("en-IN")}</td>
+            <td>${tx.transactionType}</td>
+            <td>₹${tx.amount}</td>
+            <td>₹${tx.lateEMICharges || 0}</td>
+            <td>₹${(
+              parseFloat(tx.amount) + (parseFloat(tx.lateEMICharges) || 0)
+            ).toFixed(2)}</td>
+          </tr>`
+        )
+        .join("");
+    };
+
+    // --- Generate Loan Section ---
+    const generateLoanSection = (loan, index) => `
+      <div class="section">
+        <h3>Loan ${index + 1} Details</h3>
+        <table class="info-table">
+          <tr><td><strong>Status:</strong> ${loan.status}</td></tr>
+          <tr><td><strong>Loan Amount:</strong> ₹${
+            loan.amount
+          }</td><td><strong>Total Payable:</strong> ₹${
+      loan.totalPayableAmount
+    }</td></tr>
+          <tr><td><strong>Tenure:</strong> ${
+            loan.tenureMonths
+          } Months</td><td><strong>Interest Rate:</strong> ${
+      loan.interestRate
+    }%</td></tr>
+          <tr><td><strong>EMI Amount:</strong> ₹${
+            loan.emiAmount
+          }</td><td><strong>Pending EMIs:</strong> ${loan.pendingEmis}</td></tr>
+          <tr><td><strong>Start Date:</strong> ${
+            loan.startDate
+          }</td><td><strong>End Date:</strong> ${loan.endDate}</td></tr>
+        </table>
+
+        <h4>Transaction Details</h4>
+        <table class="transaction-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Amount (₹)</th>
+              <th>Late Charges (₹)</th>
+              <th>Total Paid (₹)</th>
+            </tr>
+          </thead>
+          <tbody>${generateTransactionTable(loan.transactions)}</tbody>
+        </table>
+      </div>
+    `;
+
+    const loansHTML = loans
+      .map((l, i) => generateLoanSection(l, i))
+      .join("<hr>");
+
+    // --- Get Current Date and Time (India) ---
+    const invoiceDate = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      dateStyle: "full",
+      timeStyle: "short",
+    });
+
+    // --- Full HTML ---
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Loan Statement - ${customer.firstName} ${customer.lastName}</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+.header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+.header img.logo { width: 100px; height: 100px; object-fit: contain; border-radius: 8px; }
+.company-info { text-align: right; }
+.section { margin-bottom: 25px; }
+.section h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; }
+.info-table, .transaction-table { width: 100%; border-collapse: collapse; }
+.info-table td { padding: 6px 10px; vertical-align: top; }
+.transaction-table th, .transaction-table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+.transaction-table th { background-color: #f2f2f2; }
+.customer-details { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 15px; align-items: start; }
+.profile-img { width: 140px; height: 140px; border-radius: 10px; border: 1px solid #ccc; object-fit: cover; }
+.footer { margin-top: 60px; text-align: right; padding-top: 30px; }
+.signature { height: 80px; }
+.stamp { height: 80px; margin-right: 30px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img class="logo" src="https://your-company-logo-url.com/logo.png" alt="Company Logo">
+  <div class="company-info">
+  <h2>Dhillon Finance</h2>
+  <p>Contact: +91 9876543210</p>
+  <p><strong>Invoice Date:</strong> ${invoiceDate}</p>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Customer Details</h3>
+  <div class="customer-details">
+    <div>
+      <img src="${
+        customer.profileFile?.image || ""
+      }" alt="Profile Image" class="profile-img" />
+    </div>
+
+    <table class="info-table">
+      <tr><td><strong>Full Name:</strong> ${customer.firstName} ${
+      customer.lastName
+    }</td></tr>
+      <tr><td><strong>Father's Name:</strong> ${
+        customer.fatherName || "-"
+      }</td></tr>
+      <tr><td><strong>Mobile No:</strong> ${customer.mobileNumber}</td></tr>
+      <tr><td><strong>City:</strong> ${customer.city}</td></tr>
+      <tr><td><strong>Address:</strong> ${customer.address}</td></tr>
+      <tr><td><strong>Status:</strong> ${customer.status}</td></tr>
+    </table>
+
+    <table class="info-table">
+      <tr><td><strong>Aadhar No:</strong> ${customer.aadharNumber}</td></tr>
+      <tr><td><strong>PAN No:</strong> ${customer.panCardNumber}</td></tr>
+      <tr><td><strong>Vehicle No:</strong> ${customer.vehicleNumber}</td></tr>
+      ${
+        !loanId
+          ? `
+          <tr><td><strong>Total Loans:</strong> ${totalLoans}</td></tr>
+          <tr><td><strong>Active Loans:</strong> ${activeLoans}</td></tr>
+          <tr><td><strong>Closed Loans:</strong> ${closedLoans}</td></tr>
+          `
+          : ""
+      }
+    </table>
+  </div>
+</div>
+
+${loansHTML}
+
+<div class="footer">
+    <p>(signature & stamp)</p>
+    <strong>Dhillon Finance</strong>
+</div>
+
+</body>
+</html>`;
+
+    res.setHeader("Content-Type", "text/html");
+    return res.status(200).send(html);
+  } catch (err) {
+    next(new ApiError(500, err.message));
+  }
+});
+
 export default {
   createCustomer,
   getCustomers,
@@ -806,4 +1022,5 @@ export default {
   getCustomerRepaymentStats,
   getCustomersNextEMI,
   updateCustomerStatusById,
+  getCustomerLoanDetailsById,
 };

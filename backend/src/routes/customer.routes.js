@@ -182,6 +182,40 @@ customerRouter.get(
   authenticateUser,
   customerController.getCustomerById
 );
+/**
+ * @swagger
+ * /customer/loanDetails/{id}:
+ *   get:
+ *     summary: Get customer loan details (HTML statement)
+ *     tags: [Customers]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Customer ID
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: loanId
+ *         required: false
+ *         description: Optional Loan ID to fetch specific loan details
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Customer Loan Details in HTML format
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ */
+customerRouter.get(
+  "/loanDetails/:id",
+  authenticateUser,
+  customerController.getCustomerLoanDetailsById
+);
 
 /**
  * @swagger
