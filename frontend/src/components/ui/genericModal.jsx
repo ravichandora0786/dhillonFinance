@@ -1,8 +1,13 @@
+import { IoCloseSharp } from "react-icons/io5";
+import { TbFileDownload } from "react-icons/tb";
+
 export default function GenericModal({
   showModal = false,
   closeModal = () => {},
+  print = () => {},
   modalTitle = "",
   modalBody,
+  name = "",
 }) {
   return (
     <>
@@ -15,13 +20,26 @@ export default function GenericModal({
               <span className="font-semibold text-xl text-black">
                 {modalTitle}
               </span>
-              <button
-                onClick={() => closeModal()}
-                className="text-gray-500 hover:text-red-500 text-2xl font-bold"
-                aria-label="Close Modal"
-              >
-                &times;
-              </button>
+              <div className="flex flex-row justify-between gap-2 items-center">
+                {name === "customerDetail" && (
+                  <button
+                    onClick={() => print()}
+                    type="button"
+                    className="text-gray-500 hover:text-green-500 text-2xl font-bold"
+                    aria-label="Print"
+                  >
+                    <TbFileDownload size={20} />
+                  </button>
+                )}
+                <button
+                  onClick={() => closeModal()}
+                  type="button"
+                  className="text-gray-500 hover:text-red-500 text-2xl font-bold"
+                  aria-label="Close Modal"
+                >
+                  <IoCloseSharp size={22} />
+                </button>
+              </div>
             </div>
             {/* Body */}
             <div className="flex-1 overflow-auto p-4 scrollbar-hide">

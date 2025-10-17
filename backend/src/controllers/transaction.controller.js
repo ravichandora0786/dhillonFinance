@@ -355,7 +355,11 @@ const updateTransaction = asyncHandler(async (req, res, next) => {
 
     //  Find active loan
     const activeLoan = await LoanModel.findOne({
-      where: { customerId, status: "Active", isActive: true },
+      where: {
+        id: transactionRecord?.loanId,
+        status: "Active",
+        isActive: true,
+      },
       transaction: t,
     });
 

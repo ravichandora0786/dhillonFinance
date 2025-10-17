@@ -53,6 +53,11 @@ const LoanDetailModal = ({
               </h3>
 
               <div className="p-4 mb-4 rounded-lg border border-slate-200 bg-white shadow-sm">
+                {/* loan Number */}
+                <div className="flex flex-row justify-start items-center gap-4 mb-2">
+                  <span className="text-lg">{`Loan No. :`}</span>
+                  <span className="text-lg underline">{loan?.loanNumber}</span>
+                </div>
                 {/* Basic Loan Info */}
                 <div className="grid grid-cols-2 md:grid-cols-2 sm:grid-cols-2 gap-4">
                   <ViewField label="Loan Amount" value={`₹ ${loan?.amount}`} />

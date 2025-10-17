@@ -69,9 +69,9 @@ export const receiveMoneyValidationSchema = Yup.object().shape({
     .oneOf(["Cash", "Bank", "UPI", "Cheque"], "Invalid Payment Type")
     .required("Payment mode is required"),
 
-  [TransactionFields.TRANSACTION_DATE]: Yup.date()
-    .required("Transaction date is required")
-    .max(new Date(), "Transaction date cannot be in the future"),
+  [TransactionFields.TRANSACTION_DATE]: Yup.date().required(
+    "Transaction date is required"
+  ),
 
   [TransactionFields.PER_DAY_CHARGES]: Yup.number()
     .typeError("Late charge must be a valid number")

@@ -826,6 +826,9 @@ const getCustomerLoanDetailsById = asyncHandler(async (req, res, next) => {
                 "transactionType",
                 "lateEMICharges",
                 "createdAt",
+                "paymentMode",
+                "transactionDate",
+                "lateEMIDays",
               ],
               separate: true,
               order: [["createdAt", "DESC"]],
@@ -840,12 +843,10 @@ const getCustomerLoanDetailsById = asyncHandler(async (req, res, next) => {
 
     const loans = customer.loans || [];
 
-    // --- Calculate Loan Stats ---
     const totalLoans = loans.length;
     const activeLoans = loans.filter((l) => l.status === "Active").length;
     const closedLoans = loans.filter((l) => l.status === "Closed").length;
 
-    // --- Generate Transaction Table ---
     const generateTransactionTable = (transactions) => {
       if (!transactions || transactions.length === 0)
         return `<tr><td colspan="6">No transactions found</td></tr>`;
@@ -855,10 +856,12 @@ const getCustomerLoanDetailsById = asyncHandler(async (req, res, next) => {
           (tx, idx) => `
           <tr>
             <td>${idx + 1}</td>
-            <td>${new Date(tx.createdAt).toLocaleDateString("en-IN")}</td>
+            <td>${new Date(tx.transactionDate).toLocaleDateString("en-IN")}</td>
             <td>${tx.transactionType}</td>
             <td>₹${tx.amount}</td>
+            <td>${tx.lateEMIDays || 0}</td>
             <td>₹${tx.lateEMICharges || 0}</td>
+            <td>${tx.paymentMode}</td>
             <td>₹${(
               parseFloat(tx.amount) + (parseFloat(tx.lateEMICharges) || 0)
             ).toFixed(2)}</td>
@@ -867,28 +870,23 @@ const getCustomerLoanDetailsById = asyncHandler(async (req, res, next) => {
         .join("");
     };
 
-    // --- Generate Loan Section ---
-    const generateLoanSection = (loan, index) => `
+    const generateLoanSection = (loan) => `
       <div class="section">
-        <h3>Loan ${index + 1} Details</h3>
+        <h3>Loan No.: ${loan.loanNumber}</h3>
         <table class="info-table">
           <tr><td><strong>Status:</strong> ${loan.status}</td></tr>
-          <tr><td><strong>Loan Amount:</strong> ₹${
-            loan.amount
-          }</td><td><strong>Total Payable:</strong> ₹${
-      loan.totalPayableAmount
-    }</td></tr>
-          <tr><td><strong>Tenure:</strong> ${
-            loan.tenureMonths
-          } Months</td><td><strong>Interest Rate:</strong> ${
-      loan.interestRate
-    }%</td></tr>
-          <tr><td><strong>EMI Amount:</strong> ₹${
-            loan.emiAmount
-          }</td><td><strong>Pending EMIs:</strong> ${loan.pendingEmis}</td></tr>
-          <tr><td><strong>Start Date:</strong> ${
-            loan.startDate
-          }</td><td><strong>End Date:</strong> ${loan.endDate}</td></tr>
+          <tr><td><strong>Loan Amount:</strong> ₹${loan.amount}</td>
+              <td><strong>Total Payable:</strong> ₹${
+                loan.totalPayableAmount
+              }</td></tr>
+          <tr><td><strong>Tenure:</strong> ${loan.tenureMonths} Months</td>
+              <td><strong>Interest Rate:</strong> ${
+                loan.interestRate
+              }%</td></tr>
+          <tr><td><strong>EMI Amount:</strong> ₹${loan.emiAmount}</td>
+              <td><strong>Pending EMIs:</strong> ${loan.pendingEmis}</td></tr>
+          <tr><td><strong>Start Date:</strong> ${loan.startDate}</td>
+              <td><strong>End Date:</strong> ${loan.endDate}</td></tr>
         </table>
 
         <h4>Transaction Details</h4>
@@ -899,7 +897,9 @@ const getCustomerLoanDetailsById = asyncHandler(async (req, res, next) => {
               <th>Date</th>
               <th>Type</th>
               <th>Amount (₹)</th>
+              <th>Late Days</th>
               <th>Late Charges (₹)</th>
+              <th>Payment Mode</th>
               <th>Total Paid (₹)</th>
             </tr>
           </thead>
@@ -908,18 +908,14 @@ const getCustomerLoanDetailsById = asyncHandler(async (req, res, next) => {
       </div>
     `;
 
-    const loansHTML = loans
-      .map((l, i) => generateLoanSection(l, i))
-      .join("<hr>");
+    const loansHTML = loans.map(generateLoanSection).join("<hr>");
 
-    // --- Get Current Date and Time (India) ---
     const invoiceDate = new Date().toLocaleString("en-IN", {
       timeZone: "Asia/Kolkata",
       dateStyle: "full",
       timeStyle: "short",
     });
 
-    // --- Full HTML ---
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -928,79 +924,190 @@ const getCustomerLoanDetailsById = asyncHandler(async (req, res, next) => {
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Loan Statement - ${customer.firstName} ${customer.lastName}</title>
 <style>
-body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-.header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-.header img.logo { width: 100px; height: 100px; object-fit: contain; border-radius: 8px; }
-.company-info { text-align: right; }
-.section { margin-bottom: 25px; }
-.section h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; }
-.info-table, .transaction-table { width: 100%; border-collapse: collapse; }
-.info-table td { padding: 6px 10px; vertical-align: top; }
-.transaction-table th, .transaction-table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-.transaction-table th { background-color: #f2f2f2; }
-.customer-details { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 15px; align-items: start; }
-.profile-img { width: 140px; height: 140px; border-radius: 10px; border: 1px solid #ccc; object-fit: cover; }
-.footer { margin-top: 60px; text-align: right; padding-top: 30px; }
-.signature { height: 80px; }
-.stamp { height: 80px; margin-right: 30px; }
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    color: #333;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+
+  .header img.logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .company-info {
+    text-align: right;
+    font-size: 12px;
+  }
+
+  h2, h3, h4 {
+    font-weight: bold;
+    color: #222;
+  }
+
+  h2 { font-size: 14px; margin: 0; }
+  h3 { font-size: 14px; margin-top: 10px; }
+  h4 { font-size: 13px; margin-top: 8px; }
+
+  .section {
+    margin-bottom: 25px;
+  }
+
+  .info-table, .transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .info-table td {
+    padding: 5px 8px;
+    vertical-align: top;
+  }
+
+  .transaction-table th, .transaction-table td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    text-align: left;
+  }
+
+  .transaction-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+
+  .customer-details {
+    display: grid;
+    grid-template-columns: 1fr 2fr 2fr;
+    gap: 10px;
+    align-items: start;
+  }
+
+  .profile-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    object-fit: cover;
+  }
+
+  .footer {
+    margin-top: 50px;
+    text-align: right;
+    padding-top: 20px;
+    font-size: 12px;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px dashed #999;
+    margin: 20px 0;
+  }
+
+  .logo-wrapper {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.logoText {
+  display: none;
+  width: 80px;
+  height: 80px;
+  border: 2px solid #999;
+  border-radius: 50%;
+  font-size: 26px;
+  font-weight: bold;
+  color: #222;
+  justify-content: center;
+  align-items: center;
+  background: #f5f5f5;
+}
+
 </style>
 </head>
 <body>
 
-<div class="header">
-  <img class="logo" src="https://your-company-logo-url.com/logo.png" alt="Company Logo">
-  <div class="company-info">
-  <h2>Dhillon Finance</h2>
-  <p>Contact: +91 9876543210</p>
-  <p><strong>Invoice Date:</strong> ${invoiceDate}</p>
-  </div>
+  <div class="header">
+    <div class="logo-wrapper">
+  <img class="logo" src="https://your-company-logo-url.com/logo.png" alt="Company Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+  <div class="logoText">DF</div>
 </div>
-
-<div class="section">
-  <h3>Customer Details</h3>
-  <div class="customer-details">
-    <div>
-      <img src="${
-        customer.profileFile?.image || ""
-      }" alt="Profile Image" class="profile-img" />
+    <div class="company-info">
+      <h2>Dhillon Finance</h2>
+      <p>Contact: +91 9876543210</p>
+      <p><strong>Invoice Date:</strong> ${invoiceDate}</p>
     </div>
+  </div>
 
-    <table class="info-table">
-      <tr><td><strong>Full Name:</strong> ${customer.firstName} ${
+  <div class="section">
+    <h3>Customer Details</h3>
+    <div class="customer-details">
+      <div>
+        <img src="${
+          customer.profileFile?.image || ""
+        }" alt="Profile Image" class="profile-img" />
+      </div>
+
+      <table class="info-table">
+        <tr><td><strong>Full Name:</strong> ${customer.firstName} ${
       customer.lastName
     }</td></tr>
-      <tr><td><strong>Father's Name:</strong> ${
-        customer.fatherName || "-"
-      }</td></tr>
-      <tr><td><strong>Mobile No:</strong> ${customer.mobileNumber}</td></tr>
-      <tr><td><strong>City:</strong> ${customer.city}</td></tr>
-      <tr><td><strong>Address:</strong> ${customer.address}</td></tr>
-      <tr><td><strong>Status:</strong> ${customer.status}</td></tr>
-    </table>
+        <tr><td><strong>Father's Name:</strong> ${
+          customer.fatherName || "-"
+        }</td></tr>
+        <tr><td><strong>Mobile No:</strong> ${customer.mobileNumber}</td></tr>
+        <tr><td><strong>Address:</strong> ${customer.address}</td></tr>
+        <tr><td><strong>City:</strong> ${customer.city}</td></tr>
+        <tr><td><strong>Status:</strong> ${customer.status}</td></tr>
+      </table>
 
-    <table class="info-table">
-      <tr><td><strong>Aadhar No:</strong> ${customer.aadharNumber}</td></tr>
-      <tr><td><strong>PAN No:</strong> ${customer.panCardNumber}</td></tr>
-      <tr><td><strong>Vehicle No:</strong> ${customer.vehicleNumber}</td></tr>
-      ${
-        !loanId
-          ? `
-          <tr><td><strong>Total Loans:</strong> ${totalLoans}</td></tr>
-          <tr><td><strong>Active Loans:</strong> ${activeLoans}</td></tr>
-          <tr><td><strong>Closed Loans:</strong> ${closedLoans}</td></tr>
-          `
-          : ""
-      }
-    </table>
+      <table class="info-table">
+        <tr><td><strong>Aadhar No:</strong> ${customer.aadharNumber}</td></tr>
+        <tr><td><strong>PAN No:</strong> ${customer.panCardNumber}</td></tr>
+        <tr><td><strong>Vehicle No:</strong> ${customer.vehicleNumber}</td></tr>
+        ${
+          !loanId
+            ? `
+            <tr><td><strong>Total Loans:</strong> ${totalLoans}</td></tr>
+            <tr><td><strong>Active Loans:</strong> ${activeLoans}</td></tr>
+            <tr><td><strong>Closed Loans:</strong> ${closedLoans}</td></tr>
+            `
+            : ""
+        }
+      </table>
+    </div>
   </div>
-</div>
 
-${loansHTML}
+  ${loansHTML}
 
-<div class="footer">
+  <div class="footer">
     <p>(signature & stamp)</p>
     <strong>Dhillon Finance</strong>
-</div>
+  </div>
 
 </body>
 </html>`;

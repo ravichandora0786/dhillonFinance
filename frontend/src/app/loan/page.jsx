@@ -40,6 +40,11 @@ import ReceiveMoneyModal from "@/components/ui/pagesComponents/receiveMoneyModal
 
 const columns = (handleDelete, handleViewLoan, handlePayEmi) => [
   {
+    header: "Loan No.",
+    accessorKey: "loanNumber",
+    cell: ({ getValue }) => <SingleParagraphColumn value={getValue()} />,
+  },
+  {
     header: () => <div className="">Customer name</div>,
     accessorKey: "customer.firstName",
     cell: ({ row, getValue }) => (

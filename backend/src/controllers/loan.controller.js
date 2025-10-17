@@ -46,6 +46,40 @@ const createLoan = asyncHandler(async (req, res, next) => {
       return next(new ApiError(400, "Customer already has an ongoing loan"));
     }
 
+    // ---- Generate Loan Number ----
+    const companyCode = "LN";
+    const year = new Date().getFullYear().toString().slice(-3);
+
+    // Last loan for this company+year
+    const lastLoan = await LoanModel.findOne({
+      where: {
+        loanNumber: {
+          [Op.like]: `${companyCode}${year}%`, // starts with LN + year
+        },
+      },
+      order: [
+        // order by numeric part descending
+        [
+          sequelize.literal(`CAST(SUBSTRING(loanNumber, 6) AS UNSIGNED)`),
+          "DESC",
+        ],
+      ],
+      transaction,
+    });
+
+    console.log(lastLoan);
+
+    let nextSequence = 1;
+
+    if (lastLoan && lastLoan.loanNumber) {
+      const lastNumStr = lastLoan.loanNumber.slice(5); // 0-1=LN, 2-4=year last 3 digits
+      nextSequence = parseInt(lastNumStr, 10) + 1;
+    }
+
+    const loanNumber = `${companyCode}${year}${nextSequence
+      .toString()
+      .padStart(3, "0")}`;
+
     // Initialize loan fields
     const loanData = {
       ...req.body,
@@ -53,6 +87,7 @@ const createLoan = asyncHandler(async (req, res, next) => {
       pendingEmis: tenureMonths,
       nextEmiAmount: emiAmount,
       lossAmount: amount,
+      loanNumber,
     };
 
     // Create loan
@@ -63,7 +98,7 @@ const createLoan = asyncHandler(async (req, res, next) => {
       {
         loanId: loan.id,
         customerId,
-        amount, // full loan amount
+        amount,
         transactionType: "Disbursement",
         transactionDate: startDate,
         description: "Loan disbursed",
@@ -383,20 +418,20 @@ export const closeLoanWithTransaction = asyncHandler(async (req, res, next) => {
       return next(new ApiError(400, "Loan is already closed"));
     }
 
-    // Get all transactions for this loan
-    const transactions = await TransactionModel.findAll({
-      where: { loanId, customerId },
+    // All transactions for this loan
+    const transactionsBefore = await TransactionModel.findAll({
+      where: { loanId, customerId, transactionType: "Repayment" },
       transaction: t,
     });
 
-    // Calculate total paid amount (only Repayment)
-    const totalRepaymentAmount = transactions
-      .filter((tx) => tx.transactionType === "Repayment")
-      .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+    const totalRepaymentAmountBefore = transactionsBefore.reduce(
+      (sum, t) => sum + Number(t.amount || 0),
+      0
+    );
 
     // Calculate pending amount
     const pendingAmount =
-      Number(loan.totalPayableAmount || 0) - totalRepaymentAmount;
+      Number(loan.totalPayableAmount || 0) - totalRepaymentAmountBefore;
 
     // If no pending amount
     if (pendingAmount <= 0) {
@@ -430,6 +465,36 @@ export const closeLoanWithTransaction = asyncHandler(async (req, res, next) => {
       { transaction: t }
     );
 
+    // All transactions for this loan
+    const transactions = await TransactionModel.findAll({
+      where: { loanId, customerId, transactionType: "Repayment" },
+      transaction: t,
+    });
+
+    const totalRepaymentAmount = transactions.reduce(
+      (sum, t) => sum + Number(t.amount || 0),
+      0
+    );
+
+    const totalLateCharges = transactions.reduce(
+      (sum, t) => sum + Number(t.lateEMICharges || 0),
+      0
+    );
+
+    // ===== Profit / Loss Calculation =====
+    const principal = parseFloat(loan.amount || 0);
+    let profitAmount = 0;
+    let lossAmount = 0;
+    const totalReceived = totalRepaymentAmount + totalLateCharges;
+
+    if (totalReceived > principal) {
+      profitAmount = totalReceived - principal;
+      lossAmount = 0;
+    } else if (totalReceived < principal) {
+      lossAmount = principal - totalReceived;
+      profitAmount = 0;
+    }
+
     // Update loan to closed
     await loan.update(
       {
@@ -438,6 +503,8 @@ export const closeLoanWithTransaction = asyncHandler(async (req, res, next) => {
         nextEmiAmount: 0,
         installmentDate: null,
         paidEmis: loan.paidEmis + 1,
+        profitAmount,
+        lossAmount,
       },
       { transaction: t }
     );

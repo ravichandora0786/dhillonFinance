@@ -77,3 +77,4 @@ export const sendMailForgotPassword = createAction(
 );
 export const resetPassword = createAction("COMMON/RESET_PASSWORD");
 export const resetForgotPassword = createAction("COMMON/RESET_FORGOT_PASSWORD");
+export const getPdfHTMLByID = createAction("COMMON/GET_PDF_HTML_BY_ID");

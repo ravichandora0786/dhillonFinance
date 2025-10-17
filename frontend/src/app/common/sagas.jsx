@@ -10,6 +10,7 @@ import {
   cleanUpUnusedImage,
   deleteImage,
   getAllImages,
+  getPdfHTMLByID,
   getPermissionsByRoleId,
   getUploadedFile,
   imageUpload,
@@ -225,6 +226,29 @@ function* cleanUpUnusedImageSaga(action) {
 }
 
 /**
+ * get pdf html from customerid and loan id
+ * @param {*}
+ */
+function* getPdfHTMLByIDSaga(action) {
+  const { customerId, loanId, onSuccess, onFailure } = action.payload;
+  try {
+    const response = yield call(
+      httpRequest.get,
+      `${endPoints.Customer}/loanDetails/${customerId}`,
+      {
+        params: { loanId },
+      }
+    );
+
+    yield onSuccess({ data: response });
+  } catch (error) {
+    const errorMessage = error?.message || "Get failed";
+    toast.error(errorMessage);
+    yield onFailure({ message: errorMessage });
+  }
+}
+
+/**
  * Get All Images by filter with customer and user
  * @param {*}
  */
@@ -254,4 +278,5 @@ export function* commonSagas() {
   yield takeLatest(cleanUpUnusedImage, cleanUpUnusedImageSaga);
   yield takeLatest(deleteImage, deleteImageSaga);
   yield takeLatest(getAllImages, getAllImagesSaga);
+  yield takeLatest(getPdfHTMLByID, getPdfHTMLByIDSaga);
 }
