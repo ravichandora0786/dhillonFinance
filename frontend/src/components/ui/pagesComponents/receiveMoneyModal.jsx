@@ -114,7 +114,7 @@ const ReceiveMoneyModal = ({
         [TransactionFields.PER_DAY_CHARGES]: 0,
         [TransactionFields.PAYMENT_MODE]: "",
         [CommonFields.IS_ACTIVE]: true,
-        [CommonFields.DESCRIPTION]: true,
+        [CommonFields.DESCRIPTION]: "",
       });
     } else {
       setInitialObject({
@@ -125,7 +125,7 @@ const ReceiveMoneyModal = ({
         [TransactionFields.PER_DAY_CHARGES]: 0,
         [TransactionFields.PAYMENT_MODE]: "",
         [CommonFields.IS_ACTIVE]: true,
-        [CommonFields.DESCRIPTION]: true,
+        [CommonFields.DESCRIPTION]: "",
       });
     }
   }, [customer]);
