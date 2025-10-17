@@ -101,7 +101,7 @@ const LoanTransactionTable = ({
       header: "Action",
       cell: ({ row }) => (
         <ActionColumnsComponent
-          showEditButton={true}
+          showEditButton={row.original.transactionType !== "Disbursement"}
           editOnClick={() => handleEdit(row?.original)}
         />
       ),

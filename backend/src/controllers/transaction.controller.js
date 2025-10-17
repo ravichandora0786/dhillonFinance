@@ -344,6 +344,14 @@ const updateTransaction = asyncHandler(async (req, res, next) => {
       return next(new ApiError(404, "Transaction not found"));
     }
 
+    // Prevent updating Disbursement transactions
+    if (transactionRecord.transactionType === "Disbursement") {
+      await t.rollback();
+      return next(
+        new ApiError(400, "Cannot update a Disbursement transaction")
+      );
+    }
+
     //  Validate customer
     const customer = await CustomerModel.findByPk(customerId, {
       transaction: t,
