@@ -323,7 +323,7 @@ const AddEditCustomerLoanComponent = ({
       label: "Recovery EMI Date",
       type: "date",
       required: true,
-      disabled: true,
+      disabled: false,
       dateMode: "single",
       minDate: "",
     },

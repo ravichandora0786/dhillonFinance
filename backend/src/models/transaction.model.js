@@ -56,6 +56,11 @@ const TransactionModel = sequelize.define(
       defaultValue: 0,
     },
 
+    installmentDateAtThatTime: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+
     transactionType: {
       type: DataTypes.ENUM(...TRANSACTION_TYPE_ENUM), // Loan given / Client paid
       allowNull: false,

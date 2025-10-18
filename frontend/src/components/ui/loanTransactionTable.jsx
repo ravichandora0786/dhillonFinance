@@ -142,7 +142,6 @@ const LoanTransactionTable = ({
           callBackFunc();
         }}
         isEdit={true}
-        installmentDate={loanData?.[LoanFields.PAY_INSTALLMENT_DATE]}
       />
     </>
   );

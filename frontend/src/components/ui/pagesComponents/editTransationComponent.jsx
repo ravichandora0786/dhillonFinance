@@ -23,13 +23,13 @@ const EditTransactionModal = ({
   data,
   callBackFunc = () => {},
   isEdit = false,
-  installmentDate,
 }) => {
   const dispatch = useDispatch();
-  const transation = data;
   const [showLateField, setShowLateField] = useState(false);
   const today = todayDate().toISOString().split("T")[0];
   const [buttonLoading, setButtonLoading] = useState(false);
+  const [installmentDateAtThatTime, setInstallmentDateAtThatTime] =
+    useState(null);
 
   // ------- Fields -------
   const fields = useMemo(() => {
@@ -53,9 +53,14 @@ const EditTransactionModal = ({
         type: "date",
         required: true,
         onChange: (date, setFieldValue) => {
-          if (installmentDate) {
+          setFieldValue(TransactionFields.TRANSACTION_DATE, date);
+
+          // Check condition dynamically when user changes date
+          if (installmentDateAtThatTime) {
             const payDate = new Date(date);
-            const instDate = new Date(installmentDate);
+            const instDate = new Date(installmentDateAtThatTime);
+
+            // Show if payDate < instDate
             if (payDate > instDate) {
               setShowLateField(true);
             } else {
@@ -63,7 +68,6 @@ const EditTransactionModal = ({
               setFieldValue(TransactionFields.PER_DAY_CHARGES, 0);
             }
           }
-          setFieldValue(TransactionFields.TRANSACTION_DATE, date);
         },
       },
       {
@@ -73,6 +77,7 @@ const EditTransactionModal = ({
       },
     ];
 
+    // show only if transaction date is before installment date
     if (showLateField) {
       baseFields.push({
         name: TransactionFields.PER_DAY_CHARGES,
@@ -82,7 +87,7 @@ const EditTransactionModal = ({
     }
 
     return baseFields;
-  }, [showLateField, installmentDate]);
+  }, [showLateField, installmentDateAtThatTime]);
 
   // ------- Initial Data -------
   const [initialObject, setInitialObject] = useState({
@@ -93,13 +98,21 @@ const EditTransactionModal = ({
     [CommonFields.DESCRIPTION]: "",
   });
 
+  // Fetch transaction details if editing
   useEffect(() => {
-    if (isEdit && transation?.id) {
+    if (isEdit && data?.id) {
       dispatch(
         getTransactionDetailById({
-          id: transation.id,
+          id: data.id,
           onSuccess: ({ data }) => {
             if (data) {
+              const transDate = data[TransactionFields.TRANSACTION_DATE];
+              const instDate =
+                data[TransactionFields.INSTALLMENT_DATE_OF_TRANSTION]?.split(
+                  "T"
+                )[0] || null;
+              setInstallmentDateAtThatTime(instDate);
+
               setInitialObject({
                 [CommonFields.ID]: data[CommonFields.ID],
                 [CommonFields.CUSTOMER_ID]: data[CommonFields.CUSTOMER_ID],
@@ -108,22 +121,29 @@ const EditTransactionModal = ({
                 [TransactionFields.PAYMENT_MODE]:
                   data[TransactionFields.PAYMENT_MODE] || "",
                 [TransactionFields.TRANSACTION_DATE]:
-                  data[TransactionFields.TRANSACTION_DATE]?.split("T")[0] ||
-                  today,
+                  data[TransactionFields.TRANSACTION_DATE],
                 [TransactionFields.PER_DAY_CHARGES]:
-                  data[TransactionFields.PER_DAY_CHARGES] || 0,
+                  data[TransactionFields.LATE_EMI_CHARGES] /
+                    data[TransactionFields.LATE_EMI_DAYS] || 0,
                 [CommonFields.DESCRIPTION]:
                   data[CommonFields.DESCRIPTION] || "",
                 [TransactionFields.TRANSACTION_TYPE]:
                   data[TransactionFields.TRANSACTION_TYPE],
                 [CommonFields.IS_ACTIVE]: data[CommonFields.IS_ACTIVE],
               });
+
+              // Show field if TRANSACTION_DATE < INSTALLMENT_DATE
+              if (instDate && new Date(transDate) > new Date(instDate)) {
+                setShowLateField(true);
+              } else {
+                setShowLateField(false);
+              }
             }
           },
         })
       );
     }
-  }, [isEdit, transation]);
+  }, [isEdit, data]);
 
   // ------- Submit Handler -------
   const handleSubmitData = async (values) => {
@@ -136,7 +156,7 @@ const EditTransactionModal = ({
     await new Promise((resolve, reject) => {
       dispatch(
         apiAction({
-          id: isEdit ? transation?.id : undefined,
+          id: isEdit ? data?.id : undefined,
           data: payload,
           onSuccess: (response) => {
             toast.success(

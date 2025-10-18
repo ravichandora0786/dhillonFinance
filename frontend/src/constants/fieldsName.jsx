@@ -73,6 +73,9 @@ export const TransactionFields = {
   PAYMENT_MODE: "paymentMode",
   TRANSACTION_DATE: "transactionDate",
   PER_DAY_CHARGES: "perDayLateCharge",
+  LATE_EMI_CHARGES: "lateEMICharges",
+  LATE_EMI_DAYS: "lateEMIDays",
+  INSTALLMENT_DATE_OF_TRANSTION: "installmentDateAtThatTime",
 };
 
 export const CommonFields = {

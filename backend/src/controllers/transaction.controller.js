@@ -78,6 +78,7 @@ const createTransaction = asyncHandler(async (req, res, next) => {
         description,
         lateEMIDays,
         lateEMICharges,
+        installmentDateAtThatTime: activeLoan.installmentDate,
       },
       { transaction: t }
     );
@@ -332,8 +333,6 @@ const updateTransaction = asyncHandler(async (req, res, next) => {
       perDayLateCharge,
     } = req.body;
 
-    transactionDate = new Date(transactionDate);
-
     // Find existing transaction
     const transactionRecord = await TransactionModel.findByPk(req.params.id, {
       transaction: t,
@@ -364,7 +363,7 @@ const updateTransaction = asyncHandler(async (req, res, next) => {
     //  Find active loan
     const activeLoan = await LoanModel.findOne({
       where: {
-        id: transactionRecord?.loanId,
+        id: transactionRecord.loanId,
         status: "Active",
         isActive: true,
       },
@@ -378,14 +377,19 @@ const updateTransaction = asyncHandler(async (req, res, next) => {
 
     const loanId = activeLoan.id;
 
+    // ===== Determine correct installment date =====
+    // Use original saved date if available, else fallback to loan table
+    let installmentDate = transactionRecord.installmentDateAtThatTime;
+
     // ===== Late EMI Calculation =====
     let lateEMIDays = 0;
     let lateEMICharges = 0;
 
-    if (transactionType === "Repayment" && activeLoan.installmentDate) {
-      const installmentDate = new Date(activeLoan.installmentDate);
-      if (transactionDate > installmentDate) {
-        const diffTime = transactionDate - installmentDate;
+    if (transactionType === "Repayment" && installmentDate) {
+      const instDate = new Date(installmentDate);
+      const transDate = new Date(transactionDate);
+      if (transDate > instDate) {
+        const diffTime = transDate - instDate;
         lateEMIDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         lateEMICharges = (
           lateEMIDays * parseFloat(perDayLateCharge || 0)
@@ -456,13 +460,14 @@ const updateTransaction = asyncHandler(async (req, res, next) => {
       await loanToUpdate.update(
         {
           nextEmiAmount: nextEmiAmount.toFixed(2),
-          profitAmount,
-          lossAmount,
+          profitAmount: profitAmount.toFixed(2),
+          lossAmount: lossAmount.toFixed(2),
         },
         { transaction: t }
       );
     }
 
+    //Commit Transaction
     await t.commit();
 
     return res
