@@ -18,7 +18,7 @@ const LoanDetailModal = ({
       closeModal={onBack}
       modalTitle={"Loan Details"}
       modalBody={
-        <div className="max-w-4xl mx-auto h-full">
+        <div className="max-w-full mx-auto h-full">
           {/* Header Section */}
           <div className="">
             <h3 className="text-lg font-semibold text-slate-700 mb-3">

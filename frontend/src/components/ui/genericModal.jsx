@@ -14,7 +14,7 @@ export default function GenericModal({
       {showModal && (
         <div className="fixed inset-0 w-full h-full z-50 flex items-center justify-center bg-gray-800/70">
           {/* Modal Box */}
-          <div className="relative w-full max-w-2xl max-sm:max-w-[90vw] max-md:max-w-[90vw] max-h-[90vh] max-sm:max-h-[70vh] max-md:max-h-[70vh] flex flex-col bg-white rounded-lg shadow-lg">
+          <div className="relative w-full max-w-6xl max-sm:max-w-[90vw] max-md:max-w-[90vw] max-h-[90vh] max-sm:max-h-[70vh] max-md:max-h-[70vh] flex flex-col bg-white rounded-lg shadow-lg">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b">
               <span className="font-semibold text-xl text-black">

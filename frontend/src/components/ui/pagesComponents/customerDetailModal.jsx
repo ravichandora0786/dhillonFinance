@@ -35,7 +35,7 @@ const CustomerDetailModal = ({
       }}
       modalBody={
         <>
-          <div className="max-w-4xl mx-auto h-full">
+          <div className="max-w-full mx-auto h-full">
             <div className="flex flex-col md:flex-row justify-between items-center gap-2 p-0 px-4">
               <div className="flex flex-col md:flex-row items-center gap-4">
                 {/* Avatar */}
